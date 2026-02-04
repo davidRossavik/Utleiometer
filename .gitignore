@@ -1,0 +1,3 @@
+# Ignore root-level package-lock.json (the actual one is in utleiometer/)
+package-lock.json
+node_modules/

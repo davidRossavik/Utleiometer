@@ -1,0 +1,1 @@
+This is the server layer, only for adiministrative. NO CLIENT stuff

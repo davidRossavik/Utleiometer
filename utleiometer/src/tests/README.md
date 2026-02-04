@@ -1,0 +1,1 @@
+Vi legger kanskje til unit og komponent-tester her senere i utviklingsprosessen.
