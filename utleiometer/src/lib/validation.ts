@@ -16,7 +16,7 @@ export const VALIDATION_RULES = {
 
 //lag funksjoner som sjekker input
 export function validateUsername(username: string): { isValid: boolean; error?: string } {
-    if (!VALIDATION_RULES.username.pattern.test(username)) {
+    if (!username) {
         return { isValid: false, error: "Brukernavn er påkrevd" };
     }
     if (!VALIDATION_RULES.username.pattern.test(username)) {
@@ -26,7 +26,7 @@ export function validateUsername(username: string): { isValid: boolean; error?: 
 }
 
 export function validateEmail(email: string): { isValid: boolean; error?: string } {
-    if (!VALIDATION_RULES.email.pattern.test(email)) {
+    if (!email) {
         return { isValid: false, error: "E-post er påkrevd" };
     }
     if (!VALIDATION_RULES.email.pattern.test(email)) {
