@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/ui/primitives/button"
 import {
   Card,
   CardAction,
@@ -7,10 +7,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Field, FieldDescription } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/ui/feedback/card"
+import { Field, FieldDescription } from "@/ui/primitives/field"
+import { Input } from "@/ui/primitives/input"
+import { Label } from "@/ui/primitives/label"
 import Link from "next/dist/client/link"
 
 export function CardDemo() {

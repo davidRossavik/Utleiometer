@@ -1,15 +1,15 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/ui/primitives/button"
+import { Badge } from "@/ui/feedback/badge"
+import { Field, FieldDescription, FieldLabel } from "@/ui/primitives/field"
+import { Input } from "@/ui/primitives/input"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/ui/feedback/card"
 
 export default function Home() {
   return (
