@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { validateUsername, validateEmail, validatePassword } from '@/lib/validation';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from "@/lib/firebase/client";
 
 export function useRegisterForm() {
     // State for hva brukeren har skrevet
@@ -84,10 +86,17 @@ export function useRegisterForm() {
 
         //TODO: Send data til backend for registrering,
         //Firebasekallet skal komme her senere
-
-        console.log('Ville ha registrert bruker:', { username, email, password });
-        alert('Registrering vellykket! (venter på Firebase-integrasjon)');
-    };
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            console.log("Registered user:", {
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+            });
+        } catch (error) {
+            console.error(error);
+            alert("Kunne ikke registrere bruker (sjekk e-post/passord eller om e-post er i bruk).");
+        };
+    }
 
     return {
         username,
