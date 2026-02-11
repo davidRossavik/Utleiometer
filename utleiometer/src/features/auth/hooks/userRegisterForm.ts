@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { validateUsername, validateEmail, validatePassword } from '@/src/lib/validation';
+import { validateUsername, validateEmail, validatePassword } from '@/lib/validation';
 
 export function useRegisterForm() {
     // State for hva brukeren har skrevet
