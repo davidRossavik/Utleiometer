@@ -98,6 +98,6 @@ export function useRegisterForm() {
         handleChange,
         handleBlur,
         handleSubmit,
-        isFormValid: isFormValid()
+        isFormValid
     };
 }

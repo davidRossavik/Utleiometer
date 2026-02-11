@@ -1,5 +1,6 @@
 import { GalleryVerticalEnd } from "lucide-react"
-import { SignupForm } from "@/ui/feedback/signup-form"
+import { RegisterForm } from "@/features/auth/components/registerForm"
+
 export default function SignupPage() {
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -10,7 +11,7 @@ export default function SignupPage() {
       >
         Utleiometer
       </a>
-        <SignupForm />
+        <RegisterForm />
       </div>
     </div>
   )
