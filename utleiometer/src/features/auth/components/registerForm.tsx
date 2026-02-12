@@ -11,10 +11,12 @@ export function RegisterForm() {
             username={form.username}
             email={form.email}
             password={form.password}
+            confirmPassword={form.confirmPassword}
             errors={form.errors}
             touched={form.touched}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
+            onConfirmPasswordChange={form.setConfirmPassword}
             onSubmit={form.handleSubmit}
         />
     );

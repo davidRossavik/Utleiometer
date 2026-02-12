@@ -21,10 +21,12 @@ type SignupFormProps = React.ComponentProps<"div"> & {
   username: string;
   email: string;
   password: string;
+  confirmPassword: string;
   errors: Record<RegisterField, string>;
   touched: Record<RegisterField, boolean>;
   onChange: (field: RegisterField, value: string) => void;
   onBlur: (field: RegisterField, value: string) => void;
+  onConfirmPasswordChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 };
 
@@ -33,10 +35,12 @@ export function SignupForm({
   username,
   email,
   password,
+  confirmPassword,
   errors, 
   touched, 
   onChange, 
   onBlur,
+  onConfirmPasswordChange,
   onSubmit,
   ...props
 }: SignupFormProps) {
@@ -108,7 +112,13 @@ export function SignupForm({
                     <FieldLabel htmlFor="confirm-password">
                       Bekreft passord
                     </FieldLabel>
-                    <Input id="confirm-password" type="password" required />
+                    <Input 
+                      id="confirm-password" 
+                      type="password" 
+                      required 
+                      value={confirmPassword}
+                      onChange={(e) => onConfirmPasswordChange(e.target.value)}
+                      />
                   </Field>
                 </Field>
                 <FieldDescription>

@@ -13,6 +13,7 @@ export function useRegisterForm() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     // State for feilmeldinger
     const [errors, setErrors] = useState({
@@ -91,6 +92,12 @@ export function useRegisterForm() {
         const hasErrors = Object.values(formErrors).some(msg => msg !== '');
         if (hasErrors) return;
 
+        // Confirm password
+        if (password !== confirmPassword) {
+            alert("Passordene må være like");
+            return;
+        }
+
         // firebase-kall
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -108,6 +115,8 @@ export function useRegisterForm() {
         username,
         email,
         password,
+        confirmPassword,
+        setConfirmPassword,
         errors,
         touched,
         handleChange,
