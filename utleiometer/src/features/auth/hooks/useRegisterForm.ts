@@ -4,6 +4,8 @@ import { validateUsername, validateEmail, validatePassword } from '@/lib/validat
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from "@/lib/firebase/client";
 
+export type RegisterField = "username" | "email" | "password";
+
 type Values = { username: string, email: string, password: string };
 type Errors = { username: string, email: string, password: string };
 type Field = keyof Values;
@@ -44,7 +46,7 @@ export function useRegisterForm() {
     };
 
     //Kjøres når brukeren skriver i et felt
-    const handleChange = (field: 'username' | 'email' | 'password', value: string) => {
+    const handleChange = (field: RegisterField, value: string) => {
         //Oppdaterer verdien
         if (field === 'username') setUsername(value);
         if (field === 'email') setEmail(value);
@@ -62,7 +64,7 @@ export function useRegisterForm() {
     };
 
     //Kjøres når brukeren forlater et felt (onBlur)
-    const handleBlur = (field: Field, value: string) => {
+    const handleBlur = (field: RegisterField, value: string) => {
         setTouched(prev => ({...prev, [field]: true }));
         //Valider feltet når det blir rørt
         const values: Values = {

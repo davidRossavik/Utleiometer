@@ -14,10 +14,9 @@ import {
   FieldLabel,
 } from "@/ui/primitives/field"
 import { Input } from "@/ui/primitives/input"
+import type { RegisterField } from "@/features/auth/hooks/useRegisterForm";
 
-type RegisterField = "username" | "email" | "password";
-
-type SignupFormProps = React.ComponentProps<"div"> & {
+type SignupFormProps = Omit<React.ComponentProps<"div">, "onChange" | "onBlur" | "onSubmit"> & {
   username: string;
   email: string;
   password: string;

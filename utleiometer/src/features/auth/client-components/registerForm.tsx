@@ -1,6 +1,6 @@
 "use client";
 
-import { useRegisterForm } from "@/features/auth/hooks/userRegisterForm";
+import { useRegisterForm } from "@/features/auth/hooks/useRegisterForm";
 import { SignupForm } from "@/ui/feedback/signup-form";
 
 export function RegisterForm() {
