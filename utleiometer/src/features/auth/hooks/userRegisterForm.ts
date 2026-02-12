@@ -4,6 +4,10 @@ import { validateUsername, validateEmail, validatePassword } from '@/lib/validat
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from "@/lib/firebase/client";
 
+type Values = { username: string, email: string, password: string };
+type Errors = { username: string, email: string, password: string };
+type Field = keyof Values;
+
 export function useRegisterForm() {
     // State for hva brukeren har skrevet
     const [username, setUsername] = useState('');
@@ -25,19 +29,17 @@ export function useRegisterForm() {
         password: false
     });
 
-    //Funksjonen som validerer ett felt
-    const validateField = (field: 'username' | 'email' | 'password', value: string) => {
-        const result =
-            field === 'username' ? validateUsername(value) :
-            field === 'email' ? validateEmail(value) :
-            validatePassword(value);
+    // Ren hjelpefunksjon som regner ut errors uten setState
+    const getErrors = (values: Values): Errors => {
+        const u = validateUsername(values.username);
+        const e = validateEmail(values.email);
+        const p = validatePassword(values.password);
 
-        //Oppdaterer errors-state med ny feilmelding (eller en tom string)
-        setErrors(prev => ({
-            ...prev,
-            [field]: result.error || ''
-        }));
-        return result.isValid;
+        return {
+            username: u.error ?? '',
+            email: e.error ?? '',
+            password: p.error ?? '',
+        };
     };
 
     //Kjøres når brukeren skriver i et felt
@@ -47,32 +49,35 @@ export function useRegisterForm() {
         if (field === 'email') setEmail(value);
         if (field === 'password') setPassword(value);
 
-        //Valider kun hvis feltet er rørt
+        //Valider kun hvis feltet er rørt (en feil-oppdatering)
         if (touched[field]) {
-            validateField(field, value);
+            const values: Values = {
+                username: field === 'username' ? value : username,
+                email: field === 'email' ? value : email,
+                password: field === 'password' ? value : password,
+            };
+            setErrors(getErrors(values))
         }
     };
 
     //Kjøres når brukeren forlater et felt (onBlur)
-    const handleBlur = (field: 'username' | 'email' | 'password') => {
-        setTouched(prev => ({
-            ...prev,
-            [field]: true
-        }));
+    const handleBlur = (field: Field, value: string) => {
+        setTouched(prev => ({...prev, [field]: true }));
         //Valider feltet når det blir rørt
-        const value = field === 'username' ? username : field === 'email' ? email : password;
-        validateField(field, value);
+        const values: Values = {
+            username: field === 'username' ? value : username,
+            email: field === 'email' ? value : email,
+            password: field === 'password' ? value : password,
+        };
+
+        setErrors(getErrors(values))
     };
 
     //Sjekker om hele skjemaet er gyldig
     const isFormValid = () => {
-
-        const usernameValid = validateField('username', username);
-        const emailValid = validateField('email', email);
-        const passwordValid = validateField('password', password);
-
-        return usernameValid && emailValid && passwordValid;
-    }
+        const errs = getErrors({ username, email, password });
+        return Object.values(errs).every(e => e === '');
+    };
 
     //Kjøres når brukeren prøver å sende inn skjemaet
     const handleSubmit = async (e: React.FormEvent) => {
@@ -80,12 +85,13 @@ export function useRegisterForm() {
 
         setTouched({ username: true, email: true, password: true });
 
-        if (!isFormValid()) {
-            return;
-        }
+        // En feil-oppdatering ved submit
+        const formErrors = getErrors({ username, email, password });
+        setErrors(formErrors);
+        const hasErrors = Object.values(formErrors).some(msg => msg !== '');
+        if (hasErrors) return;
 
-        //TODO: Send data til backend for registrering,
-        //Firebasekallet skal komme her senere
+        // firebase-kall
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log("Registered user:", {

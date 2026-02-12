@@ -24,7 +24,7 @@ type SignupFormProps = React.ComponentProps<"div"> & {
   errors: Record<RegisterField, string>;
   touched: Record<RegisterField, boolean>;
   onChange: (field: RegisterField, value: string) => void;
-  onBlur: (field: RegisterField) => void;
+  onBlur: (field: RegisterField, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 };
 
@@ -61,7 +61,7 @@ export function SignupForm({
                   required
                   value={username}
                   onChange={(e) => onChange("username", e.target.value)}
-                  onBlur={() => onBlur("username")}
+                  onBlur={(e) => onBlur("username", (e.target as HTMLInputElement).value)}
                 />
                 {touched.username && errors.username ? (
                   <FieldDescription className="text-red-600">
@@ -78,7 +78,7 @@ export function SignupForm({
                   required
                   value={email}
                   onChange={(e) => onChange("email", e.target.value)}
-                  onBlur={() => onBlur("email")}
+                  onBlur={(e) => onBlur("email", (e.target as HTMLInputElement).value)}
                 />
                 {touched.email && errors.email ? (
                   <FieldDescription className="text-red-600">
@@ -96,7 +96,7 @@ export function SignupForm({
                     required 
                     value={password}
                     onChange={(e) => onChange("password", e.target.value)}
-                    onBlur={() => onBlur("password")}
+                    onBlur={(e) => onBlur("password", (e.target as HTMLInputElement).value)}
                     />
                     {touched.password && errors.password ? (
                       <FieldDescription className="text-red-600">
