@@ -13,6 +13,7 @@ import {
 
 import { cookies } from "next/headers";
 import { getAuthenticatedUserFromSession } from "@/lib/firebase/serverApp"
+import { AuthButtons } from "@/features/auth/client-components/authButtons"
 
 export default async function Home() {
 
@@ -37,15 +38,7 @@ export default async function Home() {
             ): []}
           </div>
 
-
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost">
-              <Link href="/login">Logg inn</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/register">Opprett bruker</Link>
-            </Button>
-          </div>
+          <AuthButtons />
         </div>
       </header>
 
