@@ -11,7 +11,16 @@ import {
   CardTitle,
 } from "@/ui/feedback/card"
 
-export default function Home() {
+import { cookies } from "next/headers";
+import { getAuthenticatedUserFromSession } from "@/lib/firebase/serverApp"
+
+export default async function Home() {
+
+  // Les session cookie fra brukerens nettleserforespørsel
+  const sessionCookie = (await cookies()).get("__session")?.value;
+  // Verifiser cookie med Admin SDK og returnerer brukerinformasjon
+  const currentUser = await getAuthenticatedUserFromSession(sessionCookie);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
@@ -21,6 +30,11 @@ export default function Home() {
             {/* TODO: Logo */}
             <div className="h-9 w-9 rounded-xl bg-muted" />
             <span className="font-semibold">Utleiometer</span>
+            {currentUser ? (
+              <span className="font-medium text-gray-700">
+                Velkommen, {currentUser.displayName || currentUser.email}!
+              </span>
+            ): []}
           </div>
 
 
