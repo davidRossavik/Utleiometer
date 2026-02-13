@@ -24,6 +24,7 @@ type LoginFormUIProps = {
   onChange: (field: LoginField, value: string) => void;
   onBlur: (field: LoginField, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  isSubmitting: boolean;
 };
 
 export function LoginFormUI({
@@ -35,6 +36,7 @@ export function LoginFormUI({
   onChange,
   onBlur,
   onSubmit,
+  isSubmitting,
 }: LoginFormUIProps) {
   return (
     <div className="bg-muted flex w-full max-w-sm flex-col items-center gap-6">
@@ -65,6 +67,7 @@ export function LoginFormUI({
                 value={email}
                 onChange={(e) => onChange("email", e.target.value)}
                 onBlur={(e) => onBlur("email", (e.target as HTMLInputElement).value)}
+                disabled={isSubmitting}
               />
               {touched.email && errors.email ? (
                 <FieldDescription className="text-red-600">
@@ -84,6 +87,7 @@ export function LoginFormUI({
                 value={password}
                 onChange={(e) => onChange("password", e.target.value)}
                 onBlur={(e) => onBlur("password", (e.target as HTMLInputElement).value)}
+                disabled={isSubmitting}
               />
               {touched.password && errors.password ? (
                 <FieldDescription className="text-red-600">
@@ -92,8 +96,8 @@ export function LoginFormUI({
               ) : null}
             </div>
 
-            <Button type="submit" className="w-full">
-              Logg inn
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              { isSubmitting ? "Logger inn..." : "Logg inn"}
             </Button>
 
             {formError ? (

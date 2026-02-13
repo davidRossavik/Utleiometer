@@ -16,6 +16,7 @@ export function LoginForm() {
       onChange={form.handleChange}
       onBlur={form.handleBlur}
       onSubmit={form.handleSubmit}
+      isSubmitting={form.isSubmitting}
     />
   );
 }

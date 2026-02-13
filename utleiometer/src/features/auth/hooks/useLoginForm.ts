@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from "next/navigation";
 import { validateEmail, validatePassword } from '@/lib/validation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
@@ -45,6 +46,9 @@ export function useLoginForm() {
 
   // Felles feilmelding fra Firebase (under knappen)
   const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
 
   // Ren validering som returnerer error-objekt (ingen setState)
   const getErrors = (values: Values): Errors => {
@@ -105,10 +109,29 @@ export function useLoginForm() {
     // Én validering + én setErrors
     const ok = validateAndSetErrors(values);
     if (!ok) return;
+    setIsSubmitting(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // evt redirect her (bruk router i client-komponenten, eller i onAuthStateChanged)
+      // Logg inn bruker og hent ID-token (short lived)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await userCredential.user.getIdToken();
+      
+      // Send ID-token til API-route for å opprette en sikker session cookie
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ authIdToken: idToken }),
+      });
+
+      // Hvis API-kall vellykket (cookie satt på server)
+      // Omdiriger brukeren til hjemmesiden
+      if (response.ok) {
+        router.push("/");
+      } else {
+        const data = await response.json();
+        setFormError(data.message || "Innlogging feilet under oppsett av sesjon.");
+      }
+
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       const { field, message } = getFirebaseFriendlyMessage(code);
@@ -117,8 +140,9 @@ export function useLoginForm() {
         setErrors(prev => ({ ...prev, [field]: message }));
       } else {
         setFormError(message);
-        // Alternativt: setErrors(prev => ({ ...prev, password: message }))
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -131,5 +155,6 @@ export function useLoginForm() {
     handleChange,
     handleBlur,
     handleSubmit,
+    isSubmitting,
   };
 }
