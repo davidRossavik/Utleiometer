@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { validateUsername, validateEmail, validatePassword } from '@/lib/validation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from "@/lib/firebase/client";
+import { useRouter } from "next/navigation";
 
 export type RegisterField = "username" | "email" | "password" | "confirmPassword";
 
@@ -10,12 +11,14 @@ type Values = { username: string, email: string, password: string };
 type Errors = { username: string, email: string, password: string, confirmPassword: string };
 type Field = keyof Values;
 
+
 export function useRegisterForm() {
     // State for hva brukeren har skrevet
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const router = useRouter();
 
     // State for feilmeldinger
     const [errors, setErrors] = useState({
@@ -112,7 +115,8 @@ export function useRegisterForm() {
                 uid: userCredential.user.uid,
                 email: userCredential.user.email,
             });
-        } catch (error: any) {
+            router.push("/");
+        } catch (error) {
             console.error(error);
             // Parse Firebase errors til brukervenlige meldinger
             if (error.code === 'auth/email-already-in-use') {
