@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { validateUsername, validateEmail, validatePassword } from '@/lib/validation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from "@/lib/firebase/client";
+import { useRouter } from "next/navigation";
 
-export type RegisterField = "username" | "email" | "password";
+export type RegisterField = "username" | "email" | "password" | "confirmPassword";
 
 type Values = { username: string, email: string, password: string };
-type Errors = { username: string, email: string, password: string };
+type Errors = { username: string, email: string, password: string, confirmPassword: string };
 type Field = keyof Values;
+
 
 export function useRegisterForm() {
     // State for hva brukeren har skrevet
@@ -16,12 +18,14 @@ export function useRegisterForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const router = useRouter();
 
     // State for feilmeldinger
     const [errors, setErrors] = useState({
         username: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
 
     //State for om brukeren har rørt et felt
@@ -29,19 +33,26 @@ export function useRegisterForm() {
     const [touched, setTouched] = useState({
         username: false,
         email: false,
-        password: false
+        password: false,
+        confirmPassword: false
     });
 
     // Ren hjelpefunksjon som regner ut errors uten setState
-    const getErrors = (values: Values): Errors => {
+    const getErrors = (values: Values, confirmPwd: string = ''): Errors => {
         const u = validateUsername(values.username);
         const e = validateEmail(values.email);
         const p = validatePassword(values.password);
+        
+        let confirmError = '';
+        if (confirmPwd && values.password !== confirmPwd) {
+            confirmError = 'Passordene må være like';
+        }
 
         return {
             username: u.error ?? '',
             email: e.error ?? '',
             password: p.error ?? '',
+            confirmPassword: confirmError,
         };
     };
 
@@ -51,6 +62,7 @@ export function useRegisterForm() {
         if (field === 'username') setUsername(value);
         if (field === 'email') setEmail(value);
         if (field === 'password') setPassword(value);
+        if (field === 'confirmPassword') setConfirmPassword(value);
 
         //Valider kun hvis feltet er rørt (en feil-oppdatering)
         if (touched[field]) {
@@ -59,7 +71,8 @@ export function useRegisterForm() {
                 email: field === 'email' ? value : email,
                 password: field === 'password' ? value : password,
             };
-            setErrors(getErrors(values))
+            const confirmPwd = field === 'confirmPassword' ? value : confirmPassword;
+            setErrors(getErrors(values, confirmPwd))
         }
     };
 
@@ -72,8 +85,9 @@ export function useRegisterForm() {
             email: field === 'email' ? value : email,
             password: field === 'password' ? value : password,
         };
+        const confirmPwd = field === 'confirmPassword' ? value : confirmPassword;
 
-        setErrors(getErrors(values))
+        setErrors(getErrors(values, confirmPwd))
     };
 
     //Sjekker om hele skjemaet er gyldig
@@ -86,19 +100,13 @@ export function useRegisterForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        setTouched({ username: true, email: true, password: true });
+        setTouched({ username: true, email: true, password: true, confirmPassword: true });
 
         // En feil-oppdatering ved submit
-        const formErrors = getErrors({ username, email, password });
+        const formErrors = getErrors({ username, email, password }, confirmPassword);
         setErrors(formErrors);
         const hasErrors = Object.values(formErrors).some(msg => msg !== '');
         if (hasErrors) return;
-
-        // Confirm password
-        if (password !== confirmPassword) {
-            alert("Passordene må være like");
-            return;
-        }
 
         // firebase-kall
         try {
@@ -107,9 +115,24 @@ export function useRegisterForm() {
                 uid: userCredential.user.uid,
                 email: userCredential.user.email,
             });
+            router.push("/");
         } catch (error) {
             console.error(error);
-            alert("Kunne ikke registrere bruker (sjekk e-post/passord eller om e-post er i bruk).");
+            // Parse Firebase errors til brukervenlige meldinger
+            if (error.code === 'auth/email-already-in-use') {
+                setErrors(prev => ({ ...prev, email: 'E-postadressen er allerede i bruk' }));
+                setTouched(prev => ({ ...prev, email: true }));
+            } else if (error.code === 'auth/invalid-email') {
+                setErrors(prev => ({ ...prev, email: 'Ugyldig e-postadresse' }));
+                setTouched(prev => ({ ...prev, email: true }));
+            } else if (error.code === 'auth/weak-password') {
+                setErrors(prev => ({ ...prev, password: 'Passordet er for svakt' }));
+                setTouched(prev => ({ ...prev, password: true }));
+            } else {
+                // Generisk feilmelding for ukjente feil
+                setErrors(prev => ({ ...prev, email: 'Kunne ikke registrere bruker. Prøv igjen senere.' }));
+                setTouched(prev => ({ ...prev, email: true }));
+            }
         };
     }
 
@@ -118,7 +141,6 @@ export function useRegisterForm() {
         email,
         password,
         confirmPassword,
-        setConfirmPassword,
         errors,
         touched,
         handleChange,

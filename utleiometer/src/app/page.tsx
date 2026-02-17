@@ -11,16 +11,10 @@ import {
   CardTitle,
 } from "@/ui/feedback/card"
 
-import { cookies } from "next/headers";
-import { getAuthenticatedUserFromSession } from "@/lib/firebase/serverApp"
+import { AuthButtons } from "@/features/auth/client-components/authButtons";
+import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 
-export default async function Home() {
-
-  // Les session cookie fra brukerens nettleserforespørsel
-  const sessionCookie = (await cookies()).get("__session")?.value;
-  // Verifiser cookie med Admin SDK og returnerer brukerinformasjon
-  const currentUser = await getAuthenticatedUserFromSession(sessionCookie);
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
@@ -30,22 +24,10 @@ export default async function Home() {
             {/* TODO: Logo */}
             <div className="h-9 w-9 rounded-xl bg-muted" />
             <span className="font-semibold">Utleiometer</span>
-            {currentUser ? (
-              <span className="font-medium text-gray-700">
-                Velkommen, {currentUser.displayName || currentUser.email}!
-              </span>
-            ): []}
+            <WelcomeMessage />
           </div>
 
-
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost">
-              <Link href="/login">Logg inn</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/register">Opprett bruker</Link>
-            </Button>
-          </div>
+          <AuthButtons />
         </div>
       </header>
 

@@ -112,26 +112,8 @@ export function useLoginForm() {
     setIsSubmitting(true);
 
     try {
-      // Logg inn bruker og hent ID-token (short lived)
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
-      
-      // Send ID-token til API-route for å opprette en sikker session cookie
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ authIdToken: idToken }),
-      });
-
-      // Hvis API-kall vellykket (cookie satt på server)
-      // Omdiriger brukeren til hjemmesiden
-      if (response.ok) {
-        router.push("/");
-      } else {
-        const data = await response.json();
-        setFormError(data.message || "Innlogging feilet under oppsett av sesjon.");
-      }
-
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       const { field, message } = getFirebaseFriendlyMessage(code);

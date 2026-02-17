@@ -16,7 +16,6 @@ export function RegisterForm() {
             touched={form.touched}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
-            onConfirmPasswordChange={form.setConfirmPassword}
             onSubmit={form.handleSubmit}
         />
     );
