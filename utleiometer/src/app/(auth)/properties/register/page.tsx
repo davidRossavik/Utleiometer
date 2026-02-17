@@ -188,8 +188,14 @@ export default function PropertyRegisterPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full">
-                Registrer bolig
+              {error && (
+                <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+                  {error}
+                </div>
+              )}
+
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Registrerer..." : "Registrer bolig"}
               </Button>
 
               <Field>

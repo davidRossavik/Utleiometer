@@ -4,9 +4,9 @@ import { createProperty, getPropertyByAddress } from "@/lib/firebase/properties"
 
 
 export async function createPropertyAction(formData: FormData) {
-    const address = formData.get("address") as string;
-    const zipCode = formData.get("zipCode") as string;
-    const city = formData.get("city") as string;
+    const address = (formData.get("address") as string).trim().replace(/\s+/g, ' ').toLowerCase();
+    const zipCode = (formData.get("zipCode") as string).trim();
+    const city = (formData.get("city") as string).trim().replace(/\s+/g, ' ').toLowerCase();
     const registeredByUid = formData.get("registeredByUid") as string;
     const imageUrl = formData.get("imageUrl") as string | null; 
     const createdAt = new Date();
@@ -17,7 +17,7 @@ export async function createPropertyAction(formData: FormData) {
 
     const existingProperty = await getPropertyByAddress(address, zipCode, city);
     if (existingProperty) {
-        return {error: "Property already exists"};
+        return {error: "Property already exists, please visit the property's page to leave a review."};
     }
 
     try {
