@@ -56,11 +56,11 @@ export function SignupForm({
           <form onSubmit={onSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="name">Fullt navn</FieldLabel>
+                <FieldLabel htmlFor="name">Brukernavn</FieldLabel>
                 <Input 
                   id="name"
                   type="text"
-                  placeholder="Ola Nordmann"
+                  placeholder="Ola_Nordmann"
                   required
                   value={username}
                   onChange={(e) => onChange("username", e.target.value)}
