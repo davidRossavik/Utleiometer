@@ -3,6 +3,7 @@ import { Button } from "@/ui/primitives/button"
 import { Badge } from "@/ui/feedback/badge"
 import { Field, FieldDescription, FieldLabel } from "@/ui/primitives/field"
 import { Input } from "@/ui/primitives/input"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 import {
   Card,
   CardContent,
@@ -15,6 +16,8 @@ import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 
 export default function Home() {
+
+  
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
