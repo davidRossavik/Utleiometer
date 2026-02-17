@@ -7,6 +7,7 @@ export async function createReviewAction(formData: FormData) {
     const propertyId = formData.get("propertyId") as string;
     const rating = parseInt(formData.get("rating") as string);
     const comment = formData.get("comment") as string;
+    const createdAt = new Date();
 
     if (!userId || !propertyId || isNaN(rating) || !comment) {
         throw new Error("All fields are required and rating must be a number");
