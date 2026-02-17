@@ -7,10 +7,12 @@ export async function createPropertyAction(formData: FormData) {
     const address = formData.get("address") as string;
     const zipCode = formData.get("zipCode") as string;
     const city = formData.get("city") as string;
+    const registeredByUid = formData.get("registeredByUid") as string;
     const imageUrl = formData.get("imageUrl") as string | null; 
+    const createdAt = new Date();
 
-    if (!address || !zipCode || !city) {
-        throw new Error("Address, zip code, and city are required");
+    if (!address || !zipCode || !city || !registeredByUid) {
+        throw new Error("Address, zip code, city, and user ID are required");
     }
 
     const existingProperty = await getPropertyByAddress(address, zipCode, city);
@@ -20,10 +22,12 @@ export async function createPropertyAction(formData: FormData) {
 
     try {
         // Only include imageUrl if it has a value
-        const propertyData: { address: string; zipCode: string; city: string; imageUrl?: string } = {
+        const propertyData: { address: string; zipCode: string; city: string; registeredByUid: string; imageUrl?: string } = {
             address,
             zipCode,
-            city
+            city,
+            registeredByUid,
+            createdAt
         };
         
         if (imageUrl) {

@@ -5,12 +5,15 @@ export interface Property {
   address: string;
   zipCode: string;
   city: string;
+  registeredByUid: string;
+  createdAt: Date;
   imageUrl?: string;
 }
 
-export async function createProperty(data: Omit<Property, "propertyId">) {
-    const docRef = await adminDb.collection("properties").add(data);
-    return { propertyId: docRef.id, ...data };
+export async function createProperty(data: Omit<Property, "propertyId" | "createdAt">) {
+    const propertyData = { ...data, createdAt: new Date() };
+    const docRef = await adminDb.collection("properties").add(propertyData);
+    return { propertyId: docRef.id, ...propertyData };
 }
 
 export async function getPropertyById(propertyId: string) {

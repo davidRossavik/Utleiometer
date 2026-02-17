@@ -51,6 +51,7 @@ export default function PropertyRegisterPage() {
   const formData = new FormData(e.currentTarget)
   
   try {
+    formData.append("registeredByUid", currentUser.uid)
  
     const propertyResult = await createPropertyAction(formData)
     
