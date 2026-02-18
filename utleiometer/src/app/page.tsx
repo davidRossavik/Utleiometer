@@ -68,7 +68,7 @@ export default function Home() {
             Finner du ikke boligen du ønsker å vurdere? 
           </p>
           <Link href="/properties/register">
-            <Button variant="outline" size="lg" className="text-base mouse-pointer bg-green">
+            <Button variant="outline" size="lg" className="text-base">
               Registrer ny bolig her
             </Button>
           </Link>
