@@ -1,5 +1,9 @@
 "use client"
 
+
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+
 import Link from "next/link"
 import { Button } from "@/ui/primitives/button"
 import { Badge } from "@/ui/feedback/badge"
@@ -18,7 +22,10 @@ import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 
 export default function Home() {
+  const router = useRouter()
+  const [search, setSearch] = useState("")
   const { currentUser, loading } = useAuth()
+
 
   
   return (
@@ -54,11 +61,21 @@ export default function Home() {
 
         {/* SØKEFELT */}
         <div className="mt-10 flex justify-center">
+        <form className="mt-10 flex justify-center w-full"
+        onSubmit={(e) => {
+          e.preventDefault()
+          const q = search.trim()
+          router.push(q ? `/properties?q=${encodeURIComponent(q)}` : "/properties")
+        }}
+        >
         <Input
             id="search-bar"
             placeholder="Søk etter bolig"
             className="h-16 w-full max-w-2xl text-lg"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
         />
+        </form>
         </div>
 
         {/* REGISTER NEW PROPERTY */}
