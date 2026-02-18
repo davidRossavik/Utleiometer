@@ -1,4 +1,5 @@
 import { adminDb } from "./admin";
+import { incrementReviewCount } from "./properties";
 
 export interface Review {
     reviewId: string;
@@ -12,6 +13,10 @@ export interface Review {
 export async function createReview(data: Omit<Review, "reviewId" | "createdAt">) {
     const reviewData = { ...data, createdAt: new Date() };
     const docRef = await adminDb.collection("reviews").add(reviewData);
+    
+    // Oppdater review-telleren på property
+    await incrementReviewCount(data.propertyId);
+    
     return { reviewId: docRef.id, ...reviewData };
 }
 

@@ -7,13 +7,21 @@ export interface Property {
   city: string;
   registeredByUid: string;
   createdAt: Date;
+  reviewCount?: number;
   imageUrl?: string;
 }
 
 export async function createProperty(data: Omit<Property, "propertyId" | "createdAt">) {
-    const propertyData = { ...data, createdAt: new Date() };
+    const propertyData = { ...data, createdAt: new Date(), reviewCount: 0 };
     const docRef = await adminDb.collection("properties").add(propertyData);
     return { propertyId: docRef.id, ...propertyData };
+}
+
+export async function incrementReviewCount(propertyId: string) {
+    const propertyRef = adminDb.collection("properties").doc(propertyId);
+    await propertyRef.update({
+        reviewCount: adminDb.FieldValue.increment(1)
+    });
 }
 
 export async function getPropertyById(propertyId: string) {
