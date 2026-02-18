@@ -90,7 +90,14 @@ export default function PropertyRegisterPage() {
   }
 
   return (
-    <main className="bg-muted min-h-screen flex items-center justify-center p-6">
+
+    <main className="bg-muted min-h-screen flex items-center justify-center p-6 relative">
+      <div className="absolute top-4 left-0">
+        <Link href="/">
+          <Button variant="ghost">← Tilbake</Button>
+        </Link>
+      </div>
+      
       <div className="flex w-full max-w-lg flex-col items-center gap-6">
         <Link href="/" className="font-bold text-4xl text-blue-700">
           Utleiometer
