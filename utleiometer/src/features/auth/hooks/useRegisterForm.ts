@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { validateUsername, validateEmail, validatePassword } from '@/lib/validation';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from "@/lib/firebase/client";
 import { useRouter } from "next/navigation";
 
@@ -111,9 +111,16 @@ export function useRegisterForm() {
         // firebase-kall
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            
+            // Lagre brukernavnet som displayName
+            await updateProfile(userCredential.user, {
+                displayName: username
+            });
+            
             console.log("Registered user:", {
                 uid: userCredential.user.uid,
                 email: userCredential.user.email,
+                displayName: username,
             });
             router.push("/");
         } catch (error) {
