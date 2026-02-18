@@ -63,7 +63,7 @@ export default function Home() {
 
         {/* REGISTER NEW PROPERTY */}
         {currentUser && (
-        <div className="mt-6 text-center">
+        <div className="mt-10 text-center">
           <p className="text-muted-foreground mb-3">
             Finner du ikke boligen du ønsker å vurdere? 
           </p>
