@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/ui/primitives/button"
 import { Badge } from "@/ui/feedback/badge"
@@ -16,6 +18,7 @@ import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 
 export default function Home() {
+  const { currentUser, loading } = useAuth()
 
   
   return (
@@ -57,10 +60,24 @@ export default function Home() {
             className="h-16 w-full max-w-2xl text-lg"
         />
         </div>
+
+        {/* REGISTER NEW PROPERTY */}
+        {currentUser && (
+        <div className="mt-6 text-center">
+          <p className="text-muted-foreground mb-3">
+            Finner du ikke boligen du ønsker å vurdere? 
+          </p>
+          <Link href="/properties/register">
+            <Button variant="outline" size="lg" className="text-base mouse-pointer bg-green">
+              Registrer ny bolig her
+            </Button>
+          </Link>
+        </div>)}
         </section>
 
+
         {/* HOW IT WORKS */}
-        <section id="how" className="container mx-auto px-4 py-16">
+        <section id="how" className="container mx-auto px-4 py-6">
           <div className="mx-auto max-w-5xl">
             <h2 className="text-3xl font-semibold tracking-tight">
               {/* TODO */}
