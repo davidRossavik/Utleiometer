@@ -1,4 +1,4 @@
-import { adminDb } from "./admin";
+import { adminDb, FieldValue } from "./admin";
 
 export interface Property {
   propertyId: string;
@@ -20,7 +20,7 @@ export async function createProperty(data: Omit<Property, "propertyId" | "create
 export async function incrementReviewCount(propertyId: string) {
     const propertyRef = adminDb.collection("properties").doc(propertyId);
     await propertyRef.update({
-        reviewCount: adminDb.FieldValue.increment(1)
+        reviewCount: FieldValue.increment(1)
     });
 }
 

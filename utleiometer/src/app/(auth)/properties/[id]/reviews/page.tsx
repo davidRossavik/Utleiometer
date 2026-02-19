@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 import { db } from "@/lib/firebase/client";
 import {
@@ -49,6 +50,7 @@ function formatDate(ts: any) {
 export default function PropertyReviewsPage() {
   const params = useParams<{ id: string }>();
   const propertyId = params?.id;
+  const { currentUser } = useAuth();
 
   const [property, setProperty] = useState<Property | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -154,6 +156,13 @@ export default function PropertyReviewsPage() {
                 <Button asChild variant="secondary">
                   <Link href="/properties">Til boliger</Link>
                 </Button>
+                {currentUser && (
+                  <Button asChild>
+                    <Link href={`/reviews/register?propertyId=${propertyId}&address=${encodeURIComponent(subtitle)}`}>
+                      Legg til ny anmeldelse
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
 
