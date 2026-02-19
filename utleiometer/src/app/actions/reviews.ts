@@ -7,18 +7,21 @@ export async function createReviewAction(formData: FormData) {
     const propertyId = formData.get("propertyId") as string;
     const rating = parseInt(formData.get("rating") as string);
     const comment = formData.get("comment") as string;
-    const createdAt = new Date();
+
+    console.log("createReviewAction called with:", { userId, propertyId, rating, comment });
 
     if (!userId || !propertyId || isNaN(rating) || !comment) {
-        throw new Error("All fields are required and rating must be a number");
+        console.error("Validation failed:", { userId, propertyId, rating: isNaN(rating), comment });
+        return { error: "Alle felter er påkrevd og rating må være et tall" };
     }
 
     try {
         const newReview = await createReview({ userId, propertyId, rating, comment });
-        return newReview;
+        console.log("Review created successfully:", newReview);
+        return { reviewId: newReview.reviewId };
     } catch (error) {
-        console.error("Error creating review:", error);
-        throw new Error("Failed to create review");
-    };  
-
+        console.error("Error creating review - full error:", error);
+        console.error("Error message:", error instanceof Error ? error.message : String(error));
+        return { error: `Kunne ikke opprette anmeldelse: ${error instanceof Error ? error.message : 'Ukjent feil'}` };
+    }
 }

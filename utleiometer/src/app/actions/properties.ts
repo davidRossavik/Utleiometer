@@ -1,6 +1,6 @@
 "use server";
 
-import { createProperty, getPropertyByAddress } from "@/lib/firebase/properties"; 
+import { createProperty, getPropertyByAddress, getPropertyById } from "@/lib/firebase/properties"; 
 
 
 export async function createPropertyAction(formData: FormData) {
@@ -39,5 +39,15 @@ export async function createPropertyAction(formData: FormData) {
     } catch (error) {
         console.error("Error creating property:", error);
         throw new Error("Failed to create property");
+    }
+}
+
+export async function getPropertyAction(propertyId: string) {
+    try {
+        const property = await getPropertyById(propertyId);
+        return property;
+    } catch (error) {
+        console.error("Error fetching property:", error);
+        return { error: "Could not fetch property" };
     }
 }
