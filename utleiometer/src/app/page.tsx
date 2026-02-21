@@ -20,6 +20,7 @@ import {
 
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
+import { SearchBar } from "@/features/search/components/searchBar"
 
 export default function Home() {
   const router = useRouter()
@@ -61,21 +62,7 @@ export default function Home() {
 
         {/* SØKEFELT */}
         <div className="mt-10 flex justify-center">
-        <form className="mt-10 flex justify-center w-full"
-        onSubmit={(e) => {
-          e.preventDefault()
-          const q = search.trim()
-          router.push(q ? `/properties?q=${encodeURIComponent(q)}` : "/properties")
-        }}
-        >
-        <Input
-            id="search-bar"
-            placeholder="Søk etter bolig"
-            className="h-16 w-full max-w-2xl text-lg"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-        />
-        </form>
+          <SearchBar />
         </div>
 
         {/* REGISTER NEW PROPERTY */}
