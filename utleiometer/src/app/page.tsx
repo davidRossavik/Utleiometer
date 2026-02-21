@@ -1,34 +1,13 @@
-"use client"
 
-
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-
-import Link from "next/link"
-import { Button } from "@/ui/primitives/button"
 import { Badge } from "@/ui/feedback/badge"
-import { Field, FieldDescription, FieldLabel } from "@/ui/primitives/field"
-import { Input } from "@/ui/primitives/input"
-import { useAuth } from "@/features/auth/hooks/useAuth"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/ui/feedback/card"
-
+import { RegisterButton } from "@/features/properties/components/registerButton";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/ui/feedback/card"
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { SearchBar } from "@/features/search/components/searchBar"
 
 export default function Home() {
-  const router = useRouter()
-  const [search, setSearch] = useState("")
-  const { currentUser, loading } = useAuth()
 
-
-  
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
@@ -66,17 +45,8 @@ export default function Home() {
         </div>
 
         {/* REGISTER NEW PROPERTY */}
-        {currentUser && (
-        <div className="mt-10 text-center">
-          <p className="text-muted-foreground mb-3">
-            Finner du ikke boligen du ønsker å vurdere? 
-          </p>
-          <Link href="/properties/register">
-            <Button variant="outline" size="lg" className="text-base">
-              Registrer ny bolig her
-            </Button>
-          </Link>
-        </div>)}
+        <RegisterButton/>
+
         </section>
 
 
