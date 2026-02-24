@@ -41,7 +41,7 @@ export default function Home() {
 
         {/* SØKEFELT */}
         <div className="mt-10 flex justify-center">
-          <SearchBar />
+          <SearchBar placeHolder="Søk etter bolig"/>
         </div>
 
         {/* REGISTER NEW PROPERTY */}

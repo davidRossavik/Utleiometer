@@ -15,6 +15,7 @@ import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage
 // Firebase (juster import-stien til deres db)
 import { db } from "@/lib/firebase/client";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { SearchBar } from "@/features/search/components/searchBar";
 
 type Property = {
   id: string;
@@ -114,6 +115,7 @@ export default function PropertiesPage() {
               </div>
             </div>
 
+            
             {/* SEARCH */}
             <div className="mt-8">
               <Input

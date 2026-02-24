@@ -7,9 +7,10 @@ import { Input } from "@/ui/primitives/input";
 type Props = {
     actionPath?: string;
     initialQuery?: string;
+    placeHolder?: string;
 };
 
-export function SearchBar({ actionPath = "/properties", initialQuery = ""}: Props) {
+export function SearchBar({ actionPath = "/properties", initialQuery = "", placeHolder}: Props) {
     const router = useRouter();
     const [search, setSearch] = useState(initialQuery);
 
@@ -24,7 +25,7 @@ export function SearchBar({ actionPath = "/properties", initialQuery = ""}: Prop
         >
             <Input
                 id="search-bar"
-                placeholder="Søk etter bolig"
+                placeholder= {placeHolder}
                 className="h-16 w-full max-w-2xl text-lg"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
