@@ -67,6 +67,7 @@ export default function PropertyRegisterPage() {
     await createReviewAction(formData)
     
     alert("Success! Property and review created")
+    router.push("/")
   } catch (err) {
     setError("Something went wrong")
   } finally {

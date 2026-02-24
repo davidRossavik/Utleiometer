@@ -16,7 +16,7 @@ export function RegisterButton() {
                 <p className="text-muted-foreground mb-3">
                     Finner du ikke boligen du ønsker å vurdere? 
                 </p>
-                <Link href="/properties/register">
+                <Link href="/properties/new">
                     <Button variant="outline" size="lg" className="text-base">
                         Registrer ny bolig her
                     </Button>

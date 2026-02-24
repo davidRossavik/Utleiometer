@@ -158,7 +158,7 @@ export default function PropertyReviewsPage() {
                 </Button>
                 {currentUser && (
                   <Button asChild>
-                    <Link href={`/reviews/register?propertyId=${propertyId}&address=${encodeURIComponent(subtitle)}`}>
+                    <Link href={`/properties/${propertyId}/reviews/new?propertyId=${propertyId}&address=${encodeURIComponent(subtitle)}`}>
                       Legg til ny anmeldelse
                     </Link>
                   </Button>
