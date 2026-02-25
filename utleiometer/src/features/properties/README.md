@@ -3,6 +3,17 @@
 
 This folder contains all functionality to handle properties. The structure follows a feature-based architeture which divides between UI, hooks and data-layer.
 
+### Data-flow:
+
+Firestore  
+   ↓  
+fetchProperties (data/)  
+   ↓  
+useProperties (hook)  
+   ↓  
+PropertiesClient (UI)  
+   ↓  
+PropertyCard / registerButton (presentasjon)  
 
 ## 📁 client/PropertiesClient.tsx
 This is the "entry point" to the property-screen for the client.
