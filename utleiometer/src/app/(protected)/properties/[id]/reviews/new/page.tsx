@@ -15,14 +15,15 @@ import { Label } from "@/ui/primitives/label"
 import { useState, useEffect } from "react"
 import { createReviewAction } from "@/app/actions/reviews"
 import { useAuth } from "@/features/auth/hooks/useAuth"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
 export default function ReviewRegisterPage() {
   const { currentUser, loading } = useAuth()
   const router = useRouter()
+  const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
-  const propertyId = searchParams.get("propertyId")
+  const propertyId = params?.id
   const address = searchParams.get("address") || ""
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
@@ -54,7 +55,7 @@ export default function ReviewRegisterPage() {
       const result = await createReviewAction(formData)
       
       if ("error" in result) {
-        setError(result.error)
+        setError(result.error ?? "Noe gikk galt")
         setIsSubmitting(false)
         return
       }

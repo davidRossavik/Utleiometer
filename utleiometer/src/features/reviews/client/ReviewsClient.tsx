@@ -91,7 +91,7 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
                         {currentUser && (
                         <Button asChild>
                             <Link
-                            href={`/properties/${propertyId}/reviews/new?propertyId=${propertyId}&address=${encodeURIComponent(
+                            href={`/properties/${propertyId}/reviews/new?address=${encodeURIComponent(
                                 subtitle
                             )}`}
                             >
