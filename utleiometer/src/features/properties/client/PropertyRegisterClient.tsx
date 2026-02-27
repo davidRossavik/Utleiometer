@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPropertyAndReviewAction } from "@/app/actions/properties";
 
 import { Button } from "@/ui/primitives/button";
@@ -19,18 +19,11 @@ import {
 } from "@/ui/feedback/card";
 
 export default function PropertyRegisterClient() {
-    const { currentUser, loading } = useAuth();
+    const { currentUser } = useAuth();
     const router = useRouter();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
-
-    // Redirect hvis ikke innlogget
-    useEffect(() => {
-        if (!loading && !currentUser) {
-        router.push("/login");
-        }
-    }, [currentUser, loading, router]);
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -50,7 +43,7 @@ export default function PropertyRegisterClient() {
             const result = await createPropertyAndReviewAction(formData);
 
             if ("error" in result) {
-                setError(result.error);
+                setError(result.error ?? "Noe gikk galt");
                 return;
             }
 
@@ -61,16 +54,6 @@ export default function PropertyRegisterClient() {
             setIsSubmitting(false);
         }
     }
-
-    if (loading) {
-        return (
-            <main className="...">
-            <div>Laster...</div>
-            </main>
-        );
-    }
-
-    if (!currentUser) return null;
 
      return (
             <div className="flex w-full max-w-lg flex-col items-center gap-6">

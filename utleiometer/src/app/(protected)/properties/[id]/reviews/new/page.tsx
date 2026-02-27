@@ -12,14 +12,14 @@ import {
 import { Field, FieldDescription } from "@/ui/primitives/field"
 import { Input } from "@/ui/primitives/input"
 import { Label } from "@/ui/primitives/label"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createReviewAction } from "@/app/actions/reviews"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
 export default function ReviewRegisterPage() {
-  const { currentUser, loading } = useAuth()
+  const { currentUser } = useAuth()
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
@@ -70,19 +70,6 @@ export default function ReviewRegisterPage() {
   }
 
 // end of generated function
-
-
-  if (loading) {
-    return (
-      <main className="bg-muted min-h-screen flex items-center justify-center p-6">
-        <div className="text-center">Laster...</div>
-      </main>
-    )
-  }
-
-  if (!currentUser) {
-    return null
-  }
 
   return (
     <main className="bg-muted min-h-screen flex items-center justify-center p-6">
