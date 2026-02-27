@@ -3,7 +3,7 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { submitPropertiesAndReviews } from "../data/submitProperties";
+import { createPropertyAndReviewAction } from "@/app/actions/properties";
 
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
@@ -40,13 +40,26 @@ export default function PropertyRegisterClient() {
             return;
         }
 
-        await submitPropertiesAndReviews({
-            form: e.currentTarget,
-            currentUserUid: currentUser.uid,
-            onSubmitting: setIsSubmitting,
-            onError: setError,
-            onSuccessNavigate: (path) => router.push(path)
-        });
+        setIsSubmitting(true);
+        setError("");
+
+        const formData = new FormData(e.currentTarget);
+        formData.append("registeredByUid", currentUser.uid);
+
+        try {
+            const result = await createPropertyAndReviewAction(formData);
+
+            if ("error" in result) {
+                setError(result.error);
+                return;
+            }
+
+            router.push("/");
+        } catch {
+            setError("Noe gikk galt");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     if (loading) {
