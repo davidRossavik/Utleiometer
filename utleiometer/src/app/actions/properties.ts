@@ -1,6 +1,7 @@
 "use server";
 
-import { createProperty, getPropertyByAddress } from "@/lib/firebase/properties"; 
+import { createProperty, getPropertyByAddress, getPropertyById } from "@/lib/firebase/properties"; 
+import { createReview } from "@/lib/firebase/reviews";
 
 
 export async function createPropertyAction(formData: FormData) {
@@ -39,5 +40,62 @@ export async function createPropertyAction(formData: FormData) {
     } catch (error) {
         console.error("Error creating property:", error);
         throw new Error("Failed to create property");
+    }
+}
+
+export async function createPropertyAndReviewAction(formData: FormData) {
+    const address = (formData.get("address") as string).trim().replace(/\s+/g, ' ').toLowerCase();
+    const zipCode = (formData.get("zipCode") as string).trim();
+    const city = (formData.get("city") as string).trim().replace(/\s+/g, ' ').toLowerCase();
+    const registeredByUid = formData.get("registeredByUid") as string;
+    const imageUrl = formData.get("imageUrl") as string | null;
+
+    const rating = parseInt(formData.get("rating") as string, 10);
+    const comment = (formData.get("comment") as string)?.trim();
+
+    if (!address || !zipCode || !city || !registeredByUid || isNaN(rating) || !comment) {
+        return { error: "Alle felter er påkrevd og rating må være et tall" };
+    }
+
+    const existingProperty = await getPropertyByAddress(address, zipCode, city);
+    if (existingProperty) {
+        return { error: "Property already exists, please visit the property's page to leave a review." };
+    }
+
+    try {
+        const propertyData: { address: string; zipCode: string; city: string; registeredByUid: string; imageUrl?: string } = {
+            address,
+            zipCode,
+            city,
+            registeredByUid,
+        };
+
+        if (imageUrl) {
+            propertyData.imageUrl = imageUrl;
+        }
+
+        const newProperty = await createProperty(propertyData);
+
+        await createReview({
+            userId: registeredByUid,
+            propertyId: newProperty.propertyId,
+            rating,
+            comment,
+        });
+
+        return { propertyId: newProperty.propertyId };
+    } catch (error) {
+        console.error("Error creating property and review:", error);
+        return { error: "Noe gikk galt" };
+    }
+}
+
+export async function getPropertyAction(propertyId: string) {
+    try {
+        const property = await getPropertyById(propertyId);
+        return property;
+    } catch (error) {
+        console.error("Error fetching property:", error);
+        return { error: "Could not fetch property" };
     }
 }

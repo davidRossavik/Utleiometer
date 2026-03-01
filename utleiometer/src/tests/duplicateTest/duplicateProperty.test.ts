@@ -4,6 +4,12 @@ import * as propertiesLib from '@/lib/firebase/properties';
 
 //US3 Testing duplicate property detection
 
+// Mock Firebase Admin init slik at env ikke trengs i tester
+vi.mock("@/lib/firebase/admin", () => ({
+  adminDb: {},      // eller det reviews/properties forventer
+  adminAuth: {},    // hvis dere bruker auth
+}));
+
 // Mock the Firebase properties module
 vi.mock('@/lib/firebase/properties', () => ({
   createProperty: vi.fn(),
