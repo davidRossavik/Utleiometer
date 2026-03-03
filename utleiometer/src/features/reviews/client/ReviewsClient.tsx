@@ -12,14 +12,9 @@ import Link from "next/link";
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
+import { ReviewCard } from "../componentes/ReviewCard";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
-
-function formatDate(ts: any) {
-    if (!ts?.toDate) return "";
-    const d = ts.toDate() as Date;
-    return d.toLocaleDateString("no-NO", { year: "numeric", month: "short", day: "numeric"});
-}
 
 function filterReviews(reviews: Review[], reviewSearch: string) {
     const q = reviewSearch.trim().toLowerCase();
@@ -52,6 +47,15 @@ function buildSubtitle(property: Property | null) {
         : "Ukjent bolig";
 }
 
+function handleSaveReview(updated: Review) {
+    // Placeholder – Firestore-logikk implementeres i egen issue
+    console.log("Save review:", updated);
+}
+
+function handleDeleteReview(reviewId: string) {
+    // Placeholder – Firestore-logikk implementeres i egen issue
+    console.log("Delete review:", reviewId);
+}
 
 export default function ReviewsClient({ propertyId, property }: { propertyId: string, property: Property | null}) {
     const { reviews, loading, error } = useReviews({ propertyId });
@@ -150,26 +154,13 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
                     ) : (
                     <div className="flex flex-col gap-6">
                         {visible.map((r) => (
-                        <Card key={r.id} className="transition-shadow hover:shadow-md">
-                            <CardHeader>
-                            <CardTitle className="text-xl text-blue-700">
-                                {r.title?.trim() ? r.title : "Anmeldelse"}
-                            </CardTitle>
-                            <CardDescription>
-                                <span className="mr-2">
-                                {typeof r.rating === "number" ? `${r.rating}/5` : "Ingen rating"}
-                                </span>
-                                {r.userDisplayName ? `• ${r.userDisplayName}` : null}
-                                {r.createdAt ? ` • ${formatDate(r.createdAt)}` : null}
-                            </CardDescription>
-                            </CardHeader>
-
-                            <CardContent>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line">
-                                {r.comment?.trim() ? r.comment : "Ingen tekst."}
-                            </p>
-                            </CardContent>
-                        </Card>
+                        <ReviewCard
+                            key={r.id}
+                            review={r}
+                            currentUserId={currentUser?.uid}
+                            onSave={handleSaveReview}
+                            onDelete={handleDeleteReview}
+                        />
                         ))}
                     </div>
                     )}
