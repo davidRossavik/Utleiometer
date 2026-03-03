@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/ui/primitives/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/primitives/popover";
-import { signOut } from "firebase/auth";
+import { signOut, deleteUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +13,7 @@ export function AuthButtons() {
   const { currentUser, loading } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -22,6 +23,26 @@ export function AuthButtons() {
     } catch (err) {
       console.error("Logout error:", err);
       setIsLoggingOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+    
+    const confirmed = window.confirm(
+      "Er du sikker på at du vil slette kontoen din? Dette kan ikke angres."
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      setIsDeletingAccount(true);
+      await deleteUser(currentUser);
+      router.push("/");
+    } catch (err) {
+      console.error("Delete account error:", err);
+      alert("Kunne ikke slette kontoen. Du må kanskje logge inn på nytt først.");
+      setIsDeletingAccount(false);
     }
   };
 
@@ -47,8 +68,14 @@ export function AuthButtons() {
             >
               {isLoggingOut ? "Logger ut..." : "Logg ut"}
             </Button>
-            <Button type="button" variant="destructive" className="text-left w-full">
-              Slett bruker
+            <Button 
+              type="button" 
+              variant="destructive" 
+              className="text-left w-full"
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+            >
+              {isDeletingAccount ? "Sletter..." : "Slett bruker"}
             </Button>
           </div>
         </PopoverContent>
