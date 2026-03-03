@@ -2,8 +2,9 @@
 
 import { Review } from "@/features/reviews/types";
 import { Property } from "@/features/properties/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useReviews } from "../hooks/useReviews";
+import { fetchPropertyById } from "@/features/properties/data/fetchProperties";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
@@ -46,16 +47,29 @@ function sortReviews(reviews: Review[], sort: SortKey) {
     }
 }
 
+function capitalizeFirstLetter(str: string | undefined): string {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function buildSubtitle(property: Property | null) {
-    return property 
-        ? [property.address, property.city, property.country].filter(Boolean).join(", ") 
-        : "Ukjent bolig";
+    if (!property) return "Ukjent bolig";
+    
+    const address = capitalizeFirstLetter(property.address);
+    return [address, property.city, property.country].filter(Boolean).join(", ");
 }
 
 
 export default function ReviewsClient({ propertyId, property }: { propertyId: string, property: Property | null}) {
     const { reviews, loading, error } = useReviews({ propertyId });
     const { currentUser } = useAuth();
+    const [fetchedProperty, setFetchedProperty] = useState<Property | null>(property);
+    
+    useEffect(() => {
+        if (!property && propertyId) {
+            fetchPropertyById(propertyId).then(setFetchedProperty);
+        }
+    }, [propertyId, property]);
 
     const [reviewSearch, setReviewSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("newest");
@@ -65,7 +79,7 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
         return sortReviews(filtered, sort);
     }, [reviews, reviewSearch, sort]);
 
-    const subtitle = useMemo(() => buildSubtitle(property), [property]);
+    const subtitle = useMemo(() => buildSubtitle(fetchedProperty), [fetchedProperty]);
 
     return (
             <main>

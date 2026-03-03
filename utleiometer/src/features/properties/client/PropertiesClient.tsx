@@ -70,23 +70,32 @@ function PropertiesEmpty({ onClear }: { onClear: () => void}) {
     );
 }
 
+function capitalizeFirstLetter(str: string | undefined): string {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function PropertyCard({ p }: { p: Property }) {
+  const displayAddress = capitalizeFirstLetter(p.address) || "Ukjent adresse";
+  
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader>
-        <CardTitle className="text-xl text-blue-700">
-          {p.address ?? "Ukjent adresse"}
-        </CardTitle>
-        <CardDescription>
-          {[p.city, p.country].filter(Boolean).join(", ") || "Ukjent sted"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex items-center justify-end">
-        <Button asChild>
-          <Link href={`/properties/${p.id}/reviews`}>Se anmeldelser</Link>
-        </Button>
-      </CardContent>
-    </Card>
+    <Link href={`/properties/${p.id}/reviews`} className="block">
+      <Card className="cursor-pointer transition-all hover:shadow-lg hover:shadow-blue-100/50">
+        <CardHeader>
+          <CardTitle className="text-xl text-blue-700">
+            {displayAddress}
+          </CardTitle>
+          <CardDescription>
+            {[p.city, p.country].filter(Boolean).join(", ") || "Ukjent sted"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-end">
+          <span className="text-sm font-medium text-blue-700">
+            Se anmeldelser →
+          </span>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
