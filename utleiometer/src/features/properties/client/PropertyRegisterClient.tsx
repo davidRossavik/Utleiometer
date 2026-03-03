@@ -3,7 +3,7 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createPropertyAndReviewAction } from "@/app/actions/properties";
+import { createPropertyAndReviewAction } from "@/app/[locale]/actions/properties";
 
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";

@@ -6,8 +6,12 @@ import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { SearchBar } from "@/features/search/components/searchBar";
 import { useTranslations } from 'next-intl';
+import { setRequestLocale } from "next-intl/server";
+import { use } from 'react';
 
-export default function Home() {
+export default function Home({params}) {
+  const {locale} = use(params);
+  setRequestLocale(locale);
   const t = useTranslations('HomePage');
 
   return (
