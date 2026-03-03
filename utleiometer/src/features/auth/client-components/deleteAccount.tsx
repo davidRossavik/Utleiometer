@@ -19,7 +19,6 @@ export default function DeleteAccount({ currentUser, router }: { currentUser: Us
     try {
       setIsDeletingAccount(true);
       
-      // Firebase deleteUser krever at det finnes et bruker-objekt
       await deleteUser(currentUser);
       
       //Redirect til forsiden etter sletting

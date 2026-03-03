@@ -8,6 +8,7 @@ import { signOut, deleteUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { deleteUserData } from "@/app/actions/deleteUser";
 
 export function AuthButtons() {
   const { currentUser, loading } = useAuth();
@@ -37,7 +38,13 @@ export function AuthButtons() {
     
     try {
       setIsDeletingAccount(true);
+      
+      // Slett alle brukerens anmeldelser og tilhørende boliger uten andre reviews
+      await deleteUserData(currentUser.uid);
+      
+      // Slett Firebase Auth brukerkonto
       await deleteUser(currentUser);
+      
       router.push("/");
     } catch (err) {
       console.error("Delete account error:", err);
