@@ -2,14 +2,18 @@
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-export function WelcomeMessage() {
+type Props = {
+  text: string
+}
+
+export function WelcomeMessage({text}: Props) {
   const { currentUser, loading } = useAuth();
 
   if (loading || !currentUser) return null;
 
   return (
     <span className="font-medium text-gray-700">
-      Velkommen, {currentUser.displayName || currentUser.email}!
+      {text}, {currentUser.displayName || currentUser.email}!
     </span>
   );
 }

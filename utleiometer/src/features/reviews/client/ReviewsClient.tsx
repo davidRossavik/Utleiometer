@@ -6,8 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useReviews } from "../hooks/useReviews";
 import { fetchPropertyById } from "@/features/properties/data/fetchProperties";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
-import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { Badge } from "@/ui/feedback/badge";
 import Link from "next/link";
 import { Button } from "@/ui/primitives/button";
@@ -16,6 +14,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { ReviewCard } from "../componentes/ReviewCard";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
+
+export type ReviewsClientTexts = {
+    badge: string;
+    title: string;
+    toProperties: string;
+    addReview: string;
+    searchPlaceholder: string;
+    loadingTitle: string;
+    loadingDescription: string;
+    emptyTitle: string;
+    emptyNoMatch: string;
+    emptyNoReviews: string;
+    clearSearch: string;
+    unknownProperty: string;
+};
+
+export type ReviewsClientMessages = {
+    loadReviewsError: string;
+};
+
+type ReviewsClientProps = {
+    propertyId: string;
+    property: Property | null;
+    texts: ReviewsClientTexts;
+    messages: ReviewsClientMessages;
+};
 
 function filterReviews(reviews: Review[], reviewSearch: string) {
     const q = reviewSearch.trim().toLowerCase();
@@ -47,8 +71,8 @@ function capitalizeFirstLetter(str: string | undefined): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function buildSubtitle(property: Property | null) {
-    if (!property) return "Ukjent bolig";
+function buildSubtitle(property: Property | null, unknownProperty: string) {
+    if (!property) return unknownProperty;
     
     const address = capitalizeFirstLetter(property.address);
     return [address, property.city, property.country].filter(Boolean).join(", ");
@@ -64,8 +88,8 @@ function handleDeleteReview(reviewId: string) {
     console.log("Delete review:", reviewId);
 }
 
-export default function ReviewsClient({ propertyId, property }: { propertyId: string, property: Property | null}) {
-    const { reviews, loading, error } = useReviews({ propertyId });
+export default function ReviewsClient({ propertyId, property, texts, messages }: ReviewsClientProps) {
+    const { reviews, loading, error } = useReviews({ propertyId, messages });
     const { currentUser } = useAuth();
     const [fetchedProperty, setFetchedProperty] = useState<Property | null>(property);
     
@@ -83,19 +107,22 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
         return sortReviews(filtered, sort);
     }, [reviews, reviewSearch, sort]);
 
-    const subtitle = useMemo(() => buildSubtitle(fetchedProperty), [fetchedProperty]);
+    const subtitle = useMemo(
+        () => buildSubtitle(fetchedProperty, texts.unknownProperty),
+        [fetchedProperty, texts.unknownProperty],
+    );
 
     return (
             <main>
                 {/* HEADER */}
                 <section className="container mx-auto px-4 py-12">
                 <div className="mx-auto max-w-5xl">
-                    <Badge className="mb-4">Anmeldelser</Badge>
+                    <Badge className="mb-4">{texts.badge}</Badge>
 
                     <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-blue-700">
-                        Se anmeldelser
+                        {texts.title}
                         </h1>
                         <p className="mt-2 text-muted-foreground">{subtitle}</p>
                         {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
@@ -103,7 +130,7 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
 
                     <div className="flex gap-2">
                         <Button asChild variant="secondary">
-                        <Link href="/properties">Til boliger</Link>
+                        <Link href="/properties">{texts.toProperties}</Link>
                         </Button>
 
                         {currentUser && (
@@ -113,7 +140,7 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
                                 subtitle
                             )}`}
                             >
-                            Legg til ny anmeldelse
+                            {texts.addReview}
                             </Link>
                         </Button>
                         )}
@@ -124,7 +151,7 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
                     <div className="mt-8">
                     <Input
                         id="review-search"
-                        placeholder="Søk i anmeldelser…"
+                        placeholder={texts.searchPlaceholder}
                         className="h-12 w-full text-base"
                         value={reviewSearch}
                         onChange={(e) => setReviewSearch(e.target.value)}
@@ -140,8 +167,8 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
                     <div className="flex flex-col gap-6">
                         <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl text-blue-700">Laster…</CardTitle>
-                            <CardDescription>Henter anmeldelser fra databasen.</CardDescription>
+                            <CardTitle className="text-xl text-blue-700">{texts.loadingTitle}</CardTitle>
+                            <CardDescription>{texts.loadingDescription}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-4 w-2/3 rounded bg-muted" />
@@ -152,16 +179,16 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
                     ) : visible.length === 0 ? (
                     <Card>
                         <CardHeader>
-                        <CardTitle className="text-xl text-blue-700">Ingen anmeldelser</CardTitle>
+                        <CardTitle className="text-xl text-blue-700">{texts.emptyTitle}</CardTitle>
                         <CardDescription>
                             {reviewSearch.trim()
-                            ? "Ingen treff på søket ditt."
-                            : "Det ser ikke ut som det finnes anmeldelser her enda."}
+                            ? texts.emptyNoMatch
+                            : texts.emptyNoReviews}
                         </CardDescription>
                         </CardHeader>
                         <CardContent>
                         <Button variant="secondary" onClick={() => setReviewSearch("")}>
-                            Tøm søk
+                            {texts.clearSearch}
                         </Button>
                         </CardContent>
                     </Card>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from "next/navigation";
-import { validateEmail, validatePassword } from '@/lib/validation';
+import { VALIDATION_RULES } from '@/lib/validation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 
@@ -12,25 +12,50 @@ type Values = Record<LoginField, string>;
 type Errors = Record<LoginField, string>;
 type Touched = Record<LoginField, boolean>;
 
-function getFirebaseFriendlyMessage(code?: string): { field?: LoginField; message: string } {
+export type LoginFormMessages = {
+  emailRequired: string;
+  emailInvalid: string;
+  passwordRequired: string;
+  passwordInvalid: string;
+  invalidCredential: string;
+  invalidEmailFirebase: string;
+  tooManyRequests: string;
+  loginFailed: string;
+};
+
+const defaultMessages: LoginFormMessages = {
+  emailRequired: 'E-post er påkrevd',
+  emailInvalid: 'Ugyldig e-postadresse.',
+  passwordRequired: 'Passord er påkrevd',
+  passwordInvalid: 'Passord må være minst 8 tegn langt og inneholde både bokstaver og tall.',
+  invalidCredential: 'Feil e-post eller passord.',
+  invalidEmailFirebase: 'Ugyldig e-postadresse.',
+  tooManyRequests: 'For mange forsøk. Prøv igjen senere.',
+  loginFailed: 'Innlogging feilet. Prøv igjen.',
+};
+
+function getFirebaseFriendlyMessage(
+  code: string | undefined,
+  messages: LoginFormMessages,
+): { field?: LoginField; message: string } {
   switch (code) {
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
-      return { message: 'Feil e-post eller passord.' };
+      return { message: messages.invalidCredential };
 
     case 'auth/invalid-email':
-      return { field: 'email', message: 'Ugyldig e-postadresse.' };
+      return { field: 'email', message: messages.invalidEmailFirebase };
 
     case 'auth/too-many-requests':
-      return { message: 'For mange forsøk. Prøv igjen senere.' };
+      return { message: messages.tooManyRequests };
 
     default:
-      return { message: 'Innlogging feilet. Prøv igjen.' };
+      return { message: messages.loginFailed };
   }
 }
 
-export function useLoginForm() {
+export function useLoginForm(messages: LoginFormMessages = defaultMessages) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -52,12 +77,24 @@ export function useLoginForm() {
 
   // Ren validering som returnerer error-objekt (ingen setState)
   const getErrors = (values: Values): Errors => {
-    const e = validateEmail(values.email);
-    const p = validatePassword(values.password); // evt. bytt til "påkrevd" hvis dere vil ha svakere login-validering
+    let emailError = '';
+    let passwordError = '';
+
+    if (!values.email) {
+      emailError = messages.emailRequired;
+    } else if (!VALIDATION_RULES.email.pattern.test(values.email)) {
+      emailError = messages.emailInvalid;
+    }
+
+    if (!values.password) {
+      passwordError = messages.passwordRequired;
+    } else if (!VALIDATION_RULES.password.pattern.test(values.password)) {
+      passwordError = messages.passwordInvalid;
+    }
 
     return {
-      email: e.error ?? '',
-      password: p.error ?? '',
+      email: emailError,
+      password: passwordError,
     };
   };
 
@@ -116,7 +153,7 @@ export function useLoginForm() {
       router.push("/");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
-      const { field, message } = getFirebaseFriendlyMessage(code);
+      const { field, message } = getFirebaseFriendlyMessage(code, messages);
 
       if (field) {
         setErrors(prev => ({ ...prev, [field]: message }));

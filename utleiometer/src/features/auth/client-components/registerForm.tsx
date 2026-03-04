@@ -1,10 +1,15 @@
 "use client";
 
-import { useRegisterForm } from "@/features/auth/hooks/useRegisterForm";
-import { SignupForm } from "@/ui/feedback/signup-form";
+import { useRegisterForm, type RegisterFormMessages } from "@/features/auth/hooks/useRegisterForm";
+import { SignupForm, type SignupFormTexts } from "@/ui/feedback/signup-form";
 
-export function RegisterForm() {
-    const form = useRegisterForm();
+type RegisterFormProps = {
+    texts: SignupFormTexts;
+    messages: RegisterFormMessages;
+};
+
+export function RegisterForm({ texts, messages }: RegisterFormProps) {
+    const form = useRegisterForm(messages);
 
     return (
         <SignupForm
@@ -17,6 +22,7 @@ export function RegisterForm() {
             onChange={form.handleChange}
             onBlur={form.handleBlur}
             onSubmit={form.handleSubmit}
+            texts={texts}
         />
     );
 }

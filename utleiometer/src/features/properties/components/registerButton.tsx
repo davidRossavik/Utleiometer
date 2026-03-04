@@ -4,7 +4,12 @@ import Link from "next/link";
 import { Button } from "@/ui/primitives/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-export function RegisterButton() {
+type Props = {
+    registerMessage: string
+    registerButtonText: string,
+}
+
+export function RegisterButton({registerMessage, registerButtonText}: Props) {
     const { currentUser, loading } = useAuth();
     
     if (loading) {
@@ -14,11 +19,11 @@ export function RegisterButton() {
         return (
             <div className="mt-10 text-center">
                 <p className="text-muted-foreground mb-3">
-                    Finner du ikke boligen du ønsker å vurdere? 
+                    {registerMessage}
                 </p>
                 <Link href="/properties/new">
                     <Button variant="outline" size="lg" className="text-base">
-                        Registrer ny bolig her
+                        {registerButtonText}
                     </Button>
                 </Link>
             </div>

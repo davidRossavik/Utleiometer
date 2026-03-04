@@ -10,7 +10,30 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deleteUserData } from "@/app/actions/deleteUser";
 
-export function AuthButtons() {
+type Props = {
+  account: string,
+  confirmText: string,
+  alertText: string,
+  logOutText: string,
+  logOutHandlingText: string,
+  deleteText: string,
+  deleteHandlingText: string,
+  loginText: string,
+  registerText: string
+}
+
+export function AuthButtons({
+  account,
+  confirmText,
+  alertText,
+  logOutText,
+  logOutHandlingText,
+  deleteText,
+  deleteHandlingText,
+  loginText,
+  registerText
+}: Props) {
+
   const { currentUser, loading } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -30,10 +53,7 @@ export function AuthButtons() {
   const handleDeleteAccount = async () => {
     if (!currentUser) return;
     
-    const confirmed = window.confirm(
-      "Er du sikker på at du vil slette kontoen din? Dette kan ikke angres."
-    );
-    
+    const confirmed = window.confirm(confirmText);
     if (!confirmed) return;
     
     try {
@@ -48,7 +68,7 @@ export function AuthButtons() {
       router.push("/");
     } catch (err) {
       console.error("Delete account error:", err);
-      alert("Kunne ikke slette kontoen. Du må kanskje logge inn på nytt først.");
+      alert(alertText);
       setIsDeletingAccount(false);
     }
   };
@@ -63,7 +83,7 @@ export function AuthButtons() {
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline">Konto</Button>
+          <Button variant="outline">{account}</Button>
         </PopoverTrigger>
         <PopoverContent  align="start" className="w-48 p-2">
           <div className="flex flex-col gap-1">
@@ -73,7 +93,7 @@ export function AuthButtons() {
               onClick={handleLogout}
               disabled={isLoggingOut}
             >
-              {isLoggingOut ? "Logger ut..." : "Logg ut"}
+              {isLoggingOut ? logOutHandlingText : logOutText}
             </Button>
             <Button 
               type="button" 
@@ -82,7 +102,7 @@ export function AuthButtons() {
               onClick={handleDeleteAccount}
               disabled={isDeletingAccount}
             >
-              {isDeletingAccount ? "Sletter..." : "Slett bruker"}
+              {isDeletingAccount ? deleteHandlingText : deleteText}
             </Button>
           </div>
         </PopoverContent>
@@ -94,10 +114,10 @@ export function AuthButtons() {
   return (
     <div className="flex items-center gap-2">
       <Button asChild variant="outline" >
-        <Link href="/login">Logg inn</Link>
+        <Link href="/login">{loginText}</Link>
       </Button>
       <Button asChild className="bg-blue-700 hover:bg-blue-800 text-white">
-        <Link href="/register">Opprett bruker</Link>
+        <Link href="/register">{registerText}</Link>
       </Button>
     </div>
   );

@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/ui/primitives/button";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
+import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
 
 import PropertyRegisterClient from "@/features/properties/client/PropertyRegisterClient";
 
@@ -10,7 +12,10 @@ export const metadata = {
   title: "Registrer bolig | Utleiometer",
 };
 
-export default function Page() {
+export default async function Page() {
+  const t = await getTranslations("PropertyNewPage");
+  const tHome = await getTranslations("HomePage");
+
   return (
     <div className="min-h-screen bg-muted text-foreground flex flex-col">
       {/* NAV (server wrapper, men med client innslag) */}
@@ -19,11 +24,24 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-muted" />
             <Link href="/" className="font-semibold">
-              Utleiometer
+              {t("brand")}
             </Link>
-            <WelcomeMessage />
+            <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>
-          <AuthButtons />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <AuthButtons
+              account={tHome("account")}
+              confirmText={tHome("confirmText")}
+              alertText={tHome("alertText")}
+              logOutText={tHome("logOutText")}
+              logOutHandlingText={tHome("logOutHandlingText")}
+              deleteText={tHome("deleteText")}
+              deleteHandlingText={tHome("deleteHandlingText")}
+              loginText={tHome("loginText")}
+              registerText={tHome("registerText")}
+            />
+          </div>
         </div>
       </header>
 
@@ -32,17 +50,41 @@ export default function Page() {
       {/* Tilbake-knapp – absolutt plassert */}
       <div className="absolute top-6 left-6">
         <Button asChild variant="ghost">
-          <Link href="/">← Tilbake</Link>
+          <Link href="/">{t("backButton")}</Link>
         </Button>
       </div>
 
       {/* Sentrert innhold */}
       <div className="w-full max-w-lg flex flex-col items-center gap-6">
         <Link href="/" className="font-bold text-4xl text-blue-700">
-          Utleiometer
+          {t("brand")}
         </Link>
 
-        <PropertyRegisterClient />
+        <PropertyRegisterClient
+          texts={{
+            cardTitle: t("form.cardTitle"),
+            cardDescription: t("form.cardDescription"),
+            sectionRegisterTitle: t("form.sectionRegisterTitle"),
+            addressLabel: t("form.addressLabel"),
+            addressPlaceholder: t("form.addressPlaceholder"),
+            zipCodeLabel: t("form.zipCodeLabel"),
+            zipCodePlaceholder: t("form.zipCodePlaceholder"),
+            cityLabel: t("form.cityLabel"),
+            cityPlaceholder: t("form.cityPlaceholder"),
+            sectionReviewTitle: t("form.sectionReviewTitle"),
+            commentLabel: t("form.commentLabel"),
+            commentPlaceholder: t("form.commentPlaceholder"),
+            ratingLabel: t("form.ratingLabel"),
+            ratingPlaceholder: t("form.ratingPlaceholder"),
+            submit: t("form.submit"),
+            submitting: t("form.submitting"),
+            hint: t("form.hint"),
+          }}
+          messages={{
+            notLoggedIn: t("messages.notLoggedIn"),
+            unknownError: t("messages.unknownError"),
+          }}
+        />
         
       </div>
 
@@ -51,8 +93,7 @@ export default function Page() {
       {/* FOOTER */}
       <footer className="border-t bg-background">
         <div className="container mx-auto px-4 py-10 text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Utleiometer. Laget av Lillian, Katharina,
-          Robert, David og Marius / PU-gruppe 4.
+          © {new Date().getFullYear()} {t("footer")}
         </div>
       </footer>
     </div>

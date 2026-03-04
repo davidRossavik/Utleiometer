@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { Review } from "../types";
 import { fetchReviews } from "../data/fetchReviews";
 
-export function useReviews({ propertyId }: { propertyId: string }) {
+type UseReviewsMessages = {
+    loadReviewsError: string;
+};
+
+const defaultMessages: UseReviewsMessages = {
+    loadReviewsError: "Kunne ikke hente anmeldelser",
+};
+
+export function useReviews({ propertyId, messages = defaultMessages }: { propertyId: string; messages?: UseReviewsMessages }) {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -30,7 +38,7 @@ export function useReviews({ propertyId }: { propertyId: string }) {
                 console.error("Failed to load reviews:", e);
                 if (!cancelled) {
                     setReviews([]);
-                    setError("Kunne ikke hente anmeldelser");
+                    setError(messages.loadReviewsError);
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -41,7 +49,7 @@ export function useReviews({ propertyId }: { propertyId: string }) {
         return () => {
             cancelled = true;
         };
-    }, [propertyId]);
+    }, [propertyId, messages]);
 
     return { reviews, loading, error };
 }

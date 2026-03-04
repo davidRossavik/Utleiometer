@@ -1,10 +1,15 @@
 'use client';
 
-import { useLoginForm } from '@/features/auth/hooks/useLoginForm';
-import { LoginFormUI } from '@/ui/feedback/login-form';
+import { useLoginForm, type LoginFormMessages } from '@/features/auth/hooks/useLoginForm';
+import { LoginFormUI, type LoginFormTexts } from '@/ui/feedback/login-form';
 
-export function LoginForm() {
-  const form = useLoginForm();
+type LoginFormProps = {
+  texts: LoginFormTexts;
+  messages: LoginFormMessages;
+};
+
+export function LoginForm({ texts, messages }: LoginFormProps) {
+  const form = useLoginForm(messages);
 
   return (
     <LoginFormUI
@@ -17,6 +22,7 @@ export function LoginForm() {
       onBlur={form.handleBlur}
       onSubmit={form.handleSubmit}
       isSubmitting={form.isSubmitting}
+      texts={texts}
     />
   );
 }

@@ -15,6 +15,32 @@ import { Label } from "@/ui/primitives/label";
 
 type LoginField = "email" | "password";
 
+export type LoginFormTexts = {
+  brand: string;
+  title: string;
+  description: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  passwordLabel: string;
+  submit: string;
+  submitting: string;
+  noAccount: string;
+  registerLink: string;
+};
+
+const defaultTexts: LoginFormTexts = {
+  brand: "Utleiometer",
+  title: "Innlogging",
+  description: "Skriv inn din e-postadresse for å logge inn",
+  emailLabel: "E-post",
+  emailPlaceholder: "ola.nordmann@eksempel.com",
+  passwordLabel: "Passord",
+  submit: "Logg inn",
+  submitting: "Logger inn...",
+  noAccount: "Har du ikke en konto?",
+  registerLink: "Registrer deg her",
+};
+
 type LoginFormUIProps = {
   email: string;
   password: string;
@@ -25,6 +51,7 @@ type LoginFormUIProps = {
   onBlur: (field: LoginField, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
+  texts?: LoginFormTexts;
 };
 
 export function LoginFormUI({
@@ -37,20 +64,21 @@ export function LoginFormUI({
   onBlur,
   onSubmit,
   isSubmitting,
+  texts = defaultTexts,
 }: LoginFormUIProps) {
   return (
     <div className="bg-muted flex w-full max-w-sm flex-col items-center gap-6">
       {/* BLÅ TEKST OVER */}
       <Link href="/" className="font-bold text-4xl text-blue-700">
-        Utleiometer
+        {texts.brand}
       </Link>
 
       {/* LOGIN CARD */}
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-xl">Innlogging</CardTitle>
+          <CardTitle className="text-xl">{texts.title}</CardTitle>
           <CardDescription>
-            Skriv inn din e-postadresse for å logge inn
+            {texts.description}
           </CardDescription>
           <CardAction />
         </CardHeader>
@@ -58,11 +86,11 @@ export function LoginFormUI({
         <CardContent>
           <form className="flex flex-col gap-6" onSubmit={onSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="email">E-post</Label>
+              <Label htmlFor="email">{texts.emailLabel}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="ola.nordmann@eksempel.com"
+                placeholder={texts.emailPlaceholder}
                 required
                 value={email}
                 onChange={(e) => onChange("email", e.target.value)}
@@ -78,7 +106,7 @@ export function LoginFormUI({
 
             <div className="grid gap-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Passord</Label>
+                <Label htmlFor="password">{texts.passwordLabel}</Label>
               </div>
               <Input
                 id="password"
@@ -97,7 +125,7 @@ export function LoginFormUI({
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              { isSubmitting ? "Logger inn..." : "Logg inn"}
+              { isSubmitting ? texts.submitting : texts.submit}
             </Button>
 
             {formError ? (
@@ -108,9 +136,9 @@ export function LoginFormUI({
 
             <Field>
               <FieldDescription className="text-center">
-                Har du ikke en konto?{" "}
+                {texts.noAccount}{" "}
                 <Link href="/register" className="underline">
-                  Registrer deg her
+                  {texts.registerLink}
                 </Link>
               </FieldDescription>
             </Field>
