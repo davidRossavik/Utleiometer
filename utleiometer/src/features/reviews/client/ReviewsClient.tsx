@@ -14,6 +14,7 @@ import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
+import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
 
@@ -54,16 +55,6 @@ function buildSubtitle(property: Property | null) {
     return [address, property.city, property.country].filter(Boolean).join(", ");
 }
 
-function handleSaveReview(updated: Review) {
-    // Placeholder – Firestore-logikk implementeres i egen issue
-    console.log("Save review:", updated);
-}
-
-function handleDeleteReview(reviewId: string) {
-    // Placeholder – Firestore-logikk implementeres i egen issue
-    console.log("Delete review:", reviewId);
-}
-
 export default function ReviewsClient({ propertyId, property }: { propertyId: string, property: Property | null}) {
     const { reviews, loading, error } = useReviews({ propertyId });
     const { currentUser } = useAuth();
@@ -77,6 +68,45 @@ export default function ReviewsClient({ propertyId, property }: { propertyId: st
 
     const [reviewSearch, setReviewSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("newest");
+
+    async function handleSaveReview(updated: Review) {
+        try {
+            const formData = new FormData();
+            formData.append("rating", String(updated.rating ?? 1));
+            formData.append("comment", updated.comment ?? "");
+            if (updated.title) formData.append("title", updated.title);
+
+            const result = await updateReviewAction(updated.id, formData);
+            
+            if (result.error) {
+                alert(`Feil: ${result.error}`);
+                return;
+            }
+
+            alert("Anmeldelse oppdatert!");
+            window.location.reload();
+        } catch (error) {
+            console.error("Update failed:", error);
+            alert("Kunne ikke oppdatere anmeldelse");
+        }
+    }
+
+    async function handleDeleteReview(reviewId: string) {
+        try {
+            const result = await deleteReviewAction(reviewId, propertyId);
+            
+            if (result.error) {
+                alert(`Feil: ${result.error}`);
+                return;
+            }
+
+            alert("Anmeldelse slettet!");
+            window.location.reload();
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Kunne ikke slette anmeldelse");
+        }
+    }
 
     const visible = useMemo(() => {
         const filtered = filterReviews(reviews ?? [], reviewSearch);

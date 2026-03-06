@@ -23,6 +23,12 @@ export async function incrementReviewCount(propertyId: string) {
         reviewCount: FieldValue.increment(1)
     });
 }
+export async function decrementReviewCount(propertyId: string) {
+    const propertyRef = adminDb.collection("properties").doc(propertyId);
+    await propertyRef.update({
+        reviewCount: FieldValue.increment(-1)
+    });
+}
 
 export async function getPropertyById(propertyId: string) {
     const doc = await adminDb.collection("properties").doc(propertyId).get();
