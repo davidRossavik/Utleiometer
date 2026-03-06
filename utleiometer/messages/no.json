@@ -1,6 +1,178 @@
 
 {
     "HomePage": {
-        "title": "Utleiometer"
+        "title": "Utleiometer",
+        "welcomeMessage": "Velkommen",
+
+        "account": "Konto",
+        "confirmText": "Er du sikker på at du vil slette kontoen din? Dette kan ikke angres.",
+        "alertText": "Kunne ikke slette kontoen. Du må kanskje logge inn på nytt først.",
+        "logOutText": "Logg ut",
+        "logOutHandlingText": "Logger ut...",
+        "deleteText": "Slett bruker",
+        "deleteHandlingText": "Sletter...",
+        "loginText": "Logg inn", 
+        "registerText": "Opprett bruker",
+
+        "targetAudience": "For studenter i leiemarkedet",
+        "searchPlaceholder": "Søk etter bolig",
+
+        "registerMessage": "Finner du ikke boligen du ønsker å vurdere?",
+        "registerButtonText": "Registrer ny bolig her",
+
+        "flowDescription": "Hvordan det fungerer",
+        "step1": "Steg 1",
+        "step1Description": "Søk etter bolig du vurderer å leie.",
+        "step2": "Steg 2",
+        "step2Description": "Les andres anmeldelser.",
+        "step3": "Steg 3",
+        "step3Description": "Ta et informert valg.",
+
+        "footer": "Utleiometer. Laget av Lillian, Katharina, Robert, David og Marius / PU-gruppe 4."
+    },
+
+
+    
+    "LoginPage": {
+        "brand": "Utleiometer",
+        "title": "Innlogging",
+        "description": "Skriv inn din e-postadresse for å logge inn",
+        "emailLabel": "E-post",
+        "emailPlaceholder": "ola.nordmann@eksempel.com",
+        "passwordLabel": "Passord",
+        "submit": "Logg inn",
+        "submitting": "Logger inn...",
+        "noAccount": "Har du ikke en konto?",
+        "registerLink": "Registrer deg her",
+        "errors": {
+            "emailRequired": "E-post er påkrevd",
+            "emailInvalid": "Ugyldig e-postadresse.",
+            "passwordRequired": "Passord er påkrevd",
+            "passwordInvalid": "Passord må være minst 8 tegn langt og inneholde både bokstaver og tall.",
+            "invalidCredential": "Feil e-post eller passord.",
+            "invalidEmailFirebase": "Ugyldig e-postadresse.",
+            "tooManyRequests": "For mange forsøk. Prøv igjen senere.",
+            "loginFailed": "Innlogging feilet. Prøv igjen."
+        }
+    },
+    "RegisterPage": {
+        "brand": "Utleiometer",
+        "title": "Opprett bruker",
+        "description": "Skriv inn e-posten din nedenfor for å opprette en konto",
+        "usernameLabel": "Brukernavn",
+        "usernamePlaceholder": "Ola_Nordmann",
+        "emailLabel": "E-post",
+        "emailPlaceholder": "ola.nordmann@example.com",
+        "passwordLabel": "Passord",
+        "confirmPasswordLabel": "Bekreft passord",
+        "passwordHint": "Må være minst 8 tegn langt.",
+        "submit": "Opprett bruker",
+        "hasAccount": "Har du allerede en konto?",
+        "loginLink": "Logg inn",
+        "termsPrefix": "Ved å klikke fortsett, godtar du våre",
+        "termsLink": "Vilkår for bruk",
+        "andText": "og",
+        "privacyLink": "Personvernregler",
+        "errors": {
+            "usernameRequired": "Brukernavn er påkrevd",
+            "usernameInvalid": "Brukernavn må være mellom 3 og 20 tegn og kan kun inneholde bokstaver, tall og understreker.",
+            "emailRequired": "E-post er påkrevd",
+            "emailInvalid": "Ugyldig e-postadresse.",
+            "passwordRequired": "Passord er påkrevd",
+            "passwordInvalid": "Passord må være minst 8 tegn langt og inneholde både bokstaver og tall.",
+            "confirmPasswordMismatch": "Passordene må være like",
+            "emailInUse": "E-postadressen er allerede i bruk",
+            "invalidEmailFirebase": "Ugyldig e-postadresse",
+            "weakPassword": "Passordet er for svakt",
+            "registerFailed": "Kunne ikke registrere bruker. Prøv igjen senere."
+        }
+    },
+    "PropertyNewPage": {
+        "brand": "Utleiometer",
+        "backButton": "← Tilbake",
+        "footer": "Utleiometer. Laget av Lillian, Katharina, Robert, David og Marius / PU-gruppe 4.",
+        "form": {
+            "cardTitle": "Registrer og anmeld bolig",
+            "cardDescription": "Registrer adressen og del din erfaring",
+            "sectionRegisterTitle": "📍 Registrer bolig",
+            "addressLabel": "Adresse",
+            "addressPlaceholder": "F.eks. Elgeseter gate 1",
+            "zipCodeLabel": "Postnummer",
+            "zipCodePlaceholder": "7030",
+            "cityLabel": "By",
+            "cityPlaceholder": "Trondheim",
+            "sectionReviewTitle": "🏠 Anmeld bolig",
+            "commentLabel": "Beskriv boligen",
+            "commentPlaceholder": "F.eks. Stille nabolag, litt langt fra sentrum",
+            "ratingLabel": "Vurdering (1–5)",
+            "ratingPlaceholder": "3",
+            "submit": "Registrer bolig",
+            "submitting": "Registrerer...",
+            "hint": "Du kan redigere anmeldelsen senere"
+        },
+        "messages": {
+            "notLoggedIn": "Du må være logget inn for å registrere en bolig",
+            "unknownError": "Noe gikk galt"
+        }
+    },
+    "PropertyReviewNewPage": {
+        "brand": "Utleiometer",
+        "form": {
+            "cardTitlePrefix": "Legg til anmeldelse for",
+            "cardDescription": "Del din erfaring med denne boligen",
+            "commentLabel": "Beskriv boligen",
+            "commentPlaceholder": "F.eks. Stille nabolag, litt langt fra sentrum",
+            "ratingLabel": "Vurdering (1–5)",
+            "ratingPlaceholder": "3",
+            "submit": "Legg til anmeldelse",
+            "submitting": "Legger til...",
+            "hint": "Du kan redigere anmeldelsen senere"
+        },
+        "messages": {
+            "successAlert": "Anmeldelse lagt til!",
+            "notLoggedIn": "Du må være logget inn for å legge til en anmeldelse",
+            "missingPropertyId": "Fant ikke bolig-ID",
+            "unknownError": "Noe gikk galt"
+        }
+    },
+    "PublicPropertiesPage": {
+        "brand": "Utleiometer",
+        "footer": "Utleiometer. Laget av Lillian, Katharina, Robert, David og Marius / PU-gruppe 4.",
+        "badge": "Boliger",
+        "title": "Utforsk boliger",
+        "subtitle": "Finn en bolig og se anmeldelser fra andre studenter.",
+        "homeButton": "Til forsiden",
+        "searchPlaceholder": "Søk på adresse, by eller land...",
+        "loadingTitle": "Laster…",
+        "loadingDescription1": "Henter boliger fra databasen.",
+        "loadingDescription2": "Dette tar vanligvis bare et øyeblikk.",
+        "emptyTitle": "Ingen treff",
+        "emptyDescription": "Prøv et annet søk, eller fjern filteret.",
+        "clearSearch": "Tøm søk",
+        "unknownAddress": "Ukjent adresse",
+        "unknownPlace": "Ukjent sted",
+        "seeReviews": "Se anmeldelser",
+        "messages": {
+            "loadPropertiesError": "Kunne ikke hente boliger"
+        }
+    },
+    "PublicPropertyReviewsPage": {
+        "brand": "Utleiometer",
+        "footer": "Utleiometer. Laget av Lillian, Katharina, Robert, David og Marius / PU-gruppe 4.",
+        "badge": "Anmeldelser",
+        "title": "Se anmeldelser",
+        "toProperties": "Til boliger",
+        "addReview": "Legg til ny anmeldelse",
+        "searchPlaceholder": "Søk i anmeldelser…",
+        "loadingTitle": "Laster…",
+        "loadingDescription": "Henter anmeldelser fra databasen.",
+        "emptyTitle": "Ingen anmeldelser",
+        "emptyNoMatch": "Ingen treff på søket ditt.",
+        "emptyNoReviews": "Det ser ikke ut som det finnes anmeldelser her enda.",
+        "clearSearch": "Tøm søk",
+        "unknownProperty": "Ukjent bolig",
+        "messages": {
+            "loadReviewsError": "Kunne ikke hente anmeldelser"
+        }
     }
 }

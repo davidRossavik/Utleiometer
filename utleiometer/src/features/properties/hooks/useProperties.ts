@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { fetchProperties } from "../data/fetchProperties";
 import { Property } from "../types";
 
-export function useProperties() {
+type UsePropertiesMessages = {
+    loadPropertiesError: string;
+};
+
+const defaultMessages: UsePropertiesMessages = {
+    loadPropertiesError: "Kunne ikke hente boliger",
+};
+
+export function useProperties(messages: UsePropertiesMessages = defaultMessages) {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -22,7 +30,7 @@ export function useProperties() {
                 console.error("Failed to load properties:", e);
                 if (!cancelled) {
                     setProperties([]);
-                    setError("Kunne ikke hente boliger");
+                    setError(messages.loadPropertiesError);
                 }
             } finally {
                 if (!cancelled) setLoading(false);

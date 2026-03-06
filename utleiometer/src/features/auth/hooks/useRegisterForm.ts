@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { validateUsername, validateEmail, validatePassword } from '@/lib/validation';
+import { VALIDATION_RULES } from '@/lib/validation';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from "@/lib/firebase/client";
 import { useRouter } from "next/navigation";
@@ -9,10 +9,37 @@ export type RegisterField = "username" | "email" | "password" | "confirmPassword
 
 type Values = { username: string, email: string, password: string };
 type Errors = { username: string, email: string, password: string, confirmPassword: string };
-type Field = keyof Values;
+
+export type RegisterFormMessages = {
+    usernameRequired: string;
+    usernameInvalid: string;
+    emailRequired: string;
+    emailInvalid: string;
+    passwordRequired: string;
+    passwordInvalid: string;
+    confirmPasswordMismatch: string;
+    emailInUse: string;
+    invalidEmailFirebase: string;
+    weakPassword: string;
+    registerFailed: string;
+};
+
+const defaultMessages: RegisterFormMessages = {
+    usernameRequired: 'Brukernavn er påkrevd',
+    usernameInvalid: 'Brukernavn må være mellom 3 og 20 tegn og kan kun inneholde bokstaver, tall og understreker.',
+    emailRequired: 'E-post er påkrevd',
+    emailInvalid: 'Ugyldig e-postadresse.',
+    passwordRequired: 'Passord er påkrevd',
+    passwordInvalid: 'Passord må være minst 8 tegn langt og inneholde både bokstaver og tall.',
+    confirmPasswordMismatch: 'Passordene må være like',
+    emailInUse: 'E-postadressen er allerede i bruk',
+    invalidEmailFirebase: 'Ugyldig e-postadresse',
+    weakPassword: 'Passordet er for svakt',
+    registerFailed: 'Kunne ikke registrere bruker. Prøv igjen senere.',
+};
 
 
-export function useRegisterForm() {
+export function useRegisterForm(messages: RegisterFormMessages = defaultMessages) {
     // State for hva brukeren har skrevet
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -39,19 +66,37 @@ export function useRegisterForm() {
 
     // Ren hjelpefunksjon som regner ut errors uten setState
     const getErrors = (values: Values, confirmPwd: string = ''): Errors => {
-        const u = validateUsername(values.username);
-        const e = validateEmail(values.email);
-        const p = validatePassword(values.password);
+        let usernameError = '';
+        let emailError = '';
+        let passwordError = '';
+
+        if (!values.username) {
+            usernameError = messages.usernameRequired;
+        } else if (!VALIDATION_RULES.username.pattern.test(values.username)) {
+            usernameError = messages.usernameInvalid;
+        }
+
+        if (!values.email) {
+            emailError = messages.emailRequired;
+        } else if (!VALIDATION_RULES.email.pattern.test(values.email)) {
+            emailError = messages.emailInvalid;
+        }
+
+        if (!values.password) {
+            passwordError = messages.passwordRequired;
+        } else if (!VALIDATION_RULES.password.pattern.test(values.password)) {
+            passwordError = messages.passwordInvalid;
+        }
         
         let confirmError = '';
         if (confirmPwd && values.password !== confirmPwd) {
-            confirmError = 'Passordene må være like';
+            confirmError = messages.confirmPasswordMismatch;
         }
 
         return {
-            username: u.error ?? '',
-            email: e.error ?? '',
-            password: p.error ?? '',
+            username: usernameError,
+            email: emailError,
+            password: passwordError,
             confirmPassword: confirmError,
         };
     };
@@ -123,21 +168,23 @@ export function useRegisterForm() {
                 displayName: username,
             });
             router.push("/");
-        } catch (error) {
+        } catch (error: unknown) {
             console.error(error);
             // Parse Firebase errors til brukervenlige meldinger
-            if (error.code === 'auth/email-already-in-use') {
-                setErrors(prev => ({ ...prev, email: 'E-postadressen er allerede i bruk' }));
+            const code = (error as { code?: string })?.code;
+
+            if (code === 'auth/email-already-in-use') {
+                setErrors(prev => ({ ...prev, email: messages.emailInUse }));
                 setTouched(prev => ({ ...prev, email: true }));
-            } else if (error.code === 'auth/invalid-email') {
-                setErrors(prev => ({ ...prev, email: 'Ugyldig e-postadresse' }));
+            } else if (code === 'auth/invalid-email') {
+                setErrors(prev => ({ ...prev, email: messages.invalidEmailFirebase }));
                 setTouched(prev => ({ ...prev, email: true }));
-            } else if (error.code === 'auth/weak-password') {
-                setErrors(prev => ({ ...prev, password: 'Passordet er for svakt' }));
+            } else if (code === 'auth/weak-password') {
+                setErrors(prev => ({ ...prev, password: messages.weakPassword }));
                 setTouched(prev => ({ ...prev, password: true }));
             } else {
                 // Generisk feilmelding for ukjente feil
-                setErrors(prev => ({ ...prev, email: 'Kunne ikke registrere bruker. Prøv igjen senere.' }));
+                setErrors(prev => ({ ...prev, email: messages.registerFailed }));
                 setTouched(prev => ({ ...prev, email: true }));
             }
         };

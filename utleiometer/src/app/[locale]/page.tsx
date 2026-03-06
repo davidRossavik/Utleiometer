@@ -5,11 +5,16 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/ui/fe
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { SearchBar } from "@/features/search/components/searchBar";
+import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
 import { useTranslations } from 'next-intl';
 import { setRequestLocale } from "next-intl/server";
 import { use } from 'react';
 
-export default function Home({params}) {
+type Props = {
+  params: Promise<{locale: string}>;
+}
+
+export default function Home({params}: Props) {
   const {locale} = use(params);
   setRequestLocale(locale);
   const t = useTranslations('HomePage');
@@ -22,11 +27,24 @@ export default function Home({params}) {
           <div className="flex items-center gap-3">
             {/* TODO: Logo */}
             <div className="h-9 w-9 rounded-xl bg-muted" />
-            <span className="font-semibold">Utleiometer</span>
-            <WelcomeMessage />
+            <span className="font-semibold">{t("title")}</span>
+            <WelcomeMessage text={t("welcomeMessage")}/>
           </div>
 
-          <AuthButtons />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <AuthButtons 
+              account={t("account")}
+              confirmText={t("confirmText")}
+              alertText={t("alertText")}
+              logOutText={t("logOutText")}
+              logOutHandlingText={t("logOutHandlingText")}
+              deleteText={t("deleteText")}
+              deleteHandlingText={t("deleteHandlingText")}
+              loginText={t("loginText")}
+              registerText={t("registerText")}
+            />
+          </div>
         </div>
       </header>
 
@@ -36,7 +54,7 @@ export default function Home({params}) {
           <div className="mx-auto max-w-5xl">
             <Badge className="mb-4">
               {/* TODO: liten tagline */}
-              For studenter i leiemarkedet
+              {t("targetAudience")}
             </Badge>
 
             <h1 className="text-4xl text-blue-700 font-bold text-center tracking-tight md:text-6xl">
@@ -47,11 +65,14 @@ export default function Home({params}) {
 
         {/* SØKEFELT */}
         <div className="mt-10 flex justify-center">
-          <SearchBar placeHolder="Søk etter bolig"/>
+          <SearchBar placeHolder={t("searchPlaceholder")}/>
         </div>
 
         {/* REGISTER NEW PROPERTY */}
-        <RegisterButton/>
+        <RegisterButton 
+          registerMessage={t("registerMessage")}
+          registerButtonText={t("registerButtonText")}
+        />
 
         </section>
 
@@ -61,28 +82,28 @@ export default function Home({params}) {
           <div className="mx-auto max-w-5xl">
             <h2 className="text-3xl font-semibold tracking-tight">
               {/* TODO */}
-              Hvordan det fungerer
+              {t("flowDescription")}
             </h2>
 
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}Steg 1</CardTitle>
-                  <CardDescription>{/* TODO */}Søk etter bolig du vurderer å leie.</CardDescription>
+                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}{t("step1")}</CardTitle>
+                  <CardDescription>{/* TODO */}{t("step1Description")}</CardDescription>
                 </CardHeader>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}Steg 2</CardTitle>
-                  <CardDescription>{/* TODO */}Les andres anmeldelser.</CardDescription>
+                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}{t("step2")}</CardTitle>
+                  <CardDescription>{/* TODO */}{t("step2Description")}</CardDescription>
                 </CardHeader>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}Steg 3</CardTitle>
-                  <CardDescription>{/* TODO */}Ta et informert valg.</CardDescription>
+                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}{t("step3")}</CardTitle>
+                  <CardDescription>{/* TODO */}{t("step3Description")}</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -94,7 +115,7 @@ export default function Home({params}) {
       <footer className="border-t">
         <div className="container mx-auto px-4 py-10 text-sm text-muted-foreground">
           {/* TODO */}
-          © {new Date().getFullYear()} Utleiometer. Laget av Lillian, Katharina, Robert, David og Marius / PU-gruppe 4.
+          © {new Date().getFullYear()} {t("footer")}
         </div>
       </footer>
     </div>

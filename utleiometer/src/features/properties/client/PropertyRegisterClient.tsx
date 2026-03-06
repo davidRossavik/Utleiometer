@@ -18,7 +18,37 @@ import {
   CardTitle,
 } from "@/ui/feedback/card";
 
-export default function PropertyRegisterClient() {
+export type PropertyRegisterTexts = {
+    cardTitle: string;
+    cardDescription: string;
+    sectionRegisterTitle: string;
+    addressLabel: string;
+    addressPlaceholder: string;
+    zipCodeLabel: string;
+    zipCodePlaceholder: string;
+    cityLabel: string;
+    cityPlaceholder: string;
+    sectionReviewTitle: string;
+    commentLabel: string;
+    commentPlaceholder: string;
+    ratingLabel: string;
+    ratingPlaceholder: string;
+    submit: string;
+    submitting: string;
+    hint: string;
+};
+
+export type PropertyRegisterMessages = {
+    notLoggedIn: string;
+    unknownError: string;
+};
+
+type PropertyRegisterClientProps = {
+    texts: PropertyRegisterTexts;
+    messages: PropertyRegisterMessages;
+};
+
+export default function PropertyRegisterClient({ texts, messages }: PropertyRegisterClientProps) {
     const { currentUser } = useAuth();
     const router = useRouter();
 
@@ -29,7 +59,7 @@ export default function PropertyRegisterClient() {
         e.preventDefault();
 
         if (!currentUser) {
-            setError("Du må være logget inn for å registere en bolig");
+            setError(messages.notLoggedIn);
             return;
         }
 
@@ -43,13 +73,13 @@ export default function PropertyRegisterClient() {
             const result = await createPropertyAndReviewAction(formData);
 
             if ("error" in result) {
-                setError(result.error ?? "Noe gikk galt");
+                setError(result.error ?? messages.unknownError);
                 return;
             }
 
             router.push("/");
         } catch {
-            setError("Noe gikk galt");
+            setError(messages.unknownError);
         } finally {
             setIsSubmitting(false);
         }
@@ -59,45 +89,45 @@ export default function PropertyRegisterClient() {
             <div className="flex w-full max-w-lg flex-col items-center gap-6">
                 <Card className="w-full">
                 <CardHeader>
-                    <CardTitle className="text-xl">Registrer og anmeld bolig</CardTitle>
-                    <CardDescription>Registrer adressen og del din erfaring</CardDescription>
+                    <CardTitle className="text-xl">{texts.cardTitle}</CardTitle>
+                    <CardDescription>{texts.cardDescription}</CardDescription>
                 </CardHeader>
 
                 <CardContent>
                     <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
                     {/* === 1. REGISTRER BOLIG === */}
                     <div className="space-y-4">
-                        <h3 className="text-base font-semibold">📍 Registrer bolig</h3>
+                        <h3 className="text-base font-semibold">{texts.sectionRegisterTitle}</h3>
 
                         <div className="grid gap-2">
-                        <Label htmlFor="address">Adresse</Label>
+                        <Label htmlFor="address">{texts.addressLabel}</Label>
                         <Input
                             id="address"
                             name="address"
                             type="text"
-                            placeholder="F.eks. Elgeseter gate 1"
+                            placeholder={texts.addressPlaceholder}
                             required
                         />
                         </div>
 
                         <div className="grid gap-2">
-                        <Label htmlFor="zipCode">Postnummer</Label>
+                        <Label htmlFor="zipCode">{texts.zipCodeLabel}</Label>
                         <Input
                             id="zipCode"
                             name="zipCode"
                             type="text"
-                            placeholder="7030"
+                            placeholder={texts.zipCodePlaceholder}
                             required
                         />
                         </div>
 
                         <div className="grid gap-2">
-                        <Label htmlFor="city">By</Label>
+                        <Label htmlFor="city">{texts.cityLabel}</Label>
                         <Input
                             id="city"
                             name="city"
                             type="text"
-                            placeholder="Trondheim"
+                            placeholder={texts.cityPlaceholder}
                             required
                         />
                         </div>
@@ -107,21 +137,21 @@ export default function PropertyRegisterClient() {
 
                     {/* === 2. ANMELDELSE AV BOLIG === */}
                     <div className="space-y-4">
-                        <h3 className="text-base font-semibold">🏠 Anmeld bolig</h3>
+                        <h3 className="text-base font-semibold">{texts.sectionReviewTitle}</h3>
 
                         <div className="grid gap-2">
-                        <Label htmlFor="comment">Beskriv boligen</Label>
+                        <Label htmlFor="comment">{texts.commentLabel}</Label>
                         <textarea
                             id="comment"
                             name="comment"
-                            placeholder="F.eks. Stille nabolag, litt langt fra sentrum"
+                            placeholder={texts.commentPlaceholder}
                             className="min-h-[100px] rounded-md border bg-background px-3 py-2 text-sm"
                             required
                         />
                         </div>
 
                         <div className="grid gap-2">
-                        <Label htmlFor="rating">Vurdering (1–5)</Label>
+                        <Label htmlFor="rating">{texts.ratingLabel}</Label>
                         <Input
                             id="rating"
                             name="rating"
@@ -129,7 +159,7 @@ export default function PropertyRegisterClient() {
                             min={1}
                             max={5}
                             step={1}
-                            placeholder="3"
+                            placeholder={texts.ratingPlaceholder}
                             required
                         />
                         </div>
@@ -142,12 +172,12 @@ export default function PropertyRegisterClient() {
                     )}
 
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? "Registrerer..." : "Registrer bolig"}
+                        {isSubmitting ? texts.submitting : texts.submit}
                     </Button>
 
                     <Field>
                         <FieldDescription className="text-center">
-                        Du kan redigere anmeldelsen senere
+                        {texts.hint}
                         </FieldDescription>
                     </Field>
                     </form>

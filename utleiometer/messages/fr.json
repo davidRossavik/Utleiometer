@@ -1,5 +1,178 @@
 {
     "HomePage": {
-        "title": "L'Utleiomètre"
+        "title": "L'Utleiomètre",
+        "welcomeMessage": "Bienvenue",
+
+        "account": "Compte",
+        "confirmText": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+        "alertText": "Impossible de supprimer le compte. Vous devez peut-être vous reconnecter d'abord.",
+        "logOutText": "Se déconnecter",
+        "logOutHandlingText": "Déconnexion...",
+        "deleteText": "Supprimer le compte",
+        "deleteHandlingText": "Suppression...",
+        "loginText": "Se connecter",
+        "registerText": "Créer un compte",
+
+        "targetAudience": "Pour les étudiants sur le marché locatif",
+        "searchPlaceholder": "Rechercher un logement",
+
+        "registerMessage": "Vous ne trouvez pas le logement que vous souhaitez évaluer ?",
+        "registerButtonText": "Enregistrer un nouveau logement ici",
+
+        "flowDescription": "Comment ça fonctionne",
+        "step1": "Étape 1",
+        "step1Description": "Recherchez le logement que vous envisagez de louer.",
+        "step2": "Étape 2",
+        "step2Description": "Lisez les avis des autres.",
+        "step3": "Étape 3",
+        "step3Description": "Prenez une décision éclairée.",
+
+        "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4."
+    },
+
+
+
+    
+    "LoginPage": {
+        "brand": "L'Utleiomètre",
+        "title": "Connexion",
+        "description": "Saisissez votre adresse e-mail pour vous connecter",
+        "emailLabel": "E-mail",
+        "emailPlaceholder": "jean.dupont@exemple.com",
+        "passwordLabel": "Mot de passe",
+        "submit": "Se connecter",
+        "submitting": "Connexion en cours...",
+        "noAccount": "Vous n'avez pas de compte ?",
+        "registerLink": "Inscrivez-vous ici",
+        "errors": {
+            "emailRequired": "L'e-mail est requis",
+            "emailInvalid": "Adresse e-mail invalide.",
+            "passwordRequired": "Le mot de passe est requis",
+            "passwordInvalid": "Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.",
+            "invalidCredential": "E-mail ou mot de passe incorrect.",
+            "invalidEmailFirebase": "Adresse e-mail invalide.",
+            "tooManyRequests": "Trop de tentatives. Réessayez plus tard.",
+            "loginFailed": "Échec de la connexion. Veuillez réessayer."
+        }
+    },
+    "RegisterPage": {
+        "brand": "L'Utleiomètre",
+        "title": "Créer un compte",
+        "description": "Saisissez votre adresse e-mail ci-dessous pour créer un compte",
+        "usernameLabel": "Nom d'utilisateur",
+        "usernamePlaceholder": "Jean_Dupont",
+        "emailLabel": "E-mail",
+        "emailPlaceholder": "jean.dupont@example.com",
+        "passwordLabel": "Mot de passe",
+        "confirmPasswordLabel": "Confirmez",
+        "passwordHint": "Doit contenir au moins 8 caractères.",
+        "submit": "Créer un compte",
+        "hasAccount": "Vous avez déjà un compte ?",
+        "loginLink": "Se connecter",
+        "termsPrefix": "En cliquant sur continuer, vous acceptez nos",
+        "termsLink": "Conditions d'utilisation",
+        "andText": "et",
+        "privacyLink": "Règles de confidentialité",
+        "errors": {
+            "usernameRequired": "Le nom d'utilisateur est requis",
+            "usernameInvalid": "Le nom d'utilisateur doit contenir entre 3 et 20 caractères et uniquement des lettres, chiffres et underscores.",
+            "emailRequired": "L'e-mail est requis",
+            "emailInvalid": "Adresse e-mail invalide.",
+            "passwordRequired": "Le mot de passe est requis",
+            "passwordInvalid": "Le mot de passe doit contenir au moins 8 caractères, avec des lettres et des chiffres.",
+            "confirmPasswordMismatch": "Les mots de passe doivent être identiques",
+            "emailInUse": "Cette adresse e-mail est déjà utilisée",
+            "invalidEmailFirebase": "Adresse e-mail invalide",
+            "weakPassword": "Le mot de passe est trop faible",
+            "registerFailed": "Impossible de créer le compte. Réessayez plus tard."
+        }
+    },
+    "PropertyNewPage": {
+        "brand": "L'Utleiomètre",
+        "backButton": "← Retour",
+        "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4.",
+        "form": {
+            "cardTitle": "Enregistrer et évaluer un logement",
+            "cardDescription": "Enregistrez l'adresse et partagez votre expérience",
+            "sectionRegisterTitle": "📍 Enregistrer un logement",
+            "addressLabel": "Adresse",
+            "addressPlaceholder": "Par ex. Elgeseter gate 1",
+            "zipCodeLabel": "Code postal",
+            "zipCodePlaceholder": "7030",
+            "cityLabel": "Ville",
+            "cityPlaceholder": "Trondheim",
+            "sectionReviewTitle": "🏠 Évaluer le logement",
+            "commentLabel": "Décrivez le logement",
+            "commentPlaceholder": "Par ex. Quartier calme, un peu loin du centre",
+            "ratingLabel": "Note (1–5)",
+            "ratingPlaceholder": "3",
+            "submit": "Enregistrer le logement",
+            "submitting": "Enregistrement...",
+            "hint": "Vous pouvez modifier l'avis plus tard"
+        },
+        "messages": {
+            "notLoggedIn": "Vous devez être connecté pour enregistrer un logement",
+            "unknownError": "Une erreur est survenue"
+        }
+    },
+    "PropertyReviewNewPage": {
+        "brand": "L'Utleiomètre",
+        "form": {
+            "cardTitlePrefix": "Ajouter un avis pour",
+            "cardDescription": "Partagez votre expérience avec ce logement",
+            "commentLabel": "Décrivez le logement",
+            "commentPlaceholder": "Par ex. Quartier calme, un peu loin du centre",
+            "ratingLabel": "Note (1–5)",
+            "ratingPlaceholder": "3",
+            "submit": "Ajouter l'avis",
+            "submitting": "Ajout en cours...",
+            "hint": "Vous pouvez modifier l'avis plus tard"
+        },
+        "messages": {
+            "successAlert": "Avis ajouté !",
+            "notLoggedIn": "Vous devez être connecté pour ajouter un avis",
+            "missingPropertyId": "ID du logement introuvable",
+            "unknownError": "Une erreur est survenue"
+        }
+    },
+    "PublicPropertiesPage": {
+        "brand": "L'Utleiomètre",
+        "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4.",
+        "badge": "Logements",
+        "title": "Explorer les logements",
+        "subtitle": "Trouvez un logement et lisez les avis d'autres étudiants.",
+        "homeButton": "Retour à l'accueil",
+        "searchPlaceholder": "Rechercher par adresse, ville ou pays...",
+        "loadingTitle": "Chargement…",
+        "loadingDescription1": "Récupération des logements depuis la base de données.",
+        "loadingDescription2": "Cela ne prend généralement qu'un instant.",
+        "emptyTitle": "Aucun résultat",
+        "emptyDescription": "Essayez une autre recherche ou effacez le filtre.",
+        "clearSearch": "Effacer la recherche",
+        "unknownAddress": "Adresse inconnue",
+        "unknownPlace": "Lieu inconnu",
+        "seeReviews": "Voir les avis",
+        "messages": {
+            "loadPropertiesError": "Impossible de récupérer les logements"
+        }
+    },
+    "PublicPropertyReviewsPage": {
+        "brand": "L'Utleiomètre",
+        "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4.",
+        "badge": "Avis",
+        "title": "Voir les avis",
+        "toProperties": "Vers les logements",
+        "addReview": "Ajouter un nouvel avis",
+        "searchPlaceholder": "Rechercher dans les avis…",
+        "loadingTitle": "Chargement…",
+        "loadingDescription": "Récupération des avis depuis la base de données.",
+        "emptyTitle": "Aucun avis",
+        "emptyNoMatch": "Aucun résultat pour votre recherche.",
+        "emptyNoReviews": "Il semble qu'il n'y ait pas encore d'avis pour ce logement.",
+        "clearSearch": "Effacer la recherche",
+        "unknownProperty": "Logement inconnu",
+        "messages": {
+            "loadReviewsError": "Impossible de récupérer les avis"
+        }
     }
 }
