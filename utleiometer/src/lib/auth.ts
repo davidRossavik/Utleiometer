@@ -38,3 +38,23 @@ export async function refreshUserToken(user: User | null): Promise<void> {
     console.error("Error refreshing token:", error);
   }
 }
+
+/**
+ * Get the Firebase ID token for the current user
+ * This token is used to verify the user's identity in server actions
+ * 
+ * @param user - Firebase User object
+ * @returns Promise<string | null> - The ID token, or null if no user
+ */
+export async function getIdToken(user: User | null): Promise<string | null> {
+  if (!user) {
+    return null;
+  }
+
+  try {
+    return await user.getIdToken();
+  } catch (error) {
+    console.error("Error getting ID token:", error);
+    return null;
+  }
+}
