@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
 import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
+import PropertyMap from "@/ui/map/propertyMap";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
 
@@ -306,6 +307,11 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         () => buildDetailRows(fetchedProperty, texts),
         [fetchedProperty, texts],
     );
+
+    const hasCoordinates =
+        typeof fetchedProperty?.latitude === "number" &&
+        typeof fetchedProperty?.longitude === "number";
+
     const submitted = searchParams.get("submitted");
     const successMessage =
         submitted === "review"
@@ -346,6 +352,20 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                                         <p className="mt-1 text-sm font-medium text-foreground">{row.value}</p>
                                     </div>
                                 ))}
+                            </div>
+
+                            <div className="border-t border-blue-100 p-3">
+                                {hasCoordinates ? (
+                                    <PropertyMap
+                                        lat={fetchedProperty!.latitude!}
+                                        lng={fetchedProperty!.longitude!}
+                                        title={heading}
+                                    />
+                                ) : (
+                                    <p className="rounded-lg border bg-background/90 px-3 py-2 text-sm text-muted-foreground">
+                                        Kart er ikke tilgjengelig for denne boligen ennå.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
