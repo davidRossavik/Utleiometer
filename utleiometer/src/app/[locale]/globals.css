@@ -79,8 +79,9 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  --landing-blob-left: oklch(0.85 0.07 246 / 0.5);
-  --landing-blob-right: oklch(0.9 0.05 208 / 0.44);
+  --landing-accent: rgb(29 78 216 / 0.16);
+  --landing-accent-strong: rgb(29 78 216 / 0.24);
+  --landing-accent-line: rgb(29 78 216 / 0.08);
   --landing-panel-bg: oklch(0.99 0.01 255 / 0.82);
   --landing-panel-border: oklch(0.86 0.02 250 / 0.7);
   --landing-dot: oklch(0.68 0.03 250 / 0.22);
@@ -118,8 +119,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
-  --landing-blob-left: oklch(0.44 0.07 246 / 0.42);
-  --landing-blob-right: oklch(0.5 0.07 208 / 0.36);
+  --landing-accent: rgb(59 130 246 / 0.24);
+  --landing-accent-strong: rgb(59 130 246 / 0.34);
+  --landing-accent-line: rgb(147 197 253 / 0.12);
   --landing-panel-bg: oklch(0.24 0.014 255 / 0.72);
   --landing-panel-border: oklch(0.58 0.03 246 / 0.35);
   --landing-dot: oklch(0.74 0.02 250 / 0.2);
@@ -226,15 +228,64 @@
   }
 
   .landing-main-bg {
+    position: relative;
     background:
-      radial-gradient(58rem 30rem at -8% -10%, var(--landing-blob-left), transparent 72%),
-      radial-gradient(48rem 28rem at 108% -6%, var(--landing-blob-right), transparent 74%),
+      radial-gradient(90rem 42rem at 50% -36%, var(--landing-accent), transparent 60%),
+      radial-gradient(44rem 24rem at 8% 16%, var(--landing-accent-strong), transparent 72%),
+      radial-gradient(44rem 24rem at 92% 12%, var(--landing-accent-strong), transparent 74%),
+      linear-gradient(180deg, oklch(0.996 0.002 250) 0%, oklch(0.985 0.006 248) 34%, var(--background) 76%, var(--background) 100%),
       linear-gradient(to bottom, var(--background) 0%, var(--background) 62%, var(--background) 100%);
+  }
+
+  .dark .landing-main-bg {
+    background:
+      radial-gradient(90rem 42rem at 50% -36%, var(--landing-accent), transparent 60%),
+      radial-gradient(44rem 24rem at 8% 16%, var(--landing-accent-strong), transparent 72%),
+      radial-gradient(44rem 24rem at 92% 12%, var(--landing-accent-strong), transparent 74%),
+      linear-gradient(180deg, oklch(0.19 0.012 250) 0%, oklch(0.165 0.01 248) 34%, var(--background) 76%, var(--background) 100%),
+      linear-gradient(to bottom, var(--background) 0%, var(--background) 62%, var(--background) 100%);
+  }
+
+  .landing-main-bg::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    inset: -18% -12% 30% -12%;
+    background:
+      conic-gradient(
+        from 130deg at 50% 52%,
+        transparent 0deg,
+        var(--landing-accent) 52deg,
+        transparent 122deg,
+        var(--landing-accent-strong) 216deg,
+        transparent 296deg,
+        var(--landing-accent) 360deg
+      );
+    filter: blur(48px) saturate(1.08);
+    opacity: 0.52;
+    animation: landing-ambient-drift 20s ease-in-out infinite alternate;
+  }
+
+  .landing-main-bg::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      120deg,
+      transparent 0 18px,
+      var(--landing-accent-line) 18px 19px,
+      transparent 19px 36px
+    );
+    mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 78%);
+    opacity: 0.5;
   }
 
   .landing-hero-layer {
     position: relative;
-    z-index: 2;
+    z-index: 3;
   }
 
   .landing-hero-panel {
@@ -249,35 +300,9 @@
       inset 0 1px 0 oklch(1 0 0 / 0.25);
   }
 
-  .landing-orb {
-    position: absolute;
-    z-index: 1;
-    border-radius: 9999px;
-    pointer-events: none;
-    filter: blur(44px);
-    animation: landing-float 14s ease-in-out infinite;
-  }
-
-  .landing-orb--left {
-    top: 2.25rem;
-    left: -9rem;
-    width: 20rem;
-    height: 20rem;
-    background: var(--landing-blob-left);
-  }
-
-  .landing-orb--right {
-    top: 0.25rem;
-    right: -7.5rem;
-    width: 18rem;
-    height: 18rem;
-    background: var(--landing-blob-right);
-    animation-delay: -4s;
-  }
-
   .landing-dot-pattern {
     position: absolute;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
     inset: 0;
     background-image: radial-gradient(circle at center, var(--landing-dot) 0.06rem, transparent 0.08rem);
@@ -299,33 +324,29 @@
       border-radius: var(--radius-xl);
     }
 
-    .landing-orb--left {
-      top: 2rem;
-      left: -9.5rem;
-      width: 16rem;
-      height: 16rem;
-    }
-
-    .landing-orb--right {
-      top: 1rem;
-      right: -8.75rem;
-      width: 14rem;
-      height: 14rem;
-    }
-
     .landing-dot-pattern {
       opacity: 0.45;
+    }
+
+    .landing-main-bg::before {
+      inset: -12% -18% 36% -18%;
+      filter: blur(34px) saturate(1.04);
+      opacity: 0.44;
+      animation-duration: 24s;
+    }
+
+    .landing-main-bg::after {
+      opacity: 0.36;
     }
   }
 }
 
-@keyframes landing-float {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
+@keyframes landing-ambient-drift {
+  0% {
+    transform: translate3d(-1.4%, -1.2%, 0) scale(1) rotate(-1.2deg);
   }
 
-  50% {
-    transform: translate3d(0, -12px, 0);
+  100% {
+    transform: translate3d(1.8%, 1.4%, 0) scale(1.07) rotate(1.4deg);
   }
 }

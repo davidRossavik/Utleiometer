@@ -62,8 +62,6 @@ export default function Home({params}: Props) {
       </header>
 
       <main className="landing-main-bg relative isolate overflow-hidden">
-        <div aria-hidden className="landing-orb landing-orb--left" />
-        <div aria-hidden className="landing-orb landing-orb--right" />
         <div aria-hidden className="landing-dot-pattern" />
 
         {/* HERO */}
@@ -91,25 +89,27 @@ export default function Home({params}: Props) {
           </div>
         </section>
 
-        <PopularPropertiesSection
-          texts={{
-            title: t("popularPropertiesTitle"),
-            emptyDescription: t("popularPropertiesEmpty"),
-            imagePlaceholder: t("popularPropertiesImagePlaceholder"),
-            ratingLabel: t("popularPropertiesRatingLabel"),
-            propertyTypeLabel: t("popularPropertiesPropertyTypeLabel"),
-            areaSqmLabel: t("popularPropertiesAreaLabel"),
-            notProvided: t("popularPropertiesNotProvided"),
-            propertyTypeHouse: t("propertyTypeHouse"),
-            propertyTypeApartment: t("propertyTypeApartment"),
-            propertyTypeBedsit: t("propertyTypeBedsit"),
-            notRated: t("popularPropertiesNotRated"),
-            viewAllButton: t("popularPropertiesViewAllButton"),
-          }}
-          messages={{
-            loadPropertiesError: t("messages.loadPropertiesError"),
-          }}
-        />
+        <div className="relative z-10">
+          <PopularPropertiesSection
+            texts={{
+              title: t("popularPropertiesTitle"),
+              emptyDescription: t("popularPropertiesEmpty"),
+              imagePlaceholder: t("popularPropertiesImagePlaceholder"),
+              ratingLabel: t("popularPropertiesRatingLabel"),
+              propertyTypeLabel: t("popularPropertiesPropertyTypeLabel"),
+              areaSqmLabel: t("popularPropertiesAreaLabel"),
+              notProvided: t("popularPropertiesNotProvided"),
+              propertyTypeHouse: t("propertyTypeHouse"),
+              propertyTypeApartment: t("propertyTypeApartment"),
+              propertyTypeBedsit: t("propertyTypeBedsit"),
+              notRated: t("popularPropertiesNotRated"),
+              viewAllButton: t("popularPropertiesViewAllButton"),
+            }}
+            messages={{
+              loadPropertiesError: t("messages.loadPropertiesError"),
+            }}
+          />
+        </div>
       </main>
 
       {/* FOOTER */}

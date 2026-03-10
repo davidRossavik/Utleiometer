@@ -108,9 +108,9 @@ export default function ReviewCreateClient({
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-background to-cyan-50 p-6">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-background to-blue-100/70 p-6">
       <div aria-hidden className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-blue-200/45 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -right-20 top-16 h-64 w-64 rounded-full bg-cyan-200/40 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -right-20 top-16 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl" />
 
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6">
         <Link href="/" className="font-bold text-4xl text-blue-700 drop-shadow-sm transition-colors hover:text-blue-800">
