@@ -104,6 +104,7 @@ export default function Home({params}: Props) {
             propertyTypeApartment: t("propertyTypeApartment"),
             propertyTypeBedsit: t("propertyTypeBedsit"),
             notRated: t("popularPropertiesNotRated"),
+            viewAllButton: t("popularPropertiesViewAllButton"),
           }}
           messages={{
             loadPropertiesError: t("messages.loadPropertiesError"),

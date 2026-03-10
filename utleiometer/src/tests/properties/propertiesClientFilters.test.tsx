@@ -65,6 +65,10 @@ const texts: PropertiesClientTexts = {
   minRatingPlaceholder: "Minimum rating",
   minRatingValue: "{value} stjerner",
   minRatingAriaLabel: "Minimum rating",
+  sortByLabel: "Sorter etter",
+  sortByAlphabetical: "Alfabetisk",
+  sortByLatestReview: "Nyligst (lagt til anmeldelse)",
+  sortByPopularity: "Popularitet (best rating)",
   emptyFilteredDescription: "Ingen boliger matcher valgt område og rating.",
   unknownAddress: "Ukjent adresse",
   unknownPlace: "Ukjent sted",
@@ -148,5 +152,20 @@ describe("PropertiesClient filters", () => {
     expect(screen.getByText("Elgeseter gate 1")).toBeInTheDocument();
     expect(screen.getByText("Munkegata 10")).toBeInTheDocument();
     expect(screen.getByText("Kirkegata 2")).toBeInTheDocument();
+  });
+
+  it("updates URL when sort order is changed", () => {
+    render(
+      <PropertiesClient
+        texts={texts}
+        messages={{ loadPropertiesError: "Kunne ikke hente boliger" }}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Sorter etter"), { target: { value: "popularity" } });
+
+    expect(replaceMock).toHaveBeenCalled();
+    const lastCall = replaceMock.mock.calls[replaceMock.mock.calls.length - 1];
+    expect(lastCall?.[0]).toContain("sort=popularity");
   });
 });

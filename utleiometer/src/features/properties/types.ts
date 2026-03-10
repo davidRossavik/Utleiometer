@@ -29,4 +29,5 @@ export type Property = {
     roomAreaSqm?: number;
     hasPrivateBathroom?: boolean;
     otherBedsitsInUnit?: number;
+    latestReviewAt?: number;
 };

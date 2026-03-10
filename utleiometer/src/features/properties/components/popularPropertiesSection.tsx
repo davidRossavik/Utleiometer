@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { StarRatingDisplay } from "@/features/reviews/componentes/StarRatingDisplay";
+import { Button } from "@/ui/primitives/button";
 
 import { useProperties } from "../hooks/useProperties";
 import type { Property } from "../types";
@@ -20,6 +21,7 @@ type PopularPropertiesTexts = {
   propertyTypeApartment: string;
   propertyTypeBedsit: string;
   notRated: string;
+  viewAllButton: string;
 };
 
 type PopularPropertiesMessages = {
@@ -65,7 +67,7 @@ export function selectPopularProperties(properties: Property[]) {
 
       return getSortableAddress(a).localeCompare(getSortableAddress(b));
     })
-    .slice(0, 12);
+    .slice(0, 9);
 }
 
 function getPropertyTypeLabel(propertyType: Property["propertyType"], texts: PopularPropertiesTexts) {
@@ -121,42 +123,50 @@ export function PopularPropertiesSection({ texts, messages }: PopularPropertiesS
         ) : popularProperties.length === 0 ? (
           <p className="mt-4 text-muted-foreground">{texts.emptyDescription}</p>
         ) : (
-          <div data-testid="popular-properties-grid" className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {popularProperties.map((property) => {
-              const overallRating = getOverallRating(property) ?? undefined;
-              const areaSqm = getAreaSqm(property, texts);
+          <>
+            <div data-testid="popular-properties-grid" className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {popularProperties.map((property) => {
+                const overallRating = getOverallRating(property) ?? undefined;
+                const areaSqm = getAreaSqm(property, texts);
 
-              return (
-                <Link key={property.id} href={`/properties/${property.id}/reviews`} className="block">
-                  <Card className="h-full cursor-pointer transition-all hover:shadow-lg hover:shadow-blue-100/50">
-                    <CardHeader>
-                      <div className="mb-3 flex h-40 items-center justify-center rounded-lg border bg-muted/30 text-sm text-muted-foreground">
-                        {texts.imagePlaceholder}
-                      </div>
-                      <CardTitle className="text-xl text-blue-700">
-                        {formatAddress(property.address, texts.notProvided)}
-                      </CardTitle>
-                      <CardDescription>
-                        {texts.propertyTypeLabel}: {getPropertyTypeLabel(property.propertyType, texts)}
-                      </CardDescription>
-                    </CardHeader>
+                return (
+                  <Link key={property.id} href={`/properties/${property.id}/reviews`} className="block">
+                    <Card className="h-full cursor-pointer gap-4 transition-all hover:shadow-lg hover:shadow-blue-100/50">
+                      <CardHeader className="gap-1">
+                        <div className="mb-3 flex h-40 items-center justify-center rounded-lg border bg-muted/30 text-sm text-muted-foreground">
+                          {texts.imagePlaceholder}
+                        </div>
+                        <CardTitle className="text-xl text-blue-700">
+                          {formatAddress(property.address, texts.notProvided)}
+                        </CardTitle>
+                        <CardDescription className="text-base font-semibold text-muted-foreground/90">
+                          {getPropertyTypeLabel(property.propertyType, texts)}
+                        </CardDescription>
+                      </CardHeader>
 
-                    <CardContent className="space-y-3">
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{texts.ratingLabel}</p>
-                        <StarRatingDisplay value={overallRating} fallbackLabel={texts.notRated} showDecimalLabel />
-                      </div>
+                      <CardContent className="space-y-3">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{texts.ratingLabel}</p>
+                          <StarRatingDisplay value={overallRating} fallbackLabel={texts.notRated} showDecimalLabel />
+                        </div>
 
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{texts.areaSqmLabel}</p>
-                        <p className="text-sm font-medium">{areaSqm === texts.notProvided ? areaSqm : `${areaSqm} m²`}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{texts.areaSqmLabel}</p>
+                          <p className="text-sm font-medium">{areaSqm === texts.notProvided ? areaSqm : `${areaSqm} m²`}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <Button asChild size="lg" className="rounded-xl px-8">
+                <Link href="/properties">{texts.viewAllButton}</Link>
+              </Button>
+            </div>
+          </>
         )}
       </div>
     </section>

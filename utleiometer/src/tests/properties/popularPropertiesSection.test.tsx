@@ -34,10 +34,11 @@ const texts: PopularPropertiesTexts = {
   propertyTypeApartment: "Leilighet",
   propertyTypeBedsit: "Hybel",
   notRated: "Ikke vurdert",
+  viewAllButton: "Vis alle boliger",
 };
 
 describe("selectPopularProperties", () => {
-  it("filters, sorts and limits to 12 by rating, then rating count, then address", () => {
+  it("filters, sorts and limits to 9 by rating, then rating count, then address", () => {
     const manyProperties: Property[] = [
       { id: "ignored-no-rating", address: "A Street", ratingCount: 3 },
       { id: "ignored-no-reviews", address: "B Street", ratingsSummary: { overall: 4.9 }, ratingCount: 0 },
@@ -58,7 +59,7 @@ describe("selectPopularProperties", () => {
 
     const selected = selectPopularProperties(manyProperties);
 
-    expect(selected).toHaveLength(12);
+    expect(selected).toHaveLength(9);
     expect(selected.map((property) => property.id)).toEqual([
       "alpha",
       "zeta",
@@ -69,9 +70,6 @@ describe("selectPopularProperties", () => {
       "r3",
       "r4",
       "r5",
-      "r6",
-      "r7",
-      "r8",
     ]);
   });
 });
@@ -114,14 +112,14 @@ describe("PopularPropertiesSection", () => {
     expect(screen.getByText("Elgeseter Gate 1")).toBeInTheDocument();
     expect(screen.getByText("Munkegata 10")).toBeInTheDocument();
     expect(screen.getAllByText("Bilde kommer snart")).toHaveLength(2);
-    expect(screen.getByText("Boligtype: Hus")).toBeInTheDocument();
-    expect(screen.getByText("Boligtype: Hybel")).toBeInTheDocument();
+    expect(screen.getByText("Hus")).toBeInTheDocument();
+    expect(screen.getByText("Hybel")).toBeInTheDocument();
     expect(screen.getByText("80 m²")).toBeInTheDocument();
     expect(screen.getByText("22 m²")).toBeInTheDocument();
 
-    const links = screen.getAllByRole("link");
-    expect(links[0]).toHaveAttribute("href", "/properties/prop-1/reviews");
-    expect(links[1]).toHaveAttribute("href", "/properties/prop-2/reviews");
+    expect(screen.getByRole("link", { name: "Vis alle boliger" })).toHaveAttribute("href", "/properties");
+    expect(screen.getByRole("link", { name: /elgeseter gate 1/i })).toHaveAttribute("href", "/properties/prop-1/reviews");
+    expect(screen.getByRole("link", { name: /munkegata 10/i })).toHaveAttribute("href", "/properties/prop-2/reviews");
 
     const grid = screen.getByTestId("popular-properties-grid");
     expect(grid.className).toContain("lg:grid-cols-3");
