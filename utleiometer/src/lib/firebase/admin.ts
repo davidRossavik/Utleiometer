@@ -3,7 +3,6 @@ import { getAuth } from "firebase-admin/auth"
 import { getFirestore, FieldValue } from "firebase-admin/firestore"
 import { env } from "../env"
 
-//Generert av Claude Sonnet 4
 if (!getApps().length) {
   initializeApp({
     credential: cert({

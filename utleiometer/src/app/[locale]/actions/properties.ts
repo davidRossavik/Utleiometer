@@ -1,7 +1,8 @@
 "use server";
 
-import { createProperty, getPropertyByAddress, getPropertyById } from "@/lib/firebase/properties"; 
+import { createProperty, getPropertyByAddress, getPropertyById, deleteProperty } from "@/lib/firebase/properties"; 
 import { createReview } from "@/lib/firebase/reviews";
+import { adminAuth } from "@/lib/firebase/admin";
 
 
 export async function createPropertyAction(formData: FormData) {
@@ -97,5 +98,39 @@ export async function getPropertyAction(propertyId: string) {
     } catch (error) {
         console.error("Error fetching property:", error);
         return { error: "Could not fetch property" };
+    }
+}
+
+/**
+ * Delete a property and all its related reviews (admin only)
+ */
+export async function deletePropertyAction(
+    propertyId: string,
+    callerIdToken: string
+): Promise<{ success: boolean; error?: string; deletedReviews?: number }> {
+    try {
+        // Verify the ID token and check admin claim
+        const decodedToken = await adminAuth.verifyIdToken(callerIdToken);
+        
+        if (decodedToken.admin !== true) {
+            return { 
+                success: false, 
+                error: "Unauthorized: Only admins can delete properties" 
+            };
+        }
+
+        // Delete property and all related reviews
+        const { deletedReviews } = await deleteProperty(propertyId);
+
+        return { 
+            success: true, 
+            deletedReviews 
+        };
+    } catch (error) {
+        console.error("Error deleting property:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to delete property"
+        };
     }
 }

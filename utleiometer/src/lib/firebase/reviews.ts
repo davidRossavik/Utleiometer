@@ -50,3 +50,22 @@ export async function deleteReview(reviewId: string, propertyId: string) {
     await decrementReviewCount(propertyId);
     return { reviewId };
 }
+
+/**
+ * Delete all reviews associated with a property
+ * Used when deleting a property to maintain database integrity
+ * @param propertyId - The ID of the property whose reviews should be deleted
+ * @returns Object with count of deleted reviews
+ */
+export async function deleteReviewsByPropertyId(propertyId: string) {
+    const snapshot = await adminDb.collection("reviews").where("propertyId", "==", propertyId).get();
+    
+    // Delete all reviews in a batch for efficiency
+    const batch = adminDb.batch();
+    snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+    });
+    
+    await batch.commit();
+    return { deletedCount: snapshot.docs.length };
+}
