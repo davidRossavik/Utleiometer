@@ -65,7 +65,10 @@ export default function Home({params}: Props) {
 
         {/* SØKEFELT */}
         <div className="mt-10 flex justify-center">
-          <SearchBar placeHolder={t("searchPlaceholder")}/>
+          <SearchBar
+            placeHolder={t("searchPlaceholder")}
+            submitLabel={t("searchButton")}
+          />
         </div>
 
         {/* REGISTER NEW PROPERTY */}

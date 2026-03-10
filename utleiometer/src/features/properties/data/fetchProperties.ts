@@ -2,6 +2,66 @@ import { db } from "@/lib/firebase/client";
 import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 import { Property } from "../types";
 
+type RatingAggregate = {
+    sum: number;
+    count: number;
+};
+
+type RatingAggregatesByCategory = {
+    overall: RatingAggregate;
+    location: RatingAggregate;
+    noise: RatingAggregate;
+    landlord: RatingAggregate;
+    condition: RatingAggregate;
+};
+
+function createEmptyCategoryAggregates(): RatingAggregatesByCategory {
+    return {
+        overall: { sum: 0, count: 0 },
+        location: { sum: 0, count: 0 },
+        noise: { sum: 0, count: 0 },
+        landlord: { sum: 0, count: 0 },
+        condition: { sum: 0, count: 0 },
+    };
+}
+
+function getNumericRating(value: unknown): number | null {
+    return typeof value === "number" ? value : null;
+}
+
+function addRating(aggregate: RatingAggregate, value: number | null) {
+    if (typeof value !== "number") return;
+    aggregate.sum += value;
+    aggregate.count += 1;
+}
+
+function getReviewRatings(raw: unknown) {
+    if (!raw || typeof raw !== "object") return null;
+    const review = raw as {
+        rating?: unknown;
+        ratings?: {
+            overall?: unknown;
+            location?: unknown;
+            noise?: unknown;
+            landlord?: unknown;
+            condition?: unknown;
+        };
+    };
+
+    return {
+        overall: getNumericRating(review.ratings?.overall) ?? getNumericRating(review.rating), // legacy fallback
+        location: getNumericRating(review.ratings?.location),
+        noise: getNumericRating(review.ratings?.noise),
+        landlord: getNumericRating(review.ratings?.landlord),
+        condition: getNumericRating(review.ratings?.condition),
+    };
+}
+
+function averageValue(aggregate: RatingAggregate): number | undefined {
+    if (!aggregate.count) return undefined;
+    return Number((aggregate.sum / aggregate.count).toFixed(1));
+}
+
 export async function fetchProperties(): Promise<Property[]> {
     
     const q = query(
@@ -9,12 +69,49 @@ export async function fetchProperties(): Promise<Property[]> {
         orderBy("address", "asc")
     );
     
-    const snap = await getDocs(q);
+    const [propertySnap, reviewSnap] = await Promise.all([
+        getDocs(q),
+        getDocs(collection(db, "reviews")),
+    ]);
 
-    return snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<Property, "id">),
-    }));
+    const ratingsByProperty = new Map<string, RatingAggregatesByCategory>();
+    reviewSnap.docs.forEach((reviewDoc) => {
+        const reviewData = reviewDoc.data() as { propertyId?: unknown };
+        if (typeof reviewData.propertyId !== "string") return;
+
+        const reviewRatings = getReviewRatings(reviewDoc.data());
+        if (!reviewRatings) return;
+
+        const current = ratingsByProperty.get(reviewData.propertyId) ?? createEmptyCategoryAggregates();
+        addRating(current.overall, reviewRatings.overall);
+        addRating(current.location, reviewRatings.location);
+        addRating(current.noise, reviewRatings.noise);
+        addRating(current.landlord, reviewRatings.landlord);
+        addRating(current.condition, reviewRatings.condition);
+        ratingsByProperty.set(reviewData.propertyId, current);
+    });
+
+    return propertySnap.docs.map((d) => {
+        const aggregate = ratingsByProperty.get(d.id);
+        const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
+        const ratingCount = aggregate?.overall.count ?? 0;
+
+        return {
+            id: d.id,
+            ...(d.data() as Omit<Property, "id">),
+            ratingAvg,
+            ratingCount,
+            ratingsSummary: aggregate
+                ? {
+                    overall: averageValue(aggregate.overall),
+                    location: averageValue(aggregate.location),
+                    noise: averageValue(aggregate.noise),
+                    landlord: averageValue(aggregate.landlord),
+                    condition: averageValue(aggregate.condition),
+                }
+                : undefined,
+        };
+    });
 }
 
 export async function fetchPropertyById(propertyId: string): Promise<Property | null> {
