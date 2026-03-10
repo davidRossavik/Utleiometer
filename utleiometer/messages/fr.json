@@ -12,21 +12,25 @@
         "deleteHandlingText": "Suppression...",
         "loginText": "Se connecter",
         "registerText": "Créer un compte",
+        "addReviewButton": "Ajouter un avis",
 
         "targetAudience": "Pour les étudiants sur le marché locatif",
         "searchPlaceholder": "Rechercher une adresse ou un quartier pour lire des avis",
         "searchButton": "Rechercher",
-
-        "registerMessage": "Vous ne trouvez pas le logement que vous souhaitez évaluer ?",
-        "registerButtonText": "Enregistrer un nouveau logement ici",
-
-        "flowDescription": "Comment ça fonctionne",
-        "step1": "Étape 1",
-        "step1Description": "Recherchez le logement que vous envisagez de louer.",
-        "step2": "Étape 2",
-        "step2Description": "Lisez les avis des autres.",
-        "step3": "Étape 3",
-        "step3Description": "Prenez une décision éclairée.",
+        "popularPropertiesTitle": "Logements les plus populaires",
+        "popularPropertiesEmpty": "Aucun logement avec des avis n'est disponible pour le moment.",
+        "popularPropertiesImagePlaceholder": "Image bientôt disponible",
+        "popularPropertiesRatingLabel": "Note globale",
+        "popularPropertiesPropertyTypeLabel": "Type de logement",
+        "popularPropertiesAreaLabel": "Mètres carrés",
+        "popularPropertiesNotProvided": "Non renseigné",
+        "popularPropertiesNotRated": "Non noté",
+        "propertyTypeHouse": "Maison",
+        "propertyTypeApartment": "Appartement",
+        "propertyTypeBedsit": "Chambre",
+        "messages": {
+            "loadPropertiesError": "Impossible de récupérer les logements"
+        },
 
         "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4."
     },
@@ -90,12 +94,13 @@
     },
     "PropertyNewPage": {
         "brand": "L'Utleiomètre",
-        "backButton": "← Retour",
         "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4.",
         "form": {
-            "cardTitle": "Enregistrer et évaluer un logement",
-            "cardDescription": "Enregistrez l'adresse et partagez votre expérience",
-            "sectionRegisterTitle": "📍 Enregistrer un logement",
+            "cardTitle": "Ajouter un avis",
+            "cardDescription": "Recherchez d'abord le logement. S'il n'existe pas, ajoutez ses détails avant votre avis.",
+            "addressStepTitle": "Ajouter un avis sur un logement",
+            "propertyDetailsStepTitle": "Ajouter les détails du logement",
+            "reviewStepTitle": "Écrire un avis",
             "addressLabel": "Adresse",
             "addressPlaceholder": "Par ex. Elgeseter gate 1",
             "zipCodeLabel": "Code postal",
@@ -123,7 +128,12 @@
             "hasPrivateBathroomNo": "Non",
             "otherBedsitsInUnitLabel": "Combien d'autres chambres dans l'unité",
             "otherBedsitsInUnitPlaceholder": "2",
-            "sectionReviewTitle": "🏠 Évaluer le logement",
+            "propertyFoundMessage": "Le logement existe déjà. Continuez avec l'avis.",
+            "propertyNotFoundMessage": "Ce logement n'existe pas encore, enregistrez un nouveau logement.",
+            "continueButton": "Continuer",
+            "cancelButton": "Annuler",
+            "submitButton": "Envoyer l'avis",
+            "submittingButton": "Envoi...",
             "commentLabel": "Décrivez le logement",
             "commentPlaceholder": "Par ex. Quartier calme, un peu loin du centre",
             "ratingsTitle": "Évaluer le logement (1-5 étoiles)",
@@ -135,8 +145,6 @@
             "landlordHelp": "Comment est le propriétaire au quotidien ?",
             "conditionLabel": "État",
             "conditionHelp": "Comment jugez-vous l'état de l'appartement ?",
-            "submit": "Enregistrer le logement",
-            "submitting": "Enregistrement...",
             "hint": "Vous pouvez modifier l'avis plus tard"
         },
         "messages": {

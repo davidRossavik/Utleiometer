@@ -1,11 +1,11 @@
 
 import { Badge } from "@/ui/feedback/badge"
-import { RegisterButton } from "@/features/properties/components/registerButton";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/ui/feedback/card"
+import { PopularPropertiesSection } from "@/features/properties/components/popularPropertiesSection";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { SearchBar } from "@/features/search/components/searchBar";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { AddReviewHeaderButton } from "@/features/reviews/componentes/AddReviewHeaderButton";
 import { useTranslations } from 'next-intl';
 import { setRequestLocale } from "next-intl/server";
 import { use } from 'react';
@@ -32,7 +32,7 @@ export default function Home({params}: Props) {
           </div>
 
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <AddReviewHeaderButton label={t("addReviewButton")} />
             <AuthButtons 
               account={t("account")}
               confirmText={t("confirmText")}
@@ -44,6 +44,7 @@ export default function Home({params}: Props) {
               loginText={t("loginText")}
               registerText={t("registerText")}
             />
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -71,47 +72,26 @@ export default function Home({params}: Props) {
           />
         </div>
 
-        {/* REGISTER NEW PROPERTY */}
-        <RegisterButton 
-          registerMessage={t("registerMessage")}
-          registerButtonText={t("registerButtonText")}
+        </section>
+
+        <PopularPropertiesSection
+          texts={{
+            title: t("popularPropertiesTitle"),
+            emptyDescription: t("popularPropertiesEmpty"),
+            imagePlaceholder: t("popularPropertiesImagePlaceholder"),
+            ratingLabel: t("popularPropertiesRatingLabel"),
+            propertyTypeLabel: t("popularPropertiesPropertyTypeLabel"),
+            areaSqmLabel: t("popularPropertiesAreaLabel"),
+            notProvided: t("popularPropertiesNotProvided"),
+            propertyTypeHouse: t("propertyTypeHouse"),
+            propertyTypeApartment: t("propertyTypeApartment"),
+            propertyTypeBedsit: t("propertyTypeBedsit"),
+            notRated: t("popularPropertiesNotRated"),
+          }}
+          messages={{
+            loadPropertiesError: t("messages.loadPropertiesError"),
+          }}
         />
-
-        </section>
-
-
-        {/* HOW IT WORKS */}
-        <section id="how" className="container mx-auto px-4 py-6">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-3xl font-semibold tracking-tight">
-              {/* TODO */}
-              {t("flowDescription")}
-            </h2>
-
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}{t("step1")}</CardTitle>
-                  <CardDescription>{/* TODO */}{t("step1Description")}</CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}{t("step2")}</CardTitle>
-                  <CardDescription>{/* TODO */}{t("step2Description")}</CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl text-blue-700"> {/* TODO */}{t("step3")}</CardTitle>
-                  <CardDescription>{/* TODO */}{t("step3Description")}</CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* FOOTER */}

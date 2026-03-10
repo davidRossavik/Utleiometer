@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { AddReviewHeaderButton } from "@/features/reviews/componentes/AddReviewHeaderButton";
 
 import PropertiesClient from "@/features/properties/client/PropertiesClient";
 
@@ -28,7 +29,7 @@ export default async function PropertiesPage() {
             <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <AddReviewHeaderButton label={tHome("addReviewButton")} />
             <AuthButtons
               account={tHome("account")}
               confirmText={tHome("confirmText")}
@@ -40,6 +41,7 @@ export default async function PropertiesPage() {
               loginText={tHome("loginText")}
               registerText={tHome("registerText")}
             />
+            <LanguageSwitcher />
           </div>
         </div>
       </header>

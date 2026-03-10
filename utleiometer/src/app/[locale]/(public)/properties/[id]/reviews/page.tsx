@@ -3,6 +3,7 @@ import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage
 import ReviewsClient from "@/features/reviews/client/ReviewsClient";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { AddReviewHeaderButton } from "@/features/reviews/componentes/AddReviewHeaderButton";
 
 export default async function ReviewsPage({ params }: { params: Promise<{ id: string }>}) {
   const { id } = await params;
@@ -20,7 +21,7 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
               <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <AddReviewHeaderButton label={tHome("addReviewButton")} />
             <AuthButtons
               account={tHome("account")}
               confirmText={tHome("confirmText")}
@@ -32,6 +33,7 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
               loginText={tHome("loginText")}
               registerText={tHome("registerText")}
             />
+            <LanguageSwitcher />
           </div>
           </div>
       </header>

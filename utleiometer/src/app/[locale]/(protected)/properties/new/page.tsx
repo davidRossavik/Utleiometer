@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
-import { Button } from "@/ui/primitives/button";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { AddReviewHeaderButton } from "@/features/reviews/componentes/AddReviewHeaderButton";
 
 import PropertyRegisterClient from "@/features/properties/client/PropertyRegisterClient";
 
 export const metadata = {
-  title: "Registrer bolig | Utleiometer",
+  title: "Legg til anmeldelse | Utleiometer",
 };
 
 export default async function Page() {
@@ -29,7 +29,7 @@ export default async function Page() {
             <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <AddReviewHeaderButton label={tHome("addReviewButton")} />
             <AuthButtons
               account={tHome("account")}
               confirmText={tHome("confirmText")}
@@ -41,19 +41,13 @@ export default async function Page() {
               loginText={tHome("loginText")}
               registerText={tHome("registerText")}
             />
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
 
       {/* PAGE CONTENT */}
-      <main className="flex-1 flex items-center justify-center p-6 relative">
-      {/* Tilbake-knapp – absolutt plassert */}
-      <div className="absolute top-6 left-6">
-        <Button asChild variant="ghost">
-          <Link href="/">{t("backButton")}</Link>
-        </Button>
-      </div>
-
+      <main className="flex-1 flex items-center justify-center p-6">
       {/* Sentrert innhold */}
       <div className="w-full max-w-lg flex flex-col items-center gap-6">
         <Link href="/" className="font-bold text-4xl text-blue-700">
@@ -64,7 +58,6 @@ export default async function Page() {
           texts={{
             cardTitle: t("form.cardTitle"),
             cardDescription: t("form.cardDescription"),
-            sectionRegisterTitle: t("form.sectionRegisterTitle"),
             addressLabel: t("form.addressLabel"),
             addressPlaceholder: t("form.addressPlaceholder"),
             zipCodeLabel: t("form.zipCodeLabel"),
@@ -92,7 +85,15 @@ export default async function Page() {
             hasPrivateBathroomNo: t("form.hasPrivateBathroomNo"),
             otherBedsitsInUnitLabel: t("form.otherBedsitsInUnitLabel"),
             otherBedsitsInUnitPlaceholder: t("form.otherBedsitsInUnitPlaceholder"),
-            sectionReviewTitle: t("form.sectionReviewTitle"),
+            addressStepTitle: t("form.addressStepTitle"),
+            propertyDetailsStepTitle: t("form.propertyDetailsStepTitle"),
+            reviewStepTitle: t("form.reviewStepTitle"),
+            propertyFoundMessage: t("form.propertyFoundMessage"),
+            propertyNotFoundMessage: t("form.propertyNotFoundMessage"),
+            continueButton: t("form.continueButton"),
+            cancelButton: t("form.cancelButton"),
+            submitButton: t("form.submitButton"),
+            submittingButton: t("form.submittingButton"),
             commentLabel: t("form.commentLabel"),
             commentPlaceholder: t("form.commentPlaceholder"),
             ratingsTitle: t("form.ratingsTitle"),
@@ -104,8 +105,6 @@ export default async function Page() {
             landlordHelp: t("form.landlordHelp"),
             conditionLabel: t("form.conditionLabel"),
             conditionHelp: t("form.conditionHelp"),
-            submit: t("form.submit"),
-            submitting: t("form.submitting"),
             hint: t("form.hint"),
           }}
           messages={{

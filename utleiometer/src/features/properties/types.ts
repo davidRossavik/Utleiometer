@@ -16,6 +16,7 @@ export type Property = {
     city?: string;
     country?: string;
     ownerName?: string;
+    imageUrl?: string;
     ratingAvg?: number;
     ratingCount?: number;
     ratingsSummary?: PropertyRatingsSummary;
