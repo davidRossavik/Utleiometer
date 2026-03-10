@@ -36,7 +36,6 @@ export type ReviewCreateTexts = {
   submit: string;
   submitting: string;
   hint: string;
-  successAlert: string;
 };
 
 export type ReviewCreateMessages = {
@@ -96,8 +95,7 @@ export default function ReviewCreateClient({
         return;
       }
 
-      alert(texts.successAlert);
-      router.back();
+      router.replace(`/properties/${propertyId}/reviews?submitted=review`);
     } catch {
       setError(messages.unknownError);
     } finally {

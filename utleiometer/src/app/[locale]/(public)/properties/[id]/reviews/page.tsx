@@ -83,6 +83,8 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
           propertyTypeHouse: t("propertyTypeHouse"),
           propertyTypeApartment: t("propertyTypeApartment"),
           propertyTypeBedsit: t("propertyTypeBedsit"),
+          reviewSubmittedSuccess: t("messages.reviewSubmittedSuccess"),
+          propertySubmittedSuccess: t("messages.propertySubmittedSuccess"),
         }}
         messages={{
           loadReviewsError: t("messages.loadReviewsError"),

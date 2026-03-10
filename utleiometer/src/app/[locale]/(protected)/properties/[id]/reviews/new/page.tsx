@@ -33,7 +33,6 @@ export default async function ReviewRegisterPage({ params, searchParams }: Props
         submit: t("form.submit"),
         submitting: t("form.submitting"),
         hint: t("form.hint"),
-        successAlert: t("messages.successAlert"),
       }}
       messages={{
         notLoggedIn: t("messages.notLoggedIn"),

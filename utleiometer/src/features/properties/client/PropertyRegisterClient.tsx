@@ -113,7 +113,7 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
         return;
       }
 
-      router.push("/");
+      router.replace(`/properties/${result.propertyId}/reviews?submitted=property`);
     } catch {
       setError(messages.unknownError);
     } finally {

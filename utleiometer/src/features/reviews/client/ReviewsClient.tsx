@@ -8,6 +8,7 @@ import { fetchPropertyById } from "@/features/properties/data/fetchProperties";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Badge } from "@/ui/feedback/badge";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
@@ -61,6 +62,8 @@ export type ReviewsClientTexts = {
     propertyTypeHouse: string;
     propertyTypeApartment: string;
     propertyTypeBedsit: string;
+    reviewSubmittedSuccess: string;
+    propertySubmittedSuccess: string;
 };
 
 export type ReviewsClientMessages = {
@@ -229,6 +232,7 @@ function computeRatingSummary(reviews: Review[]): RatingSummary {
 }
 
 export default function ReviewsClient({ propertyId, property, texts, messages }: ReviewsClientProps) {
+    const searchParams = useSearchParams();
     const { reviews, loading, error } = useReviews({ propertyId, messages });
     const { currentUser } = useAuth();
     const [fetchedProperty, setFetchedProperty] = useState<Property | null>(property);
@@ -302,6 +306,13 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         () => buildDetailRows(fetchedProperty, texts),
         [fetchedProperty, texts],
     );
+    const submitted = searchParams.get("submitted");
+    const successMessage =
+        submitted === "review"
+            ? texts.reviewSubmittedSuccess
+            : submitted === "property"
+              ? texts.propertySubmittedSuccess
+              : null;
 
     return (
             <main>
@@ -315,6 +326,11 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-blue-700">
                         {heading}
                         </h1>
+                        {successMessage ? (
+                            <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+                                {successMessage}
+                            </div>
+                        ) : null}
                         {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
 
                         <div className="mt-5 overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/40 shadow-sm">

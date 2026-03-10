@@ -253,7 +253,9 @@
         "propertyTypeApartment": "Leilighet",
         "propertyTypeBedsit": "Hybel",
         "messages": {
-            "loadReviewsError": "Kunne ikke hente anmeldelser"
+            "loadReviewsError": "Kunne ikke hente anmeldelser",
+            "reviewSubmittedSuccess": "Anmeldelsen din ble sendt inn.",
+            "propertySubmittedSuccess": "Bolig og anmeldelse ble registrert."
         }
     }
 }

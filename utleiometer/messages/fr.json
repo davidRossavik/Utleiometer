@@ -253,7 +253,9 @@
         "propertyTypeApartment": "Appartement",
         "propertyTypeBedsit": "Chambre",
         "messages": {
-            "loadReviewsError": "Impossible de récupérer les avis"
+            "loadReviewsError": "Impossible de récupérer les avis",
+            "reviewSubmittedSuccess": "Votre avis a bien été envoyé.",
+            "propertySubmittedSuccess": "Le logement et l'avis ont bien été enregistrés."
         }
     }
 }
