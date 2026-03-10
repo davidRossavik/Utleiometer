@@ -15,7 +15,8 @@
         "registerText": "Opprett bruker",
 
         "targetAudience": "For studenter i leiemarkedet",
-        "searchPlaceholder": "Søk etter bolig",
+        "searchPlaceholder": "Søk etter adresse eller område for å lese anmeldelser",
+        "searchButton": "Søk",
 
         "registerMessage": "Finner du ikke boligen du ønsker å vurdere?",
         "registerButtonText": "Registrer ny bolig her",

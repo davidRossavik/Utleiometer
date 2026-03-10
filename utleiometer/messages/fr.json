@@ -14,7 +14,8 @@
         "registerText": "Créer un compte",
 
         "targetAudience": "Pour les étudiants sur le marché locatif",
-        "searchPlaceholder": "Rechercher un logement",
+        "searchPlaceholder": "Rechercher une adresse ou un quartier pour lire des avis",
+        "searchButton": "Rechercher",
 
         "registerMessage": "Vous ne trouvez pas le logement que vous souhaitez évaluer ?",
         "registerButtonText": "Enregistrer un nouveau logement ici",
