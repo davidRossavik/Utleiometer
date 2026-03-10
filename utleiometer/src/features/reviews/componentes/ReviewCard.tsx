@@ -5,12 +5,29 @@ import { Review } from "@/features/reviews/types";
 import { Button } from "@/ui/primitives/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { EditReviewForm } from "./EditReviewForm";
+import { StarRatingDisplay } from "./StarRatingDisplay";
 
 interface ReviewCardProps {
     review: Review;
     currentUserId?: string;
     onSave: (updated: Review) => void;
     onDelete: (reviewId: string) => void;
+    texts: {
+        editTitle: string;
+        defaultTitle: string;
+        notRated: string;
+        overall: string;
+        location: string;
+        noise: string;
+        landlord: string;
+        condition: string;
+        emptyComment: string;
+        confirmDelete: string;
+        deleteYes: string;
+        deleteNo: string;
+        edit: string;
+        delete: string;
+    };
 }
 
 function formatDate(ts: any) {
@@ -19,7 +36,7 @@ function formatDate(ts: any) {
     return d.toLocaleDateString("no-NO", { year: "numeric", month: "short", day: "numeric" });
 }
 
-export function ReviewCard({ review, currentUserId, onSave, onDelete }: ReviewCardProps) {
+export function ReviewCard({ review, currentUserId, onSave, onDelete, texts }: ReviewCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -40,7 +57,7 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete }: ReviewCa
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl text-blue-700">Rediger anmeldelse</CardTitle>
+                    <CardTitle className="text-xl text-blue-700">{texts.editTitle}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <EditReviewForm
@@ -58,20 +75,43 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete }: ReviewCa
         <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
                 <CardTitle className="text-xl text-blue-700">
-                    {review.title?.trim() ? review.title : "Anmeldelse"}
+                    {review.title?.trim() ? review.title : texts.defaultTitle}
                 </CardTitle>
                 <CardDescription>
-                    <span className="mr-2">
-                        {typeof review.rating === "number" ? `${review.rating}/5` : "Ingen rating"}
-                    </span>
+                    <span className="mr-2">{texts.overall}</span>
+                    <StarRatingDisplay
+                        value={review.ratings?.overall ?? review.rating}
+                        fallbackLabel={texts.notRated}
+                        className="inline-flex"
+                        showDecimalLabel
+                    />
                     {review.userDisplayName ? `• ${review.userDisplayName}` : null}
                     {review.createdAt ? ` • ${formatDate(review.createdAt)}` : null}
                 </CardDescription>
             </CardHeader>
 
             <CardContent>
+                <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                        <span className="text-sm font-medium">{texts.location}</span>
+                        <StarRatingDisplay value={review.ratings?.location} fallbackLabel={texts.notRated} />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                        <span className="text-sm font-medium">{texts.noise}</span>
+                        <StarRatingDisplay value={review.ratings?.noise} fallbackLabel={texts.notRated} />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                        <span className="text-sm font-medium">{texts.landlord}</span>
+                        <StarRatingDisplay value={review.ratings?.landlord} fallbackLabel={texts.notRated} />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                        <span className="text-sm font-medium">{texts.condition}</span>
+                        <StarRatingDisplay value={review.ratings?.condition} fallbackLabel={texts.notRated} />
+                    </div>
+                </div>
+
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
-                    {review.comment?.trim() ? review.comment : "Ingen tekst."}
+                    {review.comment?.trim() ? review.comment : texts.emptyComment}
                 </p>
             </CardContent>
 
@@ -79,21 +119,21 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete }: ReviewCa
                 <CardFooter className="gap-2">
                     {showDeleteConfirm ? (
                         <>
-                            <span className="text-sm text-red-600 mr-2">Er du sikker?</span>
+                            <span className="text-sm text-red-600 mr-2">{texts.confirmDelete}</span>
                             <Button variant="destructive" size="sm" onClick={handleDelete}>
-                                Ja, slett
+                                {texts.deleteYes}
                             </Button>
                             <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)}>
-                                Nei
+                                {texts.deleteNo}
                             </Button>
                         </>
                     ) : (
                         <>
                             <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                Rediger
+                                {texts.edit}
                             </Button>
                             <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
-                                Slett
+                                {texts.delete}
                             </Button>
                         </>
                     )}

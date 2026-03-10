@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Review } from "@/features/reviews/types";
+import type { Review, ReviewRatings } from "@/features/reviews/types";
 import { Button } from "@/ui/primitives/button";
-import { Input } from "@/ui/primitives/input";
 import { Label } from "@/ui/primitives/label";
+import { StarRatingInput } from "./StarRatingInput";
 
 interface EditReviewFormProps {
     review: Review;
@@ -13,14 +13,24 @@ interface EditReviewFormProps {
 }
 
 export function EditReviewForm({ review, onSave, onCancel }: EditReviewFormProps) {
-    const [rating, setRating] = useState<number>(review.rating ?? 1);
+    const initialCategoryValue = typeof review.rating === "number" ? review.rating : 3;
+    const [ratingLocation, setRatingLocation] = useState<number>(review.ratings?.location ?? initialCategoryValue);
+    const [ratingNoise, setRatingNoise] = useState<number>(review.ratings?.noise ?? initialCategoryValue);
+    const [ratingLandlord, setRatingLandlord] = useState<number>(review.ratings?.landlord ?? initialCategoryValue);
+    const [ratingCondition, setRatingCondition] = useState<number>(review.ratings?.condition ?? initialCategoryValue);
     const [comment, setComment] = useState<string>(review.comment ?? "");
     const [error, setError] = useState<string | null>(null);
 
+    function calculateOverall(ratings: Omit<ReviewRatings, "overall">) {
+        return Number((((ratings.location + ratings.noise + ratings.landlord + ratings.condition) / 4)).toFixed(1));
+    }
+
     function handleSave() {
-        // Validering
-        if (rating < 1 || rating > 5) {
-            setError("Rating må være mellom 1 og 5.");
+        const categoryValues = [ratingLocation, ratingNoise, ratingLandlord, ratingCondition];
+        const hasInvalidCategory = categoryValues.some((value) => value < 1 || value > 5 || !Number.isInteger(value));
+
+        if (hasInvalidCategory) {
+            setError("Alle kategorier må være mellom 1 og 5.");
             return;
         }
         if (!comment.trim()) {
@@ -28,10 +38,22 @@ export function EditReviewForm({ review, onSave, onCancel }: EditReviewFormProps
             return;
         }
 
+        const ratingsWithoutOverall = {
+            location: ratingLocation,
+            noise: ratingNoise,
+            landlord: ratingLandlord,
+            condition: ratingCondition,
+        };
+        const ratings: ReviewRatings = {
+            ...ratingsWithoutOverall,
+            overall: calculateOverall(ratingsWithoutOverall),
+        };
+
         setError(null);
         onSave({
             ...review,
-            rating,
+            rating: ratings.overall, // legacy support
+            ratings,
             comment: comment.trim(),
         });
     }
@@ -39,14 +61,46 @@ export function EditReviewForm({ review, onSave, onCancel }: EditReviewFormProps
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-                <Label htmlFor={`edit-rating-${review.id}`}>Rating (1–5)</Label>
-                <Input
-                    id={`edit-rating-${review.id}`}
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={rating}
-                    onChange={(e) => setRating(Number(e.target.value))}
+                <Label htmlFor={`edit-rating-location-${review.id}`}>Beliggenhet</Label>
+                <StarRatingInput
+                    id={`edit-rating-location-${review.id}`}
+                    name="editRatingLocation"
+                    value={ratingLocation}
+                    onChange={setRatingLocation}
+                    required
+                />
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <Label htmlFor={`edit-rating-noise-${review.id}`}>Støy</Label>
+                <StarRatingInput
+                    id={`edit-rating-noise-${review.id}`}
+                    name="editRatingNoise"
+                    value={ratingNoise}
+                    onChange={setRatingNoise}
+                    required
+                />
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <Label htmlFor={`edit-rating-landlord-${review.id}`}>Utleier</Label>
+                <StarRatingInput
+                    id={`edit-rating-landlord-${review.id}`}
+                    name="editRatingLandlord"
+                    value={ratingLandlord}
+                    onChange={setRatingLandlord}
+                    required
+                />
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <Label htmlFor={`edit-rating-condition-${review.id}`}>Standard</Label>
+                <StarRatingInput
+                    id={`edit-rating-condition-${review.id}`}
+                    name="editRatingCondition"
+                    value={ratingCondition}
+                    onChange={setRatingCondition}
+                    required
                 />
             </div>
 

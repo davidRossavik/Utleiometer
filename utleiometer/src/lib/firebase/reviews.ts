@@ -1,11 +1,20 @@
 import { adminDb } from "./admin";
 import { incrementReviewCount, decrementReviewCount } from "./properties";
 
+export interface ReviewRatings {
+    location: number;
+    noise: number;
+    landlord: number;
+    condition: number;
+    overall: number;
+}
+
 export interface Review {
     reviewId: string;
     userId: string;
     propertyId: string;
-    rating: number;
+    rating?: number; // legacy
+    ratings?: ReviewRatings;
     comment: string;
     title?: string;
     createdAt: Date;
@@ -29,12 +38,13 @@ export async function getReviewsByPropertyId(propertyId: string) {
 
 export async function updateReview(
     reviewId: string, 
-    data: { rating: number; comment: string; title?: string }
+    data: { ratings: ReviewRatings; comment: string; title?: string }
 ) {
     const reviewRef = adminDb.collection("reviews").doc(reviewId);
     
     const updateData = {
-        rating: data.rating,
+        rating: data.ratings.overall, // legacy support
+        ratings: data.ratings,
         comment: data.comment,
         title: data.title || "",
         updatedAt: new Date()

@@ -1,257 +1,174 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createPropertyAction } from '@/app/actions/properties';
-import * as propertiesLib from '@/lib/firebase/properties';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createPropertyAction } from "@/app/[locale]/actions/properties";
+import * as propertiesLib from "@/lib/firebase/properties";
 
-//US3 Testing duplicate property detection
-
-// Mock Firebase Admin init slik at env ikke trengs i tester
 vi.mock("@/lib/firebase/admin", () => ({
-  adminDb: {},      // eller det reviews/properties forventer
-  adminAuth: {},    // hvis dere bruker auth
+  adminDb: {},
+  adminAuth: {},
 }));
 
-// Mock the Firebase properties module
-vi.mock('@/lib/firebase/properties', () => ({
+vi.mock("@/lib/firebase/properties", () => ({
   createProperty: vi.fn(),
   getPropertyByAddress: vi.fn(),
+  getPropertyById: vi.fn(),
 }));
 
-describe('Duplicate Property Detection', () => {
+describe("Duplicate Property Detection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('createPropertyAction', () => {
-    const mockPropertyData = {
-      address: '123 test street',
-      zipCode: '12345',
-      city: 'test city',
-      registeredByUid: 'user123',
-      imageUrl: 'https://example.com/image.jpg',
-    };
-// This test verifies that the createPropertyAction correctly identifies duplicates based on address, zip code, and city, regardless of whitespace and case differences.
-    it('should return error when duplicate property exists', async () => {
-      // getPropertyByAddress to return an existing property
-      const existingProperty = {
-        propertyId: 'existing-id',
-        address: '123 test street',
-        zipCode: '12345',
-        city: 'test city',
-        registeredByUid: 'user456',
-        createdAt: new Date(),
-      };
+  function buildBaseFormData() {
+    const formData = new FormData();
+    formData.append("address", "Test Street 1");
+    formData.append("zipCode", "7030");
+    formData.append("city", "Trondheim");
+    formData.append("registeredByUid", "user123");
+    formData.append("propertyType", "house");
+    formData.append("areaSqm", "80");
+    formData.append("bedrooms", "3");
+    formData.append("bathrooms", "1");
+    formData.append("floors", "2");
+    formData.append("buildYear", "2010");
+    return formData;
+  }
 
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(existingProperty);
-
-      //Create FormData with the same address details
-      const formData = new FormData();
-      formData.append('address', mockPropertyData.address);
-      formData.append('zipCode', mockPropertyData.zipCode);
-      formData.append('city', mockPropertyData.city);
-      formData.append('registeredByUid', mockPropertyData.registeredByUid);
-      formData.append('imageUrl', mockPropertyData.imageUrl);
-
-      const result = await createPropertyAction(formData);
-
-      expect(result).toEqual({
-        error: "Property already exists, please visit the property's page to leave a review.",
-      });
-      expect(propertiesLib.getPropertyByAddress).toHaveBeenCalledWith(
-        '123 test street',
-        '12345',
-        'test city'
-      );
-      expect(propertiesLib.createProperty).not.toHaveBeenCalled();
+  it("returns duplicate error when property already exists", async () => {
+    vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue({
+      propertyId: "existing-id",
+      address: "test street 1",
+      zipCode: "7030",
+      city: "trondheim",
+      registeredByUid: "user456",
+      propertyType: "house" as const,
+      createdAt: new Date(),
     });
 
-// This test ensures that the duplicate detection logic is robust against variations in whitespace and letter casing, which are common user input issues.
-    it('should normalize whitespace and case before checking for duplicates', async () => {
-      const existingProperty = {
-        propertyId: 'existing-id',
-        address: '123 test street',
-        zipCode: '12345',
-        city: 'test city',
-        registeredByUid: 'user456',
-        createdAt: new Date(),
-      };
+    const result = await createPropertyAction(buildBaseFormData());
 
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(existingProperty);
-
-      // create FormData with extra whitespace and different case
-      const formData = new FormData();
-      formData.append('address', '  123   TEST   Street  ');
-      formData.append('zipCode', ' 12345 ');
-      formData.append('city', '  Test   CITY  ');
-      formData.append('registeredByUid', 'user123');
-
-      const result = await createPropertyAction(formData);
-
-      expect(result).toEqual({
-        error: "Property already exists, please visit the property's page to leave a review.",
-      });
-      // Should be called with normalized values
-      expect(propertiesLib.getPropertyByAddress).toHaveBeenCalledWith(
-        '123 test street',
-        '12345',
-        'test city'
-      );
+    expect(result).toEqual({
+      error: "Property already exists, please visit the property's page to leave a review.",
     });
-
-    it('should create property successfully when no duplicate exists', async () => {
-      // Mock getPropertyByAddress to return null (no duplicate)
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(null);
-
-      const newProperty = {
-        propertyId: 'new-id-123',
-        address: '456 new street',
-        zipCode: '67890',
-        city: 'new city',
-        registeredByUid: 'user789',
-        createdAt: new Date(),
-        imageUrl: 'https://example.com/new-image.jpg',
-      };
-
-      vi.mocked(propertiesLib.createProperty).mockResolvedValue(newProperty);
-
-      const formData = new FormData();
-      formData.append('address', '456 New Street');
-      formData.append('zipCode', '67890');
-      formData.append('city', 'New City');
-      formData.append('registeredByUid', 'user789');
-      formData.append('imageUrl', 'https://example.com/new-image.jpg');
-
-      const result = await createPropertyAction(formData);
-
-      expect(result).toEqual(newProperty);
-      expect(propertiesLib.getPropertyByAddress).toHaveBeenCalledWith(
-        '456 new street',
-        '67890',
-        'new city'
-      );
-      expect(propertiesLib.createProperty).toHaveBeenCalledWith(
-        expect.objectContaining({
-          address: '456 new street',
-          zipCode: '67890',
-          city: 'new city',
-          registeredByUid: 'user789',
-          imageUrl: 'https://example.com/new-image.jpg',
-        })
-      );
-    });
-// This test verifies that the duplicate detection logic is based on property details rather than the user who registered it, ensuring that different users cannot register the same property.
-    it('should detect duplicate even with different users', async () => {
-      const existingProperty = {
-        propertyId: 'existing-id',
-        address: 'main street 1',
-        zipCode: '54321',
-        city: 'oslo',
-        registeredByUid: 'user-original',
-        createdAt: new Date(),
-      };
-
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(existingProperty);
-
-      // Different user trying to register the same property
-      const formData = new FormData();
-      formData.append('address', 'Main Street 1');
-      formData.append('zipCode', '54321');
-      formData.append('city', 'Oslo');
-      formData.append('registeredByUid', 'user-different');
-
-      const result = await createPropertyAction(formData);
-
-      expect(result).toEqual({
-        error: "Property already exists, please visit the property's page to leave a review.",
-      });
-    });
-
-    it('should throw error when required fields are missing', async () => {
-      const formData = new FormData();
-      formData.append('address', '123 test street');
-      // Missing zipCode, city, and registeredByUid
-
-      await expect(createPropertyAction(formData)).rejects.toThrow();
-    });
-
-    it('should create property without imageUrl when not provided', async () => {
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(null);
-
-      const newProperty = {
-        propertyId: 'new-id',
-        address: 'test street',
-        zipCode: '11111',
-        city: 'bergen',
-        registeredByUid: 'user123',
-        createdAt: new Date(),
-      };
-
-      vi.mocked(propertiesLib.createProperty).mockResolvedValue(newProperty);
-
-      const formData = new FormData();
-      formData.append('address', 'Test Street');
-      formData.append('zipCode', '11111');
-      formData.append('city', 'Bergen');
-      formData.append('registeredByUid', 'user123');
-      // No imageUrl provided
-
-      const result = await createPropertyAction(formData);
-
-      expect(result).toEqual(newProperty);
-      expect(propertiesLib.createProperty).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          imageUrl: expect.anything(),
-        })
-      );
-    });
-
-    it('should handle database errors appropriately', async () => {
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(null);
-      vi.mocked(propertiesLib.createProperty).mockRejectedValue(
-        new Error('Database connection failed')
-      );
-
-      const formData = new FormData();
-      formData.append('address', 'Test Street');
-      formData.append('zipCode', '11111');
-      formData.append('city', 'Bergen');
-      formData.append('registeredByUid', 'user123');
-
-      await expect(createPropertyAction(formData)).rejects.toThrow(
-        'Failed to create property'
-      );
-    });
+    expect(propertiesLib.createProperty).not.toHaveBeenCalled();
   });
 
-  describe('getPropertyByAddress', () => {
-    it('should correctly identify duplicate by matching address, zipCode, and city', async () => {
-      // This test verifies the duplicate detection logic at the database level
-      const mockProperty = {
-        propertyId: 'test-id',
-        address: 'storgata 1',
-        zipCode: '0182',
-        city: 'oslo',
-        registeredByUid: 'user123',
-        createdAt: new Date(),
-      };
-
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(mockProperty);
-
-      const result = await propertiesLib.getPropertyByAddress('storgata 1', '0182', 'oslo');
-
-      expect(result).toEqual(mockProperty);
-      expect(propertiesLib.getPropertyByAddress).toHaveBeenCalledWith(
-        'storgata 1',
-        '0182',
-        'oslo'
-      );
+  it("normalizes whitespace and case before duplicate check", async () => {
+    vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue({
+      propertyId: "existing-id",
+      address: "test street 1",
+      zipCode: "7030",
+      city: "trondheim",
+      registeredByUid: "user456",
+      propertyType: "house" as const,
+      createdAt: new Date(),
     });
 
-    it('should return null when no matching property exists', async () => {
-      vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(null);
+    const formData = buildBaseFormData();
+    formData.set("address", "  TEST   STREET   1 ");
+    formData.set("city", " TrOnDhEiM ");
 
-      const result = await propertiesLib.getPropertyByAddress('nonexistent street', '99999', 'nowhere');
+    await createPropertyAction(formData);
 
-      expect(result).toBeNull();
+    expect(propertiesLib.getPropertyByAddress).toHaveBeenCalledWith("test street 1", "7030", "trondheim");
+  });
+
+  it("creates property when no duplicate exists", async () => {
+    vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(null);
+
+    const newProperty = {
+      propertyId: "new-id-123",
+      address: "test street 1",
+      zipCode: "7030",
+      city: "trondheim",
+      registeredByUid: "user123",
+      reviewCount: 0,
+      propertyType: "house" as const,
+      areaSqm: 80,
+      bedrooms: 3,
+      bathrooms: 1,
+      floors: 2,
+      buildYear: 2010,
+      createdAt: new Date(),
+    };
+
+    vi.mocked(propertiesLib.createProperty).mockResolvedValue(newProperty);
+
+    const result = await createPropertyAction(buildBaseFormData());
+
+    expect(result).toEqual(newProperty);
+    expect(propertiesLib.createProperty).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: "test street 1",
+        zipCode: "7030",
+        city: "trondheim",
+        registeredByUid: "user123",
+        propertyType: "house",
+        areaSqm: 80,
+        bedrooms: 3,
+        bathrooms: 1,
+        floors: 2,
+        buildYear: 2010,
+      }),
+    );
+  });
+
+  it("throws when required fields are missing", async () => {
+    const formData = new FormData();
+    formData.append("address", "test street");
+
+    await expect(createPropertyAction(formData)).rejects.toThrow();
+  });
+
+  it("throws when buildYear is invalid", async () => {
+    const formData = buildBaseFormData();
+    formData.set("buildYear", "1700");
+
+    await expect(createPropertyAction(formData)).rejects.toThrow("Build year must be between 1800 and current year");
+  });
+
+  it("throws when propertyType is invalid", async () => {
+    const formData = buildBaseFormData();
+    formData.set("propertyType", "villa");
+
+    await expect(createPropertyAction(formData)).rejects.toThrow("Property type is invalid");
+  });
+
+  it("creates bedsit with bedsit-specific fields", async () => {
+    vi.mocked(propertiesLib.getPropertyByAddress).mockResolvedValue(null);
+    vi.mocked(propertiesLib.createProperty).mockResolvedValue({
+      propertyId: "bedsit-id",
+      address: "test street 1",
+      zipCode: "7030",
+      city: "trondheim",
+      registeredByUid: "user123",
+      reviewCount: 0,
+      propertyType: "bedsit",
+      roomAreaSqm: 20,
+      hasPrivateBathroom: false,
+      otherBedsitsInUnit: 3,
+      createdAt: new Date(),
     });
+
+    const formData = buildBaseFormData();
+    formData.set("propertyType", "bedsit");
+    formData.delete("areaSqm");
+    formData.delete("bedrooms");
+    formData.delete("bathrooms");
+    formData.delete("floors");
+    formData.delete("buildYear");
+    formData.append("roomAreaSqm", "20");
+    formData.append("hasPrivateBathroom", "false");
+    formData.append("otherBedsitsInUnit", "3");
+
+    await createPropertyAction(formData);
+
+    expect(propertiesLib.createProperty).toHaveBeenCalledWith(
+      expect.objectContaining({
+        propertyType: "bedsit",
+        roomAreaSqm: 20,
+        hasPrivateBathroom: false,
+        otherBedsitsInUnit: 3,
+      }),
+    );
   });
 });

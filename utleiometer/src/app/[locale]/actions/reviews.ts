@@ -1,22 +1,51 @@
 "use server"; 
 
 import { createReview, updateReview, deleteReview } from "@/lib/firebase/reviews";
+import type { ReviewRatings } from "@/features/reviews/types";
+
+function parseCategoryRating(formData: FormData, key: string) {
+    const value = parseInt(formData.get(key) as string, 10);
+    return Number.isInteger(value) ? value : NaN;
+}
+
+function buildRatings(formData: FormData): ReviewRatings | null {
+    const location = parseCategoryRating(formData, "ratingLocation");
+    const noise = parseCategoryRating(formData, "ratingNoise");
+    const landlord = parseCategoryRating(formData, "ratingLandlord");
+    const condition = parseCategoryRating(formData, "ratingCondition");
+
+    const values = [location, noise, landlord, condition];
+    const allValid = values.every((v) => Number.isInteger(v) && v >= 1 && v <= 5);
+
+    if (!allValid) return null;
+
+    const overallRaw = (location + noise + landlord + condition) / 4;
+    const overall = Number(overallRaw.toFixed(1));
+
+    return { location, noise, landlord, condition, overall };
+}
 
 export async function createReviewAction(formData: FormData) {
     const userId = formData.get("userId") as string;
     const propertyId = formData.get("propertyId") as string;
-    const rating = parseInt(formData.get("rating") as string);
     const comment = formData.get("comment") as string;
+    const ratings = buildRatings(formData);
 
-    console.log("createReviewAction called with:", { userId, propertyId, rating, comment });
+    console.log("createReviewAction called with:", { userId, propertyId, ratings, comment });
 
-    if (!userId || !propertyId || isNaN(rating) || !comment) {
-        console.error("Validation failed:", { userId, propertyId, rating: isNaN(rating), comment });
-        return { error: "Alle felter er påkrevd og rating må være et tall" };
+    if (!userId || !propertyId || !ratings || !comment?.trim()) {
+        console.error("Validation failed:", { userId, propertyId, ratings, comment });
+        return { error: "Alle felter er påkrevd og alle kategorier må være mellom 1 og 5" };
     }
 
     try {
-        const newReview = await createReview({ userId, propertyId, rating, comment });
+        const newReview = await createReview({
+            userId,
+            propertyId,
+            rating: ratings.overall, // legacy support
+            ratings,
+            comment: comment.trim(),
+        });
         console.log("Review created successfully:", newReview);
         return { reviewId: newReview.reviewId };
     } catch (error) {
@@ -27,23 +56,19 @@ export async function createReviewAction(formData: FormData) {
 }
 
 export async function updateReviewAction(reviewId: string, formData: FormData) {
-    const rating = parseInt(formData.get("rating") as string);
     const comment = formData.get("comment") as string;
     const title = formData.get("title") as string;
+    const ratings = buildRatings(formData);
 
-    console.log("updateReviewAction called with:", { reviewId, rating, comment, title });
+    console.log("updateReviewAction called with:", { reviewId, ratings, comment, title });
 
-    if (!reviewId || isNaN(rating) || !comment?.trim()) {
-        return { error: "Review ID, rating og kommentar er påkrevd" };
-    }
-
-    if (rating < 1 || rating > 5) {
-        return { error: "Rating må være mellom 1 og 5" };
+    if (!reviewId || !ratings || !comment?.trim()) {
+        return { error: "Review ID, kategorier og kommentar er påkrevd" };
     }
 
     try {
         const updated = await updateReview(reviewId, {
-            rating,
+            ratings,
             comment: comment.trim(),
             title: title?.trim()
         });
