@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
@@ -22,9 +23,18 @@ export default async function PropertiesPage() {
       <header className="border-b bg-background">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-muted" />
-            <Link href="/" className="font-semibold">
-              {t("brand")}
+            <Link href="/" className="flex items-center gap-3 font-semibold">
+              <div className="topbar-logo h-10 w-10">
+                <Image
+                  src="/logo.png"
+                  alt={`${t("brand")} logo`}
+                  width={64}
+                  height={64}
+                  className="topbar-logo-image h-full w-full"
+                  priority
+                />
+              </div>
+              <span>{t("brand")}</span>
             </Link>
             <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>

@@ -30,6 +30,7 @@ export default async function ReviewRegisterPage({ params, searchParams }: Props
         landlordHelp: t("form.landlordHelp"),
         conditionLabel: t("form.conditionLabel"),
         conditionHelp: t("form.conditionHelp"),
+        cancel: t("form.cancel"),
         submit: t("form.submit"),
         submitting: t("form.submitting"),
         hint: t("form.hint"),

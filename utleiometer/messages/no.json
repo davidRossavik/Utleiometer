@@ -168,6 +168,7 @@
             "landlordHelp": "Hvordan er utleieren å forholde seg til?",
             "conditionLabel": "Standard",
             "conditionHelp": "Hvordan er standarden på leiligheten?",
+            "cancel": "Avbryt",
             "submit": "Legg til anmeldelse",
             "submitting": "Legger til...",
             "hint": "Du kan redigere anmeldelsen senere"

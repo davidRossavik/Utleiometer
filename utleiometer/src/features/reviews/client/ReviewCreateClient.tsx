@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/ui/feedback/card";
@@ -33,6 +32,7 @@ export type ReviewCreateTexts = {
   landlordHelp: string;
   conditionLabel: string;
   conditionHelp: string;
+  cancel: string;
   submit: string;
   submitting: string;
   hint: string;
@@ -65,6 +65,10 @@ export default function ReviewCreateClient({
   const [ratingNoise, setRatingNoise] = useState<number | undefined>(undefined);
   const [ratingLandlord, setRatingLandlord] = useState<number | undefined>(undefined);
   const [ratingCondition, setRatingCondition] = useState<number | undefined>(undefined);
+
+  function handleCancel() {
+    router.push(`/properties/${propertyId}/reviews`);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -104,25 +108,33 @@ export default function ReviewCreateClient({
   }
 
   return (
-    <main className="bg-muted min-h-screen flex items-center justify-center p-6">
-      <div className="flex w-full max-w-lg flex-col items-center gap-6">
-        <Link href="/" className="font-bold text-4xl text-blue-700">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-background to-cyan-50 p-6">
+      <div aria-hidden className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-blue-200/45 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -right-20 top-16 h-64 w-64 rounded-full bg-cyan-200/40 blur-3xl" />
+
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6">
+        <Link href="/" className="font-bold text-4xl text-blue-700 drop-shadow-sm transition-colors hover:text-blue-800">
           {texts.brand}
         </Link>
 
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-xl">
+        <Card className="w-full border-blue-100/90 bg-white/92 shadow-xl backdrop-blur-sm">
+          <CardHeader className="pb-5">
+            <CardTitle className="text-2xl text-balance text-blue-800">
               {texts.cardTitlePrefix} {address}
             </CardTitle>
-            <CardDescription>{texts.cardDescription}</CardDescription>
+            <CardDescription className="text-sm text-slate-600">{texts.cardDescription}</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="grid gap-2">
+              <div className="space-y-5">
+                <section className="space-y-3">
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
+                    {texts.ratingsTitle}
+                  </h3>
+
+                  <div className="space-y-3">
+                    <div className="grid gap-2">
                     <Label htmlFor="ratingLocation">{texts.locationLabel}</Label>
                     <p className="text-xs text-muted-foreground">{texts.locationHelp}</p>
                     <StarRatingInput
@@ -173,14 +185,16 @@ export default function ReviewCreateClient({
                       required
                     />
                   </div>
-                </div>
+                  </div>
+                </section>
 
                 <div className="grid gap-2">
                   <Label htmlFor="comment">{texts.commentLabel}</Label>
                   <textarea
                     id="comment"
                     name="comment"
-                    className="min-h-[100px] rounded-md border bg-background px-3 py-2 text-sm"
+                    placeholder={texts.commentPlaceholder}
+                    className="min-h-[120px] rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-sm shadow-xs transition-colors focus:border-blue-400 focus:outline-none"
                     required
                   />
                 </div>
@@ -192,9 +206,23 @@ export default function ReviewCreateClient({
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? texts.submitting : texts.submit}
-              </Button>
+              <div className="flex items-center justify-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-40 rounded-xl border-slate-300 bg-white hover:bg-slate-50"
+                  onClick={handleCancel}
+                >
+                  {texts.cancel}
+                </Button>
+                <Button
+                  type="submit"
+                  className="w-40 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md transition hover:from-blue-800 hover:to-blue-700"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? texts.submitting : texts.submit}
+                </Button>
+              </div>
 
               <Field>
                 <FieldDescription className="text-center">
@@ -203,8 +231,6 @@ export default function ReviewCreateClient({
               </Field>
             </form>
           </CardContent>
-
-          <CardFooter />
         </Card>
       </div>
     </main>

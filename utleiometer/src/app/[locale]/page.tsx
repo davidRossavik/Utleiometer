@@ -1,4 +1,6 @@
 
+import Image from "next/image";
+import Link from "next/link";
 import { Badge } from "@/ui/feedback/badge"
 import { PopularPropertiesSection } from "@/features/properties/components/popularPropertiesSection";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
@@ -22,16 +24,26 @@ export default function Home({params}: Props) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
-      <header className="border-b">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            {/* TODO: Logo */}
-            <div className="h-9 w-9 rounded-xl bg-muted" />
-            <span className="font-semibold">{t("title")}</span>
+      <header className="topbar-shell border-b">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+          <div className="topbar-brand-chip flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="topbar-logo h-10 w-10">
+                <Image
+                  src="/logo.png"
+                  alt={`${t("title")} logo`}
+                  width={64}
+                  height={64}
+                  className="topbar-logo-image h-full w-full"
+                  priority
+                />
+              </div>
+              <span className="topbar-title text-sm font-semibold tracking-tight md:text-base">{t("title")}</span>
+            </Link>
             <WelcomeMessage text={t("welcomeMessage")}/>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="topbar-actions flex w-full items-center justify-end gap-2 sm:w-auto">
             <AddReviewHeaderButton label={t("addReviewButton")} />
             <AuthButtons 
               account={t("account")}
@@ -55,7 +67,7 @@ export default function Home({params}: Props) {
         <div aria-hidden className="landing-dot-pattern" />
 
         {/* HERO */}
-        <section className="container mx-auto px-4 py-20 md:py-28">
+        <section className="landing-hero-layer container mx-auto px-4 py-20 md:py-28">
           <div className="landing-hero-panel mx-auto max-w-5xl px-6 py-10 text-center md:px-10 md:py-14">
             <div className="mx-auto max-w-4xl">
               <Badge className="mb-6 border-blue-200 bg-blue-100/80 px-3 py-1 text-blue-800">

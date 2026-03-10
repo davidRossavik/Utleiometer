@@ -168,6 +168,7 @@
             "landlordHelp": "Comment est le propriétaire au quotidien ?",
             "conditionLabel": "État",
             "conditionHelp": "Comment jugez-vous l'état de l'appartement ?",
+            "cancel": "Annuler",
             "submit": "Ajouter l'avis",
             "submitting": "Ajout en cours...",
             "hint": "Vous pouvez modifier l'avis plus tard"

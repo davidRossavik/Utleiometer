@@ -79,8 +79,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  --landing-blob-left: oklch(0.85 0.07 246 / 0.42);
-  --landing-blob-right: oklch(0.9 0.05 208 / 0.36);
+  --landing-blob-left: oklch(0.85 0.07 246 / 0.5);
+  --landing-blob-right: oklch(0.9 0.05 208 / 0.44);
   --landing-panel-bg: oklch(0.99 0.01 255 / 0.82);
   --landing-panel-border: oklch(0.86 0.02 250 / 0.7);
   --landing-dot: oklch(0.68 0.03 250 / 0.22);
@@ -118,8 +118,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
-  --landing-blob-left: oklch(0.44 0.07 246 / 0.35);
-  --landing-blob-right: oklch(0.5 0.07 208 / 0.3);
+  --landing-blob-left: oklch(0.44 0.07 246 / 0.42);
+  --landing-blob-right: oklch(0.5 0.07 208 / 0.36);
   --landing-panel-bg: oklch(0.24 0.014 255 / 0.72);
   --landing-panel-border: oklch(0.58 0.03 246 / 0.35);
   --landing-dot: oklch(0.74 0.02 250 / 0.2);
@@ -135,6 +135,96 @@
 }
 
 @layer components {
+  .topbar-shell {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-color: var(--border);
+    backdrop-filter: blur(6px);
+    background: oklch(1 0 0 / 0.94);
+    box-shadow: 0 8px 18px oklch(0.16 0.01 250 / 0.09);
+  }
+
+  .topbar-brand-chip {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    color: var(--foreground);
+  }
+
+  .topbar-logo {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .topbar-logo-image {
+    display: block;
+    object-fit: contain;
+    transform: scale(1.35);
+    transform-origin: center;
+  }
+
+  .topbar-actions {
+    border: 1px solid oklch(0.95 0.02 250 / 0.26);
+    background: oklch(1 0 0 / 0.14);
+    padding: 0.3rem;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+  }
+
+  .topbar-title {
+    color: var(--foreground);
+    text-shadow: none;
+  }
+
+  .topbar-actions [data-slot="button"] {
+    border-radius: 999px;
+    border: 1px solid transparent;
+    height: 2.25rem;
+    min-height: 2.25rem;
+    padding-inline: 0.95rem;
+    font-weight: 600;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+  }
+
+  .topbar-actions [data-slot="button"][data-variant="outline"] {
+    border-color: oklch(0.72 0.09 246 / 0.35);
+    background: oklch(1 0 0 / 0.94);
+    color: oklch(0.35 0.1 248);
+    box-shadow: 0 2px 10px oklch(0.2 0.06 245 / 0.08);
+  }
+
+  .topbar-actions [data-slot="button"][data-variant="outline"]:hover {
+    background: oklch(0.97 0.02 246);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px oklch(0.2 0.06 245 / 0.13);
+  }
+
+  .topbar-actions [data-slot="button"][data-variant="default"] {
+    border-color: oklch(0.58 0.12 246 / 0.6);
+    background: linear-gradient(120deg, oklch(0.56 0.14 251), oklch(0.51 0.12 232));
+    color: oklch(0.99 0.01 250);
+    box-shadow: 0 8px 16px oklch(0.21 0.08 245 / 0.3);
+  }
+
+  .topbar-actions [data-slot="button"][data-variant="default"]:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
+
+  .topbar-actions [data-slot="button"][data-size="icon"] {
+    width: 2.25rem;
+    min-width: 2.25rem;
+    padding-inline: 0;
+  }
+
+  .topbar-actions [data-slot="button"] img {
+    filter: brightness(0) saturate(100%) invert(21%) sepia(29%) saturate(1436%) hue-rotate(201deg) brightness(92%) contrast(91%);
+  }
+
   .landing-main-bg {
     background:
       radial-gradient(58rem 30rem at -8% -10%, var(--landing-blob-left), transparent 72%),
@@ -142,8 +232,14 @@
       linear-gradient(to bottom, var(--background) 0%, var(--background) 62%, var(--background) 100%);
   }
 
+  .landing-hero-layer {
+    position: relative;
+    z-index: 2;
+  }
+
   .landing-hero-panel {
     position: relative;
+    z-index: 2;
     border: 1px solid var(--landing-panel-border);
     border-radius: var(--radius-4xl);
     backdrop-filter: blur(8px);
@@ -155,10 +251,10 @@
 
   .landing-orb {
     position: absolute;
-    z-index: -1;
+    z-index: 1;
     border-radius: 9999px;
     pointer-events: none;
-    filter: blur(50px);
+    filter: blur(44px);
     animation: landing-float 14s ease-in-out infinite;
   }
 
@@ -191,6 +287,18 @@
   }
 
   @media (max-width: 768px) {
+    .topbar-brand-chip {
+      width: auto;
+      justify-content: flex-start;
+    }
+
+    .topbar-actions {
+      width: 100%;
+      justify-content: flex-end;
+      overflow-x: visible;
+      border-radius: var(--radius-xl);
+    }
+
     .landing-orb--left {
       top: 2rem;
       left: -9.5rem;

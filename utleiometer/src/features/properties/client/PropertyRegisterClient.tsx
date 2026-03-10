@@ -12,7 +12,6 @@ import { Field, FieldDescription } from "@/ui/primitives/field";
 import {
   Card,
   CardContent,
-  CardFooter,
 } from "@/ui/feedback/card";
 import { StarRatingInput } from "@/features/reviews/componentes/StarRatingInput";
 
@@ -111,6 +110,11 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
   const [ratingLandlord, setRatingLandlord] = useState<number | undefined>(undefined);
   const [ratingCondition, setRatingCondition] = useState<number | undefined>(undefined);
   const [comment, setComment] = useState("");
+  const baseInputClass =
+    "h-11 rounded-xl border-slate-300/80 bg-white shadow-xs transition-colors focus-visible:border-blue-400 focus-visible:ring-blue-200";
+  const baseSelectClass =
+    "h-11 rounded-xl border border-slate-300/80 bg-white px-3 text-sm shadow-xs transition-colors focus:border-blue-400 focus:outline-none focus:ring-3 focus:ring-blue-100";
+  const formBlockClass = "space-y-4";
 
   function handleCancel() {
     router.push("/");
@@ -217,13 +221,13 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
   }
 
   return (
-    <div className="flex w-full max-w-lg flex-col items-center gap-6">
-      <Card className="w-full">
-        <CardContent>
+    <div className="flex w-full max-w-3xl flex-col items-center gap-6">
+      <Card className="w-full border-blue-100/90 bg-white/92 shadow-xl backdrop-blur-sm">
+        <CardContent className="space-y-6 p-6 md:p-8">
           {step === "address" ? (
             <form className="flex flex-col gap-6" onSubmit={handleAddressLookup}>
-              <div className="space-y-4">
-                <h3 className="text-base font-semibold">{texts.addressStepTitle}</h3>
+              <div className={`space-y-4 ${formBlockClass}`}>
+                <h3 className="text-base font-semibold text-blue-800">{texts.addressStepTitle}</h3>
 
                 <div className="grid gap-2">
                   <Label htmlFor="address">{texts.addressLabel}</Label>
@@ -231,8 +235,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                     id="address"
                     name="address"
                     type="text"
+                    placeholder={texts.addressPlaceholder}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
+                    className={baseInputClass}
                     required
                   />
                 </div>
@@ -243,8 +249,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                     id="zipCode"
                     name="zipCode"
                     type="text"
+                    placeholder={texts.zipCodePlaceholder}
                     value={zipCode}
                     onChange={(e) => setZipCode(e.target.value)}
+                    className={baseInputClass}
                     required
                   />
                 </div>
@@ -255,22 +263,28 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                     id="city"
                     name="city"
                     type="text"
+                    placeholder={texts.cityPlaceholder}
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    className={baseInputClass}
                     required
                   />
                 </div>
               </div>
 
               {error ? (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
               ) : null}
 
               <div className="flex items-center justify-center gap-3">
-                <Button type="button" variant="outline" className="w-40" onClick={handleCancel}>
+                <Button type="button" variant="outline" className="w-40 rounded-xl border-slate-300 bg-white hover:bg-slate-50" onClick={handleCancel}>
                   {texts.cancelButton}
                 </Button>
-                <Button type="submit" className="w-40" disabled={isLookingUp}>
+                <Button
+                  type="submit"
+                  className="w-40 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md hover:from-blue-800 hover:to-blue-700"
+                  disabled={isLookingUp}
+                >
                   {isLookingUp ? texts.submittingButton : texts.continueButton}
                 </Button>
               </div>
@@ -279,10 +293,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
 
           {step === "propertyDetails" ? (
             <form className="flex flex-col gap-6" onSubmit={handleContinueToReview}>
-              <div className="space-y-4">
-                <h3 className="text-base font-semibold">{texts.propertyDetailsStepTitle}</h3>
+              <div className={`space-y-4 ${formBlockClass}`}>
+                <h3 className="text-base font-semibold text-blue-800">{texts.propertyDetailsStepTitle}</h3>
 
-                <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
                   {texts.propertyNotFoundMessage}
                 </div>
 
@@ -291,7 +305,7 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                   <select
                     id="propertyType"
                     name="propertyType"
-                    className="h-10 rounded-md border bg-background px-3 text-sm"
+                    className={baseSelectClass}
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value as PropertyType)}
                     required
@@ -312,8 +326,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1}
                         step={1}
+                        placeholder={texts.areaSqmPlaceholder}
                         value={areaSqm}
                         onChange={(e) => setAreaSqm(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -326,8 +342,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1}
                         step={1}
+                        placeholder={texts.bedroomsPlaceholder}
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -340,8 +358,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1}
                         step={1}
+                        placeholder={texts.bathroomsPlaceholder}
                         value={bathrooms}
                         onChange={(e) => setBathrooms(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -354,8 +374,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1}
                         step={1}
+                        placeholder={texts.floorsPlaceholder}
                         value={floors}
                         onChange={(e) => setFloors(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -368,8 +390,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1800}
                         step={1}
+                        placeholder={texts.buildYearPlaceholder}
                         value={buildYear}
                         onChange={(e) => setBuildYear(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -386,8 +410,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1}
                         step={1}
+                        placeholder={texts.roomAreaSqmPlaceholder}
                         value={roomAreaSqm}
                         onChange={(e) => setRoomAreaSqm(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -397,7 +423,7 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                       <select
                         id="hasPrivateBathroom"
                         name="hasPrivateBathroom"
-                        className="h-10 rounded-md border bg-background px-3 text-sm"
+                        className={baseSelectClass}
                         value={hasPrivateBathroom}
                         onChange={(e) => setHasPrivateBathroom(e.target.value)}
                         required
@@ -415,8 +441,10 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                         type="number"
                         min={1}
                         step={1}
+                        placeholder={texts.otherBedsitsInUnitPlaceholder}
                         value={otherBedsitsInUnit}
                         onChange={(e) => setOtherBedsitsInUnit(e.target.value)}
+                        className={baseInputClass}
                         required
                       />
                     </div>
@@ -425,14 +453,14 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
               </div>
 
               {error ? (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
               ) : null}
 
               <div className="flex items-center justify-center gap-3">
-                <Button type="button" variant="outline" className="w-40" onClick={handleCancel}>
+                <Button type="button" variant="outline" className="w-40 rounded-xl border-slate-300 bg-white hover:bg-slate-50" onClick={handleCancel}>
                   {texts.cancelButton}
                 </Button>
-                <Button type="submit" className="w-40">
+                <Button type="submit" className="w-40 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md hover:from-blue-800 hover:to-blue-700">
                   {texts.continueButton}
                 </Button>
               </div>
@@ -441,11 +469,14 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
 
           {step === "review" ? (
             <form className="flex flex-col gap-6" onSubmit={handleFinalSubmit}>
-              <div className="space-y-4">
-                <h3 className="text-base font-semibold">{texts.reviewStepTitle}</h3>
+              <div className={`space-y-4 ${formBlockClass}`}>
+                <h3 className="text-base font-semibold text-blue-800">{texts.reviewStepTitle}</h3>
 
-                <div className="space-y-3">
-                  <div className="grid gap-2">
+                <section className="space-y-3">
+                  <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-blue-700">{texts.ratingsTitle}</h4>
+
+                  <div className="space-y-3">
+                    <div className="grid gap-2">
                     <Label htmlFor="ratingLocation">{texts.locationLabel}</Label>
                     <p className="text-xs text-muted-foreground">{texts.locationHelp}</p>
                     <StarRatingInput
@@ -496,14 +527,16 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                       required
                     />
                   </div>
-                </div>
+                  </div>
+                </section>
 
                 <div className="grid gap-2">
                   <Label htmlFor="comment">{texts.commentLabel}</Label>
                   <textarea
                     id="comment"
                     name="comment"
-                    className="min-h-[100px] rounded-md border bg-background px-3 py-2 text-sm"
+                    className="min-h-[120px] rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-sm shadow-xs transition-colors focus:border-blue-400 focus:outline-none"
+                    placeholder={texts.commentPlaceholder}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     required
@@ -512,14 +545,18 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
               </div>
 
               {error ? (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
               ) : null}
 
               <div className="flex items-center justify-center gap-3">
-                <Button type="button" variant="outline" className="w-40" onClick={handleCancel}>
+                <Button type="button" variant="outline" className="w-40 rounded-xl border-slate-300 bg-white hover:bg-slate-50" onClick={handleCancel}>
                   {texts.cancelButton}
                 </Button>
-                <Button type="submit" className="w-40" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="w-40 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md hover:from-blue-800 hover:to-blue-700"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? texts.submittingButton : texts.submitButton}
                 </Button>
               </div>
@@ -530,8 +567,6 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
             </form>
           ) : null}
         </CardContent>
-
-        <CardFooter />
       </Card>
     </div>
   );
