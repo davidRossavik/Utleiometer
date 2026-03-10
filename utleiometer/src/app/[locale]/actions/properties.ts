@@ -2,6 +2,7 @@
 
 import { createProperty, getPropertyByAddress, getPropertyById, type PropertyType } from "@/lib/firebase/properties";
 import { createReview } from "@/lib/firebase/reviews";
+import { geocodeAddress } from "@/lib/geocoding";
 import type { ReviewRatings } from "@/features/reviews/types";
 
 function parseCategoryRating(formData: FormData, key: string) {
@@ -44,6 +45,28 @@ type ParseResult =
       };
     }
   | { ok: false; error: string };
+
+async function withGeocodedCoordinates<T extends { address: string; zipCode: string; city: string }>(
+  data: T,
+) {
+  const fullAddress = `${data.address}, ${data.zipCode} ${data.city}, Norway`;
+
+  try {
+    const coordinates = await geocodeAddress(fullAddress);
+    if (!coordinates) {
+      return data;
+    }
+
+    return {
+      ...data,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+    };
+  } catch (error) {
+    console.warn("Geocoding failed. Property will be created without coordinates.", error);
+    return data;
+  }
+}
 
 const PROPERTY_TYPE_VALUES: PropertyType[] = ["house", "apartment", "bedsit"];
 const DUPLICATE_ERROR = "Property already exists, please visit the property's page to leave a review.";
@@ -167,7 +190,8 @@ export async function createPropertyAction(formData: FormData) {
   }
 
   try {
-    const newProperty = await createProperty(data);
+    const propertyData = await withGeocodedCoordinates(data);
+    const newProperty = await createProperty(propertyData);
     return newProperty;
   } catch (error) {
     console.error("Error creating property:", error);
@@ -197,7 +221,8 @@ export async function createPropertyAndReviewAction(formData: FormData) {
   }
 
   try {
-    const newProperty = await createProperty(data);
+    const propertyData = await withGeocodedCoordinates(data);
+    const newProperty = await createProperty(propertyData);
 
     await createReview({
       userId: data.registeredByUid,

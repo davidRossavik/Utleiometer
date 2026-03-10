@@ -7,6 +7,8 @@ export interface Property {
   address: string;
   zipCode: string;
   city: string;
+  latitude?: number;
+  longitude?: number;
   registeredByUid: string;
   createdAt: Date;
   reviewCount?: number;
