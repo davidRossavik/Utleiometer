@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Badge } from "@/ui/feedback/badge";
 import { Button } from "@/ui/primitives/button";
@@ -25,7 +25,12 @@ export type PropertiesClientTexts = {
   loadingDescription2: string;
   emptyTitle: string;
   emptyDescription: string;
-  clearSearch: string;
+  clearFilters: string;
+  areaFilterPlaceholder: string;
+  minRatingPlaceholder: string;
+  minRatingValue: string;
+  minRatingAriaLabel: string;
+  emptyFilteredDescription: string;
   unknownAddress: string;
   unknownPlace: string;
   seeReviews: string;
@@ -72,6 +77,62 @@ function PropertiesSearch({
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
+    </div>
+  );
+}
+
+function PropertyFilters({
+  area,
+  onAreaChange,
+  areas,
+  areaPlaceholder,
+  minRating,
+  onMinRatingChange,
+  minRatingPlaceholder,
+  minRatingTemplate,
+  minRatingAriaLabel,
+}: {
+  area: string;
+  onAreaChange: (next: string) => void;
+  areas: Array<{ value: string; label: string }>;
+  areaPlaceholder: string;
+  minRating: number | null;
+  onMinRatingChange: (next: number | null) => void;
+  minRatingPlaceholder: string;
+  minRatingTemplate: string;
+  minRatingAriaLabel: string;
+}) {
+  const ratingOptions = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+
+  return (
+    <div className="mt-3 flex flex-wrap justify-end gap-3">
+      <select
+        value={area}
+        onChange={(e) => onAreaChange(e.target.value)}
+        className="h-10 min-w-44 appearance-none rounded-full border border-input bg-white/90 px-4 text-sm text-slate-700 shadow-sm transition-all outline-none [background-image:none] hover:shadow focus-visible:ring-2 focus-visible:ring-ring/30"
+        aria-label={areaPlaceholder}
+      >
+        <option value="">{areaPlaceholder}</option>
+        {areas.map((city) => (
+          <option key={city.value} value={city.value}>
+            {city.label}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={minRating === null ? "" : String(minRating)}
+        onChange={(e) => onMinRatingChange(e.target.value ? Number(e.target.value) : null)}
+        className="h-10 min-w-44 appearance-none rounded-full border border-input bg-white/90 px-4 text-sm text-slate-700 shadow-sm transition-all outline-none [background-image:none] hover:shadow focus-visible:ring-2 focus-visible:ring-ring/30"
+        aria-label={minRatingAriaLabel}
+      >
+        <option value="">{minRatingPlaceholder}</option>
+        {ratingOptions.map((rating) => (
+          <option key={rating} value={String(rating)}>
+            {formatRatingValue(minRatingTemplate, rating)}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -135,6 +196,41 @@ function PropertiesEmpty({
       </CardContent>
     </Card>
   );
+}
+
+function parseMinRating(raw: string | null) {
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return 0;
+  const clamped = Math.min(5, Math.max(0, parsed));
+  return Math.round(clamped * 2) / 2;
+}
+
+function normalizeAreaValue(value: string | null | undefined) {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function formatRatingValue(template: string, value: number) {
+  const safeTemplate = resolveMinRatingTemplate(template);
+  return safeTemplate.replace("{value}", value.toFixed(1));
+}
+
+function resolveMinRatingTemplate(template: string) {
+  const trimmed = template.trim();
+  if (!trimmed || trimmed === "PublicPropertiesPage.minRatingValue") {
+    return "{value} stjerner";
+  }
+
+  return trimmed;
+}
+
+function formatCityLabel(city: string) {
+  return city
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 function capitalizeFirstLetter(str: string | undefined): string {
@@ -290,15 +386,66 @@ function PropertyCard({
 }
 
 export default function PropertiesClient({ texts, messages }: PropertiesClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
+  const initialArea = normalizeAreaValue(searchParams.get("area"));
+  const initialMinRating = parseMinRating(searchParams.get("minRating"));
 
   const { properties, loading, error } = useProperties(messages);
 
   const [search, setSearch] = useState(initialQ);
-  useEffect(() => setSearch(initialQ), [initialQ]);
+  const [area, setArea] = useState(initialArea);
+  const [minRating, setMinRating] = useState<number | null>(initialMinRating > 0 ? initialMinRating : null);
 
-  const filtered = usePropertySearch(properties, search);
+  useEffect(() => setSearch(initialQ), [initialQ]);
+  useEffect(() => setArea(initialArea), [initialArea]);
+  useEffect(() => setMinRating(initialMinRating > 0 ? initialMinRating : null), [initialMinRating]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const normalizedSearch = search.trim();
+    const normalizedArea = normalizeAreaValue(area);
+    const normalizedMinRating = parseMinRating(minRating === null ? null : String(minRating));
+
+    if (normalizedSearch) params.set("q", normalizedSearch);
+    else params.delete("q");
+
+    if (normalizedArea) params.set("area", normalizedArea);
+    else params.delete("area");
+
+    if (normalizedMinRating > 0) params.set("minRating", normalizedMinRating.toFixed(1));
+    else params.delete("minRating");
+
+    const current = searchParams.toString();
+    const next = params.toString();
+    if (current === next) return;
+
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+  }, [area, minRating, pathname, router, search, searchParams]);
+
+  const availableAreas = useMemo(() => {
+    const uniqueCities = new Set<string>();
+    properties.forEach((property) => {
+      const city = property.city?.trim();
+      const normalizedCity = normalizeAreaValue(city);
+      if (normalizedCity) uniqueCities.add(normalizedCity);
+    });
+
+    return Array.from(uniqueCities)
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({ value, label: formatCityLabel(value) }));
+  }, [properties]);
+
+  const filtered = usePropertySearch(properties, { search, area, minRating: minRating ?? 0 });
+  const hasActiveFilters = search.trim().length > 0 || area.trim().length > 0 || (minRating !== null && minRating > 0);
+
+  function clearAllFilters() {
+    setSearch("");
+    setArea("");
+    setMinRating(null);
+  }
 
   return (
     <main>
@@ -318,6 +465,17 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
           </div>
 
           <PropertiesSearch value={search} onChange={setSearch} placeholder={texts.searchPlaceholder} />
+          <PropertyFilters
+            area={area}
+            onAreaChange={setArea}
+            areas={availableAreas}
+            areaPlaceholder={texts.areaFilterPlaceholder}
+            minRating={minRating}
+            onMinRatingChange={setMinRating}
+            minRatingPlaceholder={texts.minRatingPlaceholder}
+            minRatingTemplate={texts.minRatingValue}
+            minRatingAriaLabel={texts.minRatingAriaLabel}
+          />
 
           {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
         </div>
@@ -333,10 +491,10 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
             />
           ) : filtered.length === 0 ? (
             <PropertiesEmpty
-              onClear={() => setSearch("")}
+              onClear={clearAllFilters}
               title={texts.emptyTitle}
-              description={texts.emptyDescription}
-              clearText={texts.clearSearch}
+              description={hasActiveFilters ? texts.emptyFilteredDescription : texts.emptyDescription}
+              clearText={texts.clearFilters}
             />
           ) : (
             <div className="flex flex-col gap-6">
