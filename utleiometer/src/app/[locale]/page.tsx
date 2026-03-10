@@ -49,29 +49,34 @@ export default function Home({params}: Props) {
         </div>
       </header>
 
-      <main>
+      <main className="landing-main-bg relative isolate overflow-hidden">
+        <div aria-hidden className="landing-orb landing-orb--left" />
+        <div aria-hidden className="landing-orb landing-orb--right" />
+        <div aria-hidden className="landing-dot-pattern" />
+
         {/* HERO */}
-        <section className="container text-center mx-auto px-4 py-20 md:py-28">
-          <div className="mx-auto max-w-5xl">
-            <Badge className="mb-4">
-              {/* TODO: liten tagline */}
-              {t("targetAudience")}
-            </Badge>
+        <section className="container mx-auto px-4 py-20 md:py-28">
+          <div className="landing-hero-panel mx-auto max-w-5xl px-6 py-10 text-center md:px-10 md:py-14">
+            <div className="mx-auto max-w-4xl">
+              <Badge className="mb-6 border-blue-200 bg-blue-100/80 px-3 py-1 text-blue-800">
+                {/* TODO: liten tagline */}
+                {t("targetAudience")}
+              </Badge>
 
-            <h1 className="text-4xl text-blue-700 font-bold text-center tracking-tight md:text-6xl">
-              {/* TODO: Hovedbudskap */}
-              {t('title')}
-            </h1>
+              <h1 className="text-balance text-4xl font-bold tracking-tight text-blue-700 md:text-6xl">
+                {/* TODO: Hovedbudskap */}
+                {t('title')}
+              </h1>
+            </div>
+
+            {/* SØKEFELT */}
+            <div className="mt-8 flex justify-center md:mt-10">
+              <SearchBar
+                placeHolder={t("searchPlaceholder")}
+                submitLabel={t("searchButton")}
+              />
+            </div>
           </div>
-
-        {/* SØKEFELT */}
-        <div className="mt-10 flex justify-center">
-          <SearchBar
-            placeHolder={t("searchPlaceholder")}
-            submitLabel={t("searchButton")}
-          />
-        </div>
-
         </section>
 
         <PopularPropertiesSection
