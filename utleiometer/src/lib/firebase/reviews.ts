@@ -19,6 +19,8 @@ export interface Review {
     title?: string;
     createdAt: Date;
     updatedAt?: Date;
+    likedBy?: string[];
+    likeCount?: number; 
 }
 
 export async function createReview(data: Omit<Review, "reviewId" | "createdAt">) {

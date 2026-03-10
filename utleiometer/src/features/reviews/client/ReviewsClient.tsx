@@ -14,7 +14,7 @@ import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
-import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
+import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
 
@@ -288,6 +288,28 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         }
     }
 
+    async function handleToggleLike(reviewId: string) {
+        if (!currentUser) {
+            alert("Du må være innlogget for å like anmeldelser");
+            return;
+        }
+
+        try {
+            const result = await toggleLikeReviewAction(reviewId, currentUser.uid);
+            
+            if (result.error) {
+                alert(`Feil: ${result.error}`);
+                return;
+            }
+
+            // Reload to get updated like counts
+            window.location.reload();
+        } catch (error) {
+            console.error("Toggle like failed:", error);
+            alert("Kunne ikke like anmeldelse");
+        }
+    }
+
     const visible = useMemo(() => {
         const filtered = filterReviews(reviews ?? [], reviewSearch);
         return sortReviews(filtered, sort);
@@ -473,6 +495,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             currentUserId={currentUser?.uid}
                             onSave={handleSaveReview}
                             onDelete={handleDeleteReview}
+                            onToggleLike={handleToggleLike}
                             texts={{
                                 editTitle: texts.reviewEditTitle,
                                 defaultTitle: texts.reviewDefaultTitle,

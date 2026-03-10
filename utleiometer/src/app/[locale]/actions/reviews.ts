@@ -1,6 +1,7 @@
 "use server"; 
 
 import { createReview, updateReview, deleteReview } from "@/lib/firebase/reviews";
+import { adminDb, FieldValue } from "@/lib/firebase/admin";
 import type { ReviewRatings } from "@/features/reviews/types";
 
 function parseCategoryRating(formData: FormData, key: string) {
@@ -94,5 +95,41 @@ export async function deleteReviewAction(reviewId: string, propertyId: string) {
     } catch (error) {
         console.error("Error deleting review:", error);
         return { error: `Kunne ikke slette: ${error instanceof Error ? error.message : 'Ukjent feil'}` };
+    }
+}
+
+export async function toggleLikeReviewAction(reviewId: string, userId: string) {
+    if (!reviewId || !userId) {
+        return { error: "Review ID og User ID er påkrevd" };
+    }
+
+    try {
+        const reviewRef = adminDb.collection("reviews").doc(reviewId);
+        const reviewDoc = await reviewRef.get();
+        
+        if (!reviewDoc.exists) {
+            return { error: "Anmeldelse ikke funnet" };
+        }
+
+        const reviewData = reviewDoc.data();
+        const likedBy = reviewData?.likedBy || [];
+        const hasLiked = likedBy.includes(userId);
+
+        if (hasLiked) {
+            await reviewRef.update({
+                likedBy: FieldValue.arrayRemove(userId),
+                likeCount: FieldValue.increment(-1)
+            });
+            return { success: true, liked: false };
+        } else {
+            await reviewRef.update({
+                likedBy: FieldValue.arrayUnion(userId),
+                likeCount: FieldValue.increment(1)
+            });
+            return { success: true, liked: true };
+        }
+    } catch (error) {
+        console.error("Error toggling like:", error);
+        return { error: `Kunne ikke oppdatere like: ${error instanceof Error ? error.message : 'Ukjent feil'}` };
     }
 }
