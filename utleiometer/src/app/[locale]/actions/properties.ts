@@ -1,14 +1,20 @@
 "use server";
 
+
 import {
   createProperty,
   getAllProperties,
   getPropertyByAddress,
   getPropertyById,
+  deleteProperty,
   type Property,
   type PropertyType,
 } from "@/lib/firebase/properties";
+
 import { createReview } from "@/lib/firebase/reviews";
+import { adminAuth } from "@/lib/firebase/admin";
+import { geocodeAddress } from "@/lib/geocoding";
+
 import type { ReviewRatings } from "@/features/reviews/types";
 
 function parseCategoryRating(formData: FormData, key: string) {
@@ -52,6 +58,7 @@ type ParseResult =
     }
   | { ok: false; error: string };
 
+
 type ParsePropertyDetailsResult =
   | {
       ok: true;
@@ -81,6 +88,29 @@ type ParseAddressAndUserResult =
       };
     }
   | { ok: false; error: string };
+
+async function withGeocodedCoordinates<T extends { address: string; zipCode: string; city: string }>(
+  data: T,
+) {
+  const fullAddress = `${data.address}, ${data.zipCode} ${data.city}, Norway`;
+
+  try {
+    const coordinates = await geocodeAddress(fullAddress);
+    if (!coordinates) {
+      return data;
+    }
+
+    return {
+      ...data,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+    };
+  } catch (error) {
+    console.warn("Geocoding failed. Property will be created without coordinates.", error);
+    return data;
+  }
+}
+
 
 const PROPERTY_TYPE_VALUES: PropertyType[] = ["house", "apartment", "bedsit"];
 const DUPLICATE_ERROR = "Property already exists, please visit the property's page to leave a review.";
@@ -292,7 +322,8 @@ export async function createPropertyAction(formData: FormData) {
   }
 
   try {
-    const newProperty = await createProperty(data);
+    const propertyData = await withGeocodedCoordinates(data);
+    const newProperty = await createProperty(propertyData);
     return newProperty;
   } catch (error) {
     console.error("Error creating property:", error);
@@ -322,7 +353,8 @@ export async function createPropertyAndReviewAction(formData: FormData) {
   }
 
   try {
-    const newProperty = await createProperty(data);
+    const propertyData = await withGeocodedCoordinates(data);
+    const newProperty = await createProperty(propertyData);
 
     await createReview({
       userId: data.registeredByUid,
@@ -403,4 +435,38 @@ export async function getPropertyAction(propertyId: string) {
     console.error("Error fetching property:", error);
     return { error: "Could not fetch property" };
   }
+}
+
+/**
+ * Delete a property and all its related reviews (admin only)
+ */
+export async function deletePropertyAction(
+    propertyId: string,
+    callerIdToken: string
+): Promise<{ success: boolean; error?: string; deletedReviews?: number }> {
+    try {
+        // Verify the ID token and check admin claim
+        const decodedToken = await adminAuth.verifyIdToken(callerIdToken);
+        
+        if (decodedToken.admin !== true) {
+            return { 
+                success: false, 
+                error: "Unauthorized: Only admins can delete properties" 
+            };
+        }
+
+        // Delete property and all related reviews
+        const { deletedReviews } = await deleteProperty(propertyId);
+
+        return { 
+            success: true, 
+            deletedReviews 
+        };
+    } catch (error) {
+        console.error("Error deleting property:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to delete property"
+        };
+    }
 }

@@ -30,4 +30,8 @@ export type Property = {
     hasPrivateBathroom?: boolean;
     otherBedsitsInUnit?: number;
     latestReviewAt?: number;
+    latitude?: number;
+    longitude?: number;
+    imageUrl?: string;
+
 };
