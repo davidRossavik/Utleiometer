@@ -81,11 +81,37 @@ export async function updateReviewAction(reviewId: string, formData: FormData) {
     }
 }
 
-export async function deleteReviewAction(reviewId: string, propertyId: string) {
-    console.log("deleteReviewAction called with:", { reviewId, propertyId });
+/**
+ * Delete a review
+ * Admins can delete any review by providing their ID token
+ * Regular users can only delete their own reviews (enforced by security rules)
+ */
+export async function deleteReviewAction(
+    reviewId: string, 
+    propertyId: string,
+    callerIdToken?: string
+): Promise<{ success?: boolean; error?: string }> {
+    console.log("deleteReviewAction called with:", { reviewId, propertyId, hasToken: !!callerIdToken });
 
     if (!reviewId || !propertyId) {
         return { error: "Review ID og Property ID er påkrevd" };
+    }
+
+    // If caller provides ID token, verify admin status
+    if (callerIdToken) {
+        try {
+            const decodedToken = await adminAuth.verifyIdToken(callerIdToken);
+            
+            if (decodedToken.admin !== true) {
+                return { 
+                    error: "Unauthorized: Only admins can delete other users' reviews" 
+                };
+            }
+            // Admin verified, proceed with deletion
+        } catch (error) {
+            console.error("Error verifying admin token:", error);
+            return { error: "Invalid authentication token" };
+        }
     }
 
     try {

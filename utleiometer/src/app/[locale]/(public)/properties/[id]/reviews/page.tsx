@@ -3,6 +3,9 @@ import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage
 import ReviewsClient from "@/features/reviews/client/ReviewsClient";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { AddReviewHeaderButton } from "@/features/reviews/componentes/AddReviewHeaderButton";
+import Image from "next/image";
+import Link from "next/link";
 
 export default async function ReviewsPage({ params }: { params: Promise<{ id: string }>}) {
   const { id } = await params;
@@ -15,12 +18,23 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
       <header className="border-b">
           <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-muted" />
-              <span className="font-semibold">{t("brand")}</span>
+              <Link href="/" className="flex items-center gap-3 font-semibold">
+                <div className="topbar-logo h-10 w-10">
+                  <Image
+                    src="/logo.png"
+                    alt={`${t("brand")} logo`}
+                    width={64}
+                    height={64}
+                    className="topbar-logo-image h-full w-full"
+                    priority
+                  />
+                </div>
+                <span>{t("brand")}</span>
+              </Link>
               <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <AddReviewHeaderButton label={tHome("addReviewButton")} />
             <AuthButtons
               account={tHome("account")}
               confirmText={tHome("confirmText")}
@@ -32,6 +46,7 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
               loginText={tHome("loginText")}
               registerText={tHome("registerText")}
             />
+            <LanguageSwitcher />
           </div>
           </div>
       </header>

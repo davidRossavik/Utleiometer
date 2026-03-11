@@ -15,6 +15,10 @@ type RatingAggregatesByCategory = {
     condition: RatingAggregate;
 };
 
+type FirestoreTimestampLike = {
+    toDate: () => Date;
+};
+
 function createEmptyCategoryAggregates(): RatingAggregatesByCategory {
     return {
         overall: { sum: 0, count: 0 },
@@ -62,6 +66,33 @@ function averageValue(aggregate: RatingAggregate): number | undefined {
     return Number((aggregate.sum / aggregate.count).toFixed(1));
 }
 
+function getTimestampMs(value: unknown): number | undefined {
+    if (value instanceof Date) {
+        const ms = value.getTime();
+        return Number.isFinite(ms) ? ms : undefined;
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+        return value;
+    }
+
+    if (typeof value === "string") {
+        const ms = Date.parse(value);
+        return Number.isFinite(ms) ? ms : undefined;
+    }
+
+    if (value && typeof value === "object" && "toDate" in value) {
+        const maybeTimestamp = value as FirestoreTimestampLike;
+        if (typeof maybeTimestamp.toDate === "function") {
+            const date = maybeTimestamp.toDate();
+            const ms = date.getTime();
+            return Number.isFinite(ms) ? ms : undefined;
+        }
+    }
+
+    return undefined;
+}
+
 export async function fetchProperties(): Promise<Property[]> {
     
     const q = query(
@@ -75,8 +106,9 @@ export async function fetchProperties(): Promise<Property[]> {
     ]);
 
     const ratingsByProperty = new Map<string, RatingAggregatesByCategory>();
+    const latestReviewAtByProperty = new Map<string, number>();
     reviewSnap.docs.forEach((reviewDoc) => {
-        const reviewData = reviewDoc.data() as { propertyId?: unknown };
+        const reviewData = reviewDoc.data() as { propertyId?: unknown; createdAt?: unknown };
         if (typeof reviewData.propertyId !== "string") return;
 
         const reviewRatings = getReviewRatings(reviewDoc.data());
@@ -89,6 +121,14 @@ export async function fetchProperties(): Promise<Property[]> {
         addRating(current.landlord, reviewRatings.landlord);
         addRating(current.condition, reviewRatings.condition);
         ratingsByProperty.set(reviewData.propertyId, current);
+
+        const createdAtMs = getTimestampMs(reviewData.createdAt);
+        if (typeof createdAtMs === "number") {
+            const previousLatest = latestReviewAtByProperty.get(reviewData.propertyId) ?? Number.NEGATIVE_INFINITY;
+            if (createdAtMs > previousLatest) {
+                latestReviewAtByProperty.set(reviewData.propertyId, createdAtMs);
+            }
+        }
     });
 
     return propertySnap.docs.map((d) => {
@@ -101,6 +141,7 @@ export async function fetchProperties(): Promise<Property[]> {
             ...(d.data() as Omit<Property, "id">),
             ratingAvg,
             ratingCount,
+            latestReviewAt: latestReviewAtByProperty.get(d.id),
             ratingsSummary: aggregate
                 ? {
                     overall: averageValue(aggregate.overall),

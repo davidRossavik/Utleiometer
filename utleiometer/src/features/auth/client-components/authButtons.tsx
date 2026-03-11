@@ -113,11 +113,14 @@ export function AuthButtons({
   // Hvis ikke innlogget, vis login og registrer knapper
   return (
     <div className="flex items-center gap-2">
+      <Button
+        asChild
+        className="rounded-full border border-blue-500 bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md hover:from-blue-800 hover:to-blue-700"
+      >
+        <Link href="/register">{registerText}</Link>
+      </Button>
       <Button asChild variant="outline" >
         <Link href="/login">{loginText}</Link>
-      </Button>
-      <Button asChild className="bg-blue-700 hover:bg-blue-800 text-white">
-        <Link href="/register">{registerText}</Link>
       </Button>
     </div>
   );

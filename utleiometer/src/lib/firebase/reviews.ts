@@ -1,20 +1,11 @@
 import { adminDb } from "./admin";
 import { incrementReviewCount, decrementReviewCount } from "./properties";
 
-export interface ReviewRatings {
-    location: number;
-    noise: number;
-    landlord: number;
-    condition: number;
-    overall: number;
-}
-
 export interface Review {
     reviewId: string;
     userId: string;
     propertyId: string;
-    rating?: number; // legacy
-    ratings?: ReviewRatings;
+    rating: number;
     comment: string;
     title?: string;
     createdAt: Date;
@@ -40,13 +31,12 @@ export async function getReviewsByPropertyId(propertyId: string) {
 
 export async function updateReview(
     reviewId: string, 
-    data: { ratings: ReviewRatings; comment: string; title?: string }
+    data: { rating: number; comment: string; title?: string }
 ) {
     const reviewRef = adminDb.collection("reviews").doc(reviewId);
     
     const updateData = {
-        rating: data.ratings.overall, // legacy support
-        ratings: data.ratings,
+        rating: data.rating,
         comment: data.comment,
         title: data.title || "",
         updatedAt: new Date()
@@ -61,4 +51,23 @@ export async function deleteReview(reviewId: string, propertyId: string) {
     await reviewRef.delete();
     await decrementReviewCount(propertyId);
     return { reviewId };
+}
+
+/**
+ * Delete all reviews associated with a property
+ * Used when deleting a property to maintain database integrity
+ * @param propertyId - The ID of the property whose reviews should be deleted
+ * @returns Object with count of deleted reviews
+ */
+export async function deleteReviewsByPropertyId(propertyId: string) {
+    const snapshot = await adminDb.collection("reviews").where("propertyId", "==", propertyId).get();
+    
+    // Delete all reviews in a batch for efficiency
+    const batch = adminDb.batch();
+    snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+    });
+    
+    await batch.commit();
+    return { deletedCount: snapshot.docs.length };
 }

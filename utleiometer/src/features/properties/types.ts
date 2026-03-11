@@ -16,6 +16,7 @@ export type Property = {
     city?: string;
     country?: string;
     ownerName?: string;
+    imageUrl?: string;
     ratingAvg?: number;
     ratingCount?: number;
     ratingsSummary?: PropertyRatingsSummary;
@@ -28,4 +29,9 @@ export type Property = {
     roomAreaSqm?: number;
     hasPrivateBathroom?: boolean;
     otherBedsitsInUnit?: number;
+    latestReviewAt?: number;
+    latitude?: number;
+    longitude?: number;
+    imageUrl?: string;
+
 };
