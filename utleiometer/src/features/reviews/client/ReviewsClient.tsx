@@ -234,7 +234,7 @@ function computeRatingSummary(reviews: Review[]): RatingSummary {
 
 export default function ReviewsClient({ propertyId, property, texts, messages }: ReviewsClientProps) {
     const searchParams = useSearchParams();
-    const { reviews, loading, error } = useReviews({ propertyId, messages });
+    const { reviews, loading, error, refetch } = useReviews({ propertyId, messages });
     const { currentUser } = useAuth();
     const [fetchedProperty, setFetchedProperty] = useState<Property | null>(property);
     
@@ -300,10 +300,11 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
             
             if (result.error) {
                 alert(`Feil: ${result.error}`);
-                return;
+                throw new Error(result.error); // Throw error so LikeButton can revert
             }
 
-            // No reload - LikeButton handles optimistic update
+            // No refetch needed - LikeButton handles optimistic update
+            // Data will sync from DB on next page load
         } catch (error) {
             console.error("Toggle like failed:", error);
             throw error; // Re-throw so LikeButton can revert optimistic update

@@ -43,7 +43,7 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const isOwner = Boolean(currentUserId && review.userId && review.userId === currentUserId);
-    const hasLiked = currentUserId ? review.LikedBy?.includes(currentUserId) : false;
+    const hasLiked = currentUserId ? review.likedBy?.includes(currentUserId) : false;
 
 
     function handleSave(updated: Review) {

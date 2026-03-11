@@ -139,19 +139,24 @@ export async function toggleLikeReviewAction(reviewId: string, userId: string) {
 
         const reviewData = reviewDoc.data();
         const likedBy = reviewData?.likedBy || [];
+        const currentLikeCount = reviewData?.likeCount || 0;
         const hasLiked = likedBy.includes(userId);
 
         if (hasLiked) {
+            // Unlike
             await reviewRef.update({
                 likedBy: FieldValue.arrayRemove(userId),
-                likeCount: FieldValue.increment(-1)
+                likeCount: Math.max(0, currentLikeCount - 1) // Prevent negative counts
             });
+            console.log(`Unlike: reviewId=${reviewId}, userId=${userId}, newCount=${Math.max(0, currentLikeCount - 1)}`);
             return { success: true, liked: false };
         } else {
+            // Like
             await reviewRef.update({
                 likedBy: FieldValue.arrayUnion(userId),
-                likeCount: FieldValue.increment(1)
+                likeCount: currentLikeCount + 1
             });
+            console.log(`Like: reviewId=${reviewId}, userId=${userId}, newCount=${currentLikeCount + 1}`);
             return { success: true, liked: true };
         }
     } catch (error) {

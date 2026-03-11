@@ -51,5 +51,25 @@ export function useReviews({ propertyId, messages = defaultMessages }: { propert
         };
     }, [propertyId, messages]);
 
-    return { reviews, loading, error };
+    const refetch = () => {
+        let cancelled = false;
+        async function reload() {
+            try {
+                setLoading(true);
+                setError(null);
+                const data = await fetchReviews(propertyId);
+                if (!cancelled) setReviews(data);
+            } catch (e) {
+                console.error("Failed to reload reviews:", e);
+                if (!cancelled) {
+                    setError(messages.loadReviewsError);
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+        reload();
+    };
+
+    return { reviews, loading, error, refetch };
 }

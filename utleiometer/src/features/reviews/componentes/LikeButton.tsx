@@ -1,6 +1,6 @@
 "use client"
 
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { Button } from "@/ui/primitives/button";
 import { Heart } from "lucide-react";
 
@@ -22,6 +22,12 @@ export function LikeButton({
     const [liked, setLiked] = useState(initialLiked);
     const [likeCount, setLikeCount] = useState(initialLikeCount);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Sync state with props when they change (e.g., after refetch)
+    useEffect(() => {
+        setLiked(initialLiked);
+        setLikeCount(initialLikeCount);
+    }, [initialLiked, initialLikeCount]);
 
     async function handleClick() {
         if (disabled || isLoading) return;
@@ -48,6 +54,7 @@ export function LikeButton({
 
     return (
         <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={handleClick}
