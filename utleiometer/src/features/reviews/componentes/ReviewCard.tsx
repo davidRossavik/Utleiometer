@@ -6,12 +6,14 @@ import { Button } from "@/ui/primitives/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { EditReviewForm } from "./EditReviewForm";
 import { StarRatingDisplay } from "./StarRatingDisplay";
+import { LikeButton } from "./LikeButton";
 
 interface ReviewCardProps {
     review: Review;
     currentUserId?: string;
     onSave: (updated: Review) => void;
     onDelete: (reviewId: string) => void;
+    onToggleLike: (reviewId: string) => Promise<void>;
     texts: {
         editTitle: string;
         defaultTitle: string;
@@ -36,11 +38,13 @@ function formatDate(ts: any) {
     return d.toLocaleDateString("no-NO", { year: "numeric", month: "short", day: "numeric" });
 }
 
-export function ReviewCard({ review, currentUserId, onSave, onDelete, texts }: ReviewCardProps) {
+export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLike, texts }: ReviewCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const isOwner = Boolean(currentUserId && review.userId && review.userId === currentUserId);
+    const hasLiked = currentUserId ? review.likedBy?.includes(currentUserId) : false;
+
 
     function handleSave(updated: Review) {
         onSave(updated);
@@ -115,30 +119,40 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, texts }: R
                 </p>
             </CardContent>
 
-            {isOwner && (
-                <CardFooter className="gap-2">
-                    {showDeleteConfirm ? (
-                        <>
-                            <span className="text-sm text-red-600 mr-2">{texts.confirmDelete}</span>
-                            <Button variant="destructive" size="sm" onClick={handleDelete}>
-                                {texts.deleteYes}
-                            </Button>
-                            <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)}>
-                                {texts.deleteNo}
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                {texts.edit}
-                            </Button>
-                            <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
-                                {texts.delete}
-                            </Button>
-                        </>
-                    )}
-                </CardFooter>
-            )}
+            <CardFooter className="flex justify-between items-center">
+                <LikeButton
+                    reviewId={review.id}
+                    initialLikeCount={review.likeCount || 0}
+                    initialLiked={hasLiked}
+                    onToggleLike={onToggleLike}
+                    disabled={!currentUserId}
+                />
+
+                {isOwner && (
+                    <div className="flex gap-2">
+                        {showDeleteConfirm ? (
+                            <>
+                                <span className="text-sm text-red-600 mr-2">{texts.confirmDelete}</span>
+                                <Button variant="destructive" size="sm" onClick={handleDelete}>
+                                    {texts.deleteYes}
+                                </Button>
+                                <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                                    {texts.deleteNo}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                                    {texts.edit}
+                                </Button>
+                                <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                                    {texts.delete}
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                )}
+            </CardFooter>
         </Card>
     );
 }

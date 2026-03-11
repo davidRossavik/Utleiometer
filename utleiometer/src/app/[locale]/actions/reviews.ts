@@ -1,7 +1,7 @@
 "use server"; 
 
 import { createReview, updateReview, deleteReview } from "@/lib/firebase/reviews";
-import { adminAuth } from "@/lib/firebase/admin";
+import { adminDb, FieldValue } from "@/lib/firebase/admin";
 import type { ReviewRatings } from "@/features/reviews/types";
 
 function parseCategoryRating(formData: FormData, key: string) {
@@ -121,5 +121,46 @@ export async function deleteReviewAction(
     } catch (error) {
         console.error("Error deleting review:", error);
         return { error: `Kunne ikke slette: ${error instanceof Error ? error.message : 'Ukjent feil'}` };
+    }
+}
+
+export async function toggleLikeReviewAction(reviewId: string, userId: string) {
+    if (!reviewId || !userId) {
+        return { error: "Review ID og User ID er påkrevd" };
+    }
+
+    try {
+        const reviewRef = adminDb.collection("reviews").doc(reviewId);
+        const reviewDoc = await reviewRef.get();
+        
+        if (!reviewDoc.exists) {
+            return { error: "Anmeldelse ikke funnet" };
+        }
+
+        const reviewData = reviewDoc.data();
+        const likedBy = reviewData?.likedBy || [];
+        const currentLikeCount = reviewData?.likeCount || 0;
+        const hasLiked = likedBy.includes(userId);
+
+        if (hasLiked) {
+            // Unlike
+            await reviewRef.update({
+                likedBy: FieldValue.arrayRemove(userId),
+                likeCount: Math.max(0, currentLikeCount - 1) // Prevent negative counts
+            });
+            console.log(`Unlike: reviewId=${reviewId}, userId=${userId}, newCount=${Math.max(0, currentLikeCount - 1)}`);
+            return { success: true, liked: false };
+        } else {
+            // Like
+            await reviewRef.update({
+                likedBy: FieldValue.arrayUnion(userId),
+                likeCount: currentLikeCount + 1
+            });
+            console.log(`Like: reviewId=${reviewId}, userId=${userId}, newCount=${currentLikeCount + 1}`);
+            return { success: true, liked: true };
+        }
+    } catch (error) {
+        console.error("Error toggling like:", error);
+        return { error: `Kunne ikke oppdatere like: ${error instanceof Error ? error.message : 'Ukjent feil'}` };
     }
 }

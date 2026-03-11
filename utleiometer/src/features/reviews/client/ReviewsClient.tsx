@@ -14,7 +14,7 @@ import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
-import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
+import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
 import PropertyMap from "@/ui/map/propertyMap";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
@@ -234,7 +234,7 @@ function computeRatingSummary(reviews: Review[]): RatingSummary {
 
 export default function ReviewsClient({ propertyId, property, texts, messages }: ReviewsClientProps) {
     const searchParams = useSearchParams();
-    const { reviews, loading, error } = useReviews({ propertyId, messages });
+    const { reviews, loading, error, refetch } = useReviews({ propertyId, messages });
     const { currentUser } = useAuth();
     const [fetchedProperty, setFetchedProperty] = useState<Property | null>(property);
     
@@ -286,6 +286,28 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         } catch (error) {
             console.error("Delete failed:", error);
             alert("Kunne ikke slette anmeldelse");
+        }
+    }
+
+    async function handleToggleLike(reviewId: string) {
+        if (!currentUser) {
+            alert("Du må være innlogget for å like anmeldelser");
+            return;
+        }
+
+        try {
+            const result = await toggleLikeReviewAction(reviewId, currentUser.uid);
+            
+            if (result.error) {
+                alert(`Feil: ${result.error}`);
+                throw new Error(result.error); // Throw error so LikeButton can revert
+            }
+
+            // No refetch needed - LikeButton handles optimistic update
+            // Data will sync from DB on next page load
+        } catch (error) {
+            console.error("Toggle like failed:", error);
+            throw error; // Re-throw so LikeButton can revert optimistic update
         }
     }
 
@@ -493,6 +515,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             currentUserId={currentUser?.uid}
                             onSave={handleSaveReview}
                             onDelete={handleDeleteReview}
+                            onToggleLike={handleToggleLike}
                             texts={{
                                 editTitle: texts.reviewEditTitle,
                                 defaultTitle: texts.reviewDefaultTitle,

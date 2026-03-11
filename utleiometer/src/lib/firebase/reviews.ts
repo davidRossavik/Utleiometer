@@ -10,10 +10,17 @@ export interface Review {
     title?: string;
     createdAt: Date;
     updatedAt?: Date;
+    likedBy?: string[];
+    likeCount?: number; 
 }
 
 export async function createReview(data: Omit<Review, "reviewId" | "createdAt">) {
-    const reviewData = { ...data, createdAt: new Date() };
+    const reviewData = { 
+        ...data, 
+        createdAt: new Date(),
+        likedBy: [],
+        likeCount: 0
+    };
     const docRef = await adminDb.collection("reviews").add(reviewData);
     
     // Oppdater review-telleren på property
