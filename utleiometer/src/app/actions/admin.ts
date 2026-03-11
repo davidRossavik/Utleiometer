@@ -105,3 +105,61 @@ export async function verifyAdminStatus(uid: string): Promise<boolean> {
     return false;
   }
 }
+
+export interface UserRecord {
+  uid: string;
+  email: string | undefined;
+  displayName: string | undefined;
+  isAdmin: boolean;
+}
+
+/**
+ * List all users (admin only)
+ */
+export async function listUsers(
+  callerIdToken: string
+): Promise<{ users?: UserRecord[]; error?: string }> {
+  const callerUid = await verifyCallerIsAdmin(callerIdToken);
+  if (!callerUid) {
+    return { error: "Unauthorized: Only admins can list users" };
+  }
+
+  try {
+    const result = await adminAuth.listUsers(1000);
+    const users: UserRecord[] = result.users.map((u) => ({
+      uid: u.uid,
+      email: u.email,
+      displayName: u.displayName,
+      isAdmin: u.customClaims?.admin === true,
+    }));
+    return { users };
+  } catch (error) {
+    console.error("Error listing users:", error);
+    return { error: error instanceof Error ? error.message : "Failed to list users" };
+  }
+}
+
+/**
+ * Delete any user account (admin only)
+ */
+export async function deleteUserAsAdmin(
+  targetUid: string,
+  callerIdToken: string
+): Promise<{ success: boolean; error?: string }> {
+  const callerUid = await verifyCallerIsAdmin(callerIdToken);
+  if (!callerUid) {
+    return { success: false, error: "Unauthorized: Only admins can delete users" };
+  }
+
+  if (callerUid === targetUid) {
+    return { success: false, error: "Admins cannot delete their own account from admin panel" };
+  }
+
+  try {
+    await adminAuth.deleteUser(targetUid);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Failed to delete user" };
+  }
+}

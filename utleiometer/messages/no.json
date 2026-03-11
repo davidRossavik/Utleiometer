@@ -282,5 +282,22 @@
             "reviewSubmittedSuccess": "Anmeldelsen din ble sendt inn.",
             "propertySubmittedSuccess": "Bolig og anmeldelse ble registrert."
         }
+    },
+    "AdminPage": {
+        "title": "Admin – Brukeroversikt",
+        "subtitle": "Administrer brukere og roller",
+        "backButton": "← Tilbake til forsiden",
+        "loading": "Laster brukere...",
+        "colName": "Navn",
+        "colEmail": "E-post",
+        "colRole": "Rolle",
+        "colActions": "Handlinger",
+        "roleAdmin": "Admin",
+        "roleUser": "Bruker",
+        "makeAdmin": "Gjør til admin",
+        "removeAdmin": "Fjern admin",
+        "delete": "Slett",
+        "confirmDelete": "Er du sikker på at du vil slette",
+        "notLoggedIn": "Ikke innlogget"
     }
 }
