@@ -401,13 +401,15 @@ export async function submitUnifiedReviewAction(formData: FormData) {
         return { error: parsedDetails.error };
       }
 
-      const newProperty = await createProperty({
+      const propertyData = await withGeocodedCoordinates({
         address: addressAndUser.data.address,
         zipCode: addressAndUser.data.zipCode,
         city: addressAndUser.data.city,
         registeredByUid: addressAndUser.data.registeredByUid,
         ...parsedDetails.data,
       });
+
+      const newProperty = await createProperty(propertyData);
 
       propertyId = newProperty.propertyId;
     }
