@@ -1,5 +1,6 @@
 import { adminDb } from "./admin";
 import { incrementReviewCount, decrementReviewCount } from "./properties";
+import type { ReviewRatings } from "@/features/reviews/types";
 
 export interface Review {
     reviewId: string;
@@ -35,18 +36,24 @@ export async function getReviewsByPropertyId(propertyId: string) {
 }
 
 export async function updateReview(
-    reviewId: string, 
-    data: { rating: number; comment: string; title?: string }
+    reviewId: string,
+    data: { ratings: ReviewRatings; comment: string; title?: string }
 ) {
     const reviewRef = adminDb.collection("reviews").doc(reviewId);
-    
-    const updateData = {
-        rating: data.rating,
+
+    const updateData: Record<string, unknown> = {
+        rating: data.ratings.overall,
+        ratings: data.ratings,
         comment: data.comment,
-        title: data.title || "",
-        updatedAt: new Date()
+        title: data.title?.trim() ?? "",
+        updatedAt: new Date(),
     };
-    
+
+    // Remove any undefined values to avoid Firestore errors
+    Object.keys(updateData).forEach((key) => {
+        if (updateData[key] === undefined) delete updateData[key];
+    });
+
     await reviewRef.update(updateData);
     return { reviewId, ...updateData };
 }
