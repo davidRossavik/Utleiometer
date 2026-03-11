@@ -9,6 +9,7 @@ vi.mock("@/lib/firebase/admin", () => ({
 
 vi.mock("@/lib/firebase/properties", () => ({
   createProperty: vi.fn(),
+  getAllProperties: vi.fn(),
   getPropertyByAddress: vi.fn(),
   getPropertyById: vi.fn(),
 }));

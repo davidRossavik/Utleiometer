@@ -11,8 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { StarRatingDisplay } from "@/features/reviews/componentes/StarRatingDisplay";
 
 import { useProperties } from "../hooks/useProperties";
-import { usePropertySearch } from "../hooks/usePropertySearch";
+import { getPropertyOverallRating, usePropertySearch } from "../hooks/usePropertySearch";
 import { Property } from "../types";
+
+type SortBy = "alphabetical" | "latestReview" | "popularity";
 
 export type PropertiesClientTexts = {
   badge: string;
@@ -30,6 +32,10 @@ export type PropertiesClientTexts = {
   minRatingPlaceholder: string;
   minRatingValue: string;
   minRatingAriaLabel: string;
+  sortByLabel: string;
+  sortByAlphabetical: string;
+  sortByLatestReview: string;
+  sortByPopularity: string;
   emptyFilteredDescription: string;
   unknownAddress: string;
   unknownPlace: string;
@@ -91,6 +97,12 @@ function PropertyFilters({
   minRatingPlaceholder,
   minRatingTemplate,
   minRatingAriaLabel,
+  sortBy,
+  onSortByChange,
+  sortByLabel,
+  sortByAlphabetical,
+  sortByLatestReview,
+  sortByPopularity,
 }: {
   area: string;
   onAreaChange: (next: string) => void;
@@ -101,38 +113,61 @@ function PropertyFilters({
   minRatingPlaceholder: string;
   minRatingTemplate: string;
   minRatingAriaLabel: string;
+  sortBy: SortBy;
+  onSortByChange: (next: SortBy) => void;
+  sortByLabel: string;
+  sortByAlphabetical: string;
+  sortByLatestReview: string;
+  sortByPopularity: string;
 }) {
   const ratingOptions = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+  const selectStyle =
+    "h-10 min-w-44 appearance-none rounded-full border border-input bg-white/90 px-4 text-sm text-slate-700 shadow-sm transition-all outline-none [background-image:none] hover:shadow focus-visible:ring-2 focus-visible:ring-ring/30";
 
   return (
-    <div className="mt-3 flex flex-wrap justify-end gap-3">
-      <select
-        value={area}
-        onChange={(e) => onAreaChange(e.target.value)}
-        className="h-10 min-w-44 appearance-none rounded-full border border-input bg-white/90 px-4 text-sm text-slate-700 shadow-sm transition-all outline-none [background-image:none] hover:shadow focus-visible:ring-2 focus-visible:ring-ring/30"
-        aria-label={areaPlaceholder}
-      >
-        <option value="">{areaPlaceholder}</option>
-        {areas.map((city) => (
-          <option key={city.value} value={city.value}>
-            {city.label}
-          </option>
-        ))}
-      </select>
+    <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-wrap items-center gap-3">
+        <select
+          value={area}
+          onChange={(e) => onAreaChange(e.target.value)}
+          className={selectStyle}
+          aria-label={areaPlaceholder}
+        >
+          <option value="">{areaPlaceholder}</option>
+          {areas.map((city) => (
+            <option key={city.value} value={city.value}>
+              {city.label}
+            </option>
+          ))}
+        </select>
 
-      <select
-        value={minRating === null ? "" : String(minRating)}
-        onChange={(e) => onMinRatingChange(e.target.value ? Number(e.target.value) : null)}
-        className="h-10 min-w-44 appearance-none rounded-full border border-input bg-white/90 px-4 text-sm text-slate-700 shadow-sm transition-all outline-none [background-image:none] hover:shadow focus-visible:ring-2 focus-visible:ring-ring/30"
-        aria-label={minRatingAriaLabel}
-      >
-        <option value="">{minRatingPlaceholder}</option>
-        {ratingOptions.map((rating) => (
-          <option key={rating} value={String(rating)}>
-            {formatRatingValue(minRatingTemplate, rating)}
-          </option>
-        ))}
-      </select>
+        <select
+          value={minRating === null ? "" : String(minRating)}
+          onChange={(e) => onMinRatingChange(e.target.value ? Number(e.target.value) : null)}
+          className={selectStyle}
+          aria-label={minRatingAriaLabel}
+        >
+          <option value="">{minRatingPlaceholder}</option>
+          {ratingOptions.map((rating) => (
+            <option key={rating} value={String(rating)}>
+              {formatRatingValue(minRatingTemplate, rating)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex justify-start md:justify-end">
+        <select
+          value={sortBy}
+          onChange={(e) => onSortByChange(parseSortBy(e.target.value))}
+          className={selectStyle}
+          aria-label={sortByLabel}
+        >
+          <option value="alphabetical">{sortByAlphabetical}</option>
+          <option value="latestReview">{sortByLatestReview}</option>
+          <option value="popularity">{sortByPopularity}</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -207,6 +242,44 @@ function parseMinRating(raw: string | null) {
 
 function normalizeAreaValue(value: string | null | undefined) {
   return (value ?? "").trim().toLowerCase();
+}
+
+function parseSortBy(value: string | null | undefined): SortBy {
+  if (value === "latestReview") return "latestReview";
+  if (value === "popularity") return "popularity";
+  return "alphabetical";
+}
+
+function normalizeAddressValue(value: string | undefined) {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function sortProperties(properties: Property[], sortBy: SortBy) {
+  const sorted = [...properties];
+
+  sorted.sort((a, b) => {
+    if (sortBy === "latestReview") {
+      const aTime = a.latestReviewAt ?? Number.NEGATIVE_INFINITY;
+      const bTime = b.latestReviewAt ?? Number.NEGATIVE_INFINITY;
+      if (bTime !== aTime) return bTime - aTime;
+      return normalizeAddressValue(a.address).localeCompare(normalizeAddressValue(b.address));
+    }
+
+    if (sortBy === "popularity") {
+      const ratingA = getPropertyOverallRating(a) ?? Number.NEGATIVE_INFINITY;
+      const ratingB = getPropertyOverallRating(b) ?? Number.NEGATIVE_INFINITY;
+      if (ratingB !== ratingA) return ratingB - ratingA;
+
+      const countA = a.ratingCount ?? 0;
+      const countB = b.ratingCount ?? 0;
+      if (countB !== countA) return countB - countA;
+      return normalizeAddressValue(a.address).localeCompare(normalizeAddressValue(b.address));
+    }
+
+    return normalizeAddressValue(a.address).localeCompare(normalizeAddressValue(b.address));
+  });
+
+  return sorted;
 }
 
 function formatRatingValue(template: string, value: number) {
@@ -392,16 +465,19 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
   const initialQ = searchParams.get("q") ?? "";
   const initialArea = normalizeAreaValue(searchParams.get("area"));
   const initialMinRating = parseMinRating(searchParams.get("minRating"));
+  const initialSortBy = parseSortBy(searchParams.get("sort"));
 
   const { properties, loading, error } = useProperties(messages);
 
   const [search, setSearch] = useState(initialQ);
   const [area, setArea] = useState(initialArea);
   const [minRating, setMinRating] = useState<number | null>(initialMinRating > 0 ? initialMinRating : null);
+  const [sortBy, setSortBy] = useState<SortBy>(initialSortBy);
 
   useEffect(() => setSearch(initialQ), [initialQ]);
   useEffect(() => setArea(initialArea), [initialArea]);
   useEffect(() => setMinRating(initialMinRating > 0 ? initialMinRating : null), [initialMinRating]);
+  useEffect(() => setSortBy(initialSortBy), [initialSortBy]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -418,12 +494,15 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
     if (normalizedMinRating > 0) params.set("minRating", normalizedMinRating.toFixed(1));
     else params.delete("minRating");
 
+    if (sortBy !== "alphabetical") params.set("sort", sortBy);
+    else params.delete("sort");
+
     const current = searchParams.toString();
     const next = params.toString();
     if (current === next) return;
 
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
-  }, [area, minRating, pathname, router, search, searchParams]);
+  }, [area, minRating, pathname, router, search, searchParams, sortBy]);
 
   const availableAreas = useMemo(() => {
     const uniqueCities = new Set<string>();
@@ -439,6 +518,7 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
   }, [properties]);
 
   const filtered = usePropertySearch(properties, { search, area, minRating: minRating ?? 0 });
+  const sorted = useMemo(() => sortProperties(filtered, sortBy), [filtered, sortBy]);
   const hasActiveFilters = search.trim().length > 0 || area.trim().length > 0 || (minRating !== null && minRating > 0);
 
   function clearAllFilters() {
@@ -475,6 +555,12 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
             minRatingPlaceholder={texts.minRatingPlaceholder}
             minRatingTemplate={texts.minRatingValue}
             minRatingAriaLabel={texts.minRatingAriaLabel}
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortByLabel={texts.sortByLabel}
+            sortByAlphabetical={texts.sortByAlphabetical}
+            sortByLatestReview={texts.sortByLatestReview}
+            sortByPopularity={texts.sortByPopularity}
           />
 
           {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
@@ -489,7 +575,7 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
               description1={texts.loadingDescription1}
               description2={texts.loadingDescription2}
             />
-          ) : filtered.length === 0 ? (
+          ) : sorted.length === 0 ? (
             <PropertiesEmpty
               onClear={clearAllFilters}
               title={texts.emptyTitle}
@@ -498,7 +584,7 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
             />
           ) : (
             <div className="flex flex-col gap-6">
-              {filtered.map((p) => (
+              {sorted.map((p) => (
                 <PropertyCard
                   key={p.id}
                   p={p}

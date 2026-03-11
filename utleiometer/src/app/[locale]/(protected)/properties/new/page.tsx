@@ -1,15 +1,16 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
-import { Button } from "@/ui/primitives/button";
 import { AuthButtons } from "@/features/auth/client-components/authButtons";
 import { WelcomeMessage } from "@/features/auth/client-components/welcomeMessage";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { AddReviewHeaderButton } from "@/features/reviews/componentes/AddReviewHeaderButton";
 
 import PropertyRegisterClient from "@/features/properties/client/PropertyRegisterClient";
 
 export const metadata = {
-  title: "Registrer bolig | Utleiometer",
+  title: "Legg til anmeldelse | Utleiometer",
 };
 
 export default async function Page() {
@@ -22,14 +23,23 @@ export default async function Page() {
       <header className="border-b bg-background">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-muted" />
-            <Link href="/" className="font-semibold">
-              {t("brand")}
+            <Link href="/" className="flex items-center gap-3 font-semibold">
+              <div className="topbar-logo h-10 w-10">
+                <Image
+                  src="/logo.png"
+                  alt={`${t("brand")} logo`}
+                  width={64}
+                  height={64}
+                  className="topbar-logo-image h-full w-full"
+                  priority
+                />
+              </div>
+              <span>{t("brand")}</span>
             </Link>
             <WelcomeMessage text={tHome("welcomeMessage")} />
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <AddReviewHeaderButton label={tHome("addReviewButton")} />
             <AuthButtons
               account={tHome("account")}
               confirmText={tHome("confirmText")}
@@ -41,30 +51,25 @@ export default async function Page() {
               loginText={tHome("loginText")}
               registerText={tHome("registerText")}
             />
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
 
       {/* PAGE CONTENT */}
-      <main className="flex-1 flex items-center justify-center p-6 relative">
-      {/* Tilbake-knapp – absolutt plassert */}
-      <div className="absolute top-6 left-6">
-        <Button asChild variant="ghost">
-          <Link href="/">{t("backButton")}</Link>
-        </Button>
-      </div>
+      <main className="relative flex-1 overflow-hidden bg-gradient-to-br from-blue-50 via-background to-blue-100/70 p-6">
+        <div aria-hidden className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-blue-200/45 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-20 top-16 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl" />
 
-      {/* Sentrert innhold */}
-      <div className="w-full max-w-lg flex flex-col items-center gap-6">
-        <Link href="/" className="font-bold text-4xl text-blue-700">
-          {t("brand")}
-        </Link>
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6">
+          <Link href="/" className="font-bold text-4xl text-blue-700 drop-shadow-sm transition-colors hover:text-blue-800">
+            {t("brand")}
+          </Link>
 
-        <PropertyRegisterClient
-          texts={{
+          <PropertyRegisterClient
+            texts={{
             cardTitle: t("form.cardTitle"),
             cardDescription: t("form.cardDescription"),
-            sectionRegisterTitle: t("form.sectionRegisterTitle"),
             addressLabel: t("form.addressLabel"),
             addressPlaceholder: t("form.addressPlaceholder"),
             zipCodeLabel: t("form.zipCodeLabel"),
@@ -92,7 +97,15 @@ export default async function Page() {
             hasPrivateBathroomNo: t("form.hasPrivateBathroomNo"),
             otherBedsitsInUnitLabel: t("form.otherBedsitsInUnitLabel"),
             otherBedsitsInUnitPlaceholder: t("form.otherBedsitsInUnitPlaceholder"),
-            sectionReviewTitle: t("form.sectionReviewTitle"),
+            addressStepTitle: t("form.addressStepTitle"),
+            propertyDetailsStepTitle: t("form.propertyDetailsStepTitle"),
+            reviewStepTitle: t("form.reviewStepTitle"),
+            propertyFoundMessage: t("form.propertyFoundMessage"),
+            propertyNotFoundMessage: t("form.propertyNotFoundMessage"),
+            continueButton: t("form.continueButton"),
+            cancelButton: t("form.cancelButton"),
+            submitButton: t("form.submitButton"),
+            submittingButton: t("form.submittingButton"),
             commentLabel: t("form.commentLabel"),
             commentPlaceholder: t("form.commentPlaceholder"),
             ratingsTitle: t("form.ratingsTitle"),
@@ -104,19 +117,15 @@ export default async function Page() {
             landlordHelp: t("form.landlordHelp"),
             conditionLabel: t("form.conditionLabel"),
             conditionHelp: t("form.conditionHelp"),
-            submit: t("form.submit"),
-            submitting: t("form.submitting"),
             hint: t("form.hint"),
-          }}
-          messages={{
-            notLoggedIn: t("messages.notLoggedIn"),
-            unknownError: t("messages.unknownError"),
-          }}
-        />
-        
-      </div>
-
-    </main>
+            }}
+            messages={{
+              notLoggedIn: t("messages.notLoggedIn"),
+              unknownError: t("messages.unknownError"),
+            }}
+          />
+        </div>
+      </main>
 
       {/* FOOTER */}
       <footer className="border-t bg-background">
