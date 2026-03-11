@@ -302,11 +302,10 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                 return;
             }
 
-            // Reload to get updated like counts
-            window.location.reload();
+            // No reload - LikeButton handles optimistic update
         } catch (error) {
             console.error("Toggle like failed:", error);
-            alert("Kunne ikke like anmeldelse");
+            throw error; // Re-throw so LikeButton can revert optimistic update
         }
     }
 

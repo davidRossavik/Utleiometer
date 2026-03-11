@@ -6,9 +6,9 @@ import { Heart } from "lucide-react";
 
 interface LikeButtonProps {
     reviewId: string;
-    intiialLikeCount: number;
+    initialLikeCount: number;
     initialLiked: boolean; 
-    onToggleLike: (reviewId: strin) => Promise<void>;
+    onToggleLike: (reviewId: string) => Promise<void>;
     disabled?: boolean;
 }
 
@@ -55,7 +55,7 @@ export function LikeButton({
             className="gap-2"
         >
             <Heart 
-                className={`h-5 w-5 transition-colors ${liked ? 'fill-pink-500 text-pink-500' : 'text-gray-400 hover:text-pink-300'}`} 
+                className={`h-5 w-5 transition-all ${liked ? 'fill-pink-500 text-pink-500' : 'fill-white text-pink-500 stroke-pink-500 stroke-2 hover:fill-pink-100'}`} 
             />
             <span className="text-sm">{likeCount}</span>
         </Button>
