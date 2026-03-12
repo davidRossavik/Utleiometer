@@ -282,5 +282,22 @@
             "reviewSubmittedSuccess": "Votre avis a bien été envoyé.",
             "propertySubmittedSuccess": "Le logement et l'avis ont bien été enregistrés."
         }
+    },
+    "AdminPage": {
+        "title": "Admin – Gestion des utilisateurs",
+        "subtitle": "Gérer les utilisateurs et les rôles",
+        "backButton": "← Retour à l'accueil",
+        "loading": "Chargement des utilisateurs...",
+        "colName": "Nom",
+        "colEmail": "E-mail",
+        "colRole": "Rôle",
+        "colActions": "Actions",
+        "roleAdmin": "Admin",
+        "roleUser": "Utilisateur",
+        "makeAdmin": "Rendre admin",
+        "removeAdmin": "Retirer admin",
+        "delete": "Supprimer",
+        "confirmDelete": "Êtes-vous sûr de vouloir supprimer",
+        "notLoggedIn": "Non connecté"
     }
 }

@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useState } from "react";
 import { Button } from "@/ui/primitives/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/primitives/popover";
 import { signOut, deleteUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { deleteUserData } from "@/app/actions/deleteUser";
 
 type Props = {
@@ -34,7 +33,7 @@ export function AuthButtons({
   registerText
 }: Props) {
 
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, isAdmin } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
@@ -81,32 +80,39 @@ export function AuthButtons({
   // Hvis innlogget, vis konto-popover med knapper i fete farger
   if (currentUser) {
     return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline">{account}</Button>
-        </PopoverTrigger>
-        <PopoverContent  align="start" className="w-48 p-2">
-          <div className="flex flex-col gap-1">
-            <Button 
-              type="button" 
-              className="bg-gradient-to-r from-blue-800 to-blue-500 text-white hover:opacity-90"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-            >
-              {isLoggingOut ? logOutHandlingText : logOutText}
-            </Button>
-            <Button 
-              type="button" 
-              variant="destructive" 
-              className="text-left w-full"
-              onClick={handleDeleteAccount}
-              disabled={isDeletingAccount}
-            >
-              {isDeletingAccount ? deleteHandlingText : deleteText}
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
+      <>
+        {isAdmin && (
+          <Button variant="outline" onClick={() => router.push("/admin")}>
+            Admin
+          </Button>
+        )}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">{account}</Button>
+          </PopoverTrigger>
+          <PopoverContent  align="start" className="w-48 p-2">
+            <div className="flex flex-col gap-1">
+              <Button 
+                type="button" 
+                className="bg-gradient-to-r from-blue-800 to-blue-500 text-white hover:opacity-90"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                {isLoggingOut ? logOutHandlingText : logOutText}
+              </Button>
+              <Button 
+                type="button" 
+                variant="destructive" 
+                className="text-left w-full"
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+              >
+                {isDeletingAccount ? deleteHandlingText : deleteText}
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </>
     );
   }
 
