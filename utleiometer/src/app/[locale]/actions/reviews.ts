@@ -30,6 +30,7 @@ export async function createReviewAction(formData: FormData) {
     const userId = formData.get("userId") as string;
     const propertyId = formData.get("propertyId") as string;
     const comment = formData.get("comment") as string;
+    const userDisplayName = (formData.get("userDisplayName") as string | null)?.trim() ?? "";
     const ratings = buildRatings(formData);
 
     console.log("createReviewAction called with:", { userId, propertyId, ratings, comment });
@@ -43,6 +44,7 @@ export async function createReviewAction(formData: FormData) {
         const newReview = await createReview({
             userId,
             propertyId,
+            userDisplayName: userDisplayName || undefined,
             rating: ratings.overall, // legacy support
             ratings,
             comment: comment.trim(),

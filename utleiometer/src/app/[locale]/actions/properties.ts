@@ -336,6 +336,7 @@ export async function createPropertyAndReviewAction(formData: FormData) {
 
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
+  const userDisplayName = asTrimmedString(formData.get("userDisplayName"));
 
   if (!parsed.ok || !ratings || !comment) {
     return {
@@ -358,6 +359,7 @@ export async function createPropertyAndReviewAction(formData: FormData) {
 
     await createReview({
       userId: data.registeredByUid,
+      userDisplayName,
       propertyId: newProperty.propertyId,
       rating: ratings.overall,
       ratings,
@@ -375,6 +377,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
   const addressAndUser = parseAddressAndUser(formData);
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
+  const userDisplayName = asTrimmedString(formData.get("userDisplayName"));
 
   if (!addressAndUser.ok || !ratings || !comment) {
     return {
@@ -416,6 +419,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
 
     await createReview({
       userId: addressAndUser.data.registeredByUid,
+      userDisplayName,
       propertyId,
       rating: ratings.overall,
       ratings,

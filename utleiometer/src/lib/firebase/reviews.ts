@@ -5,6 +5,7 @@ import type { ReviewRatings } from "@/features/reviews/types";
 export interface Review {
     reviewId: string;
     userId: string;
+    userDisplayName?: string;
     propertyId: string;
     rating: number;
     comment: string;
