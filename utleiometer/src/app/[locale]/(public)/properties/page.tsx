@@ -97,6 +97,11 @@ export default async function PropertiesPage() {
             propertyTypeHouse: t("propertyTypeHouse"),
             propertyTypeApartment: t("propertyTypeApartment"),
             propertyTypeBedsit: t("propertyTypeBedsit"),
+            adminDeleteProperty: t("adminDeleteProperty"),
+            adminDeletePropertyConfirm: t("adminDeletePropertyConfirm"),
+            adminDeletePropertySuccess: t("adminDeletePropertySuccess"),
+            adminDeletePropertyError: t("adminDeletePropertyError"),
+            adminDeletePropertyUnauthorized: t("adminDeletePropertyUnauthorized"),
           }}
           messages={{
             loadPropertiesError: t("messages.loadPropertiesError"),

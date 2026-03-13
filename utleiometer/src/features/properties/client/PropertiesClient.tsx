@@ -9,6 +9,8 @@ import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { StarRatingDisplay } from "@/features/reviews/componentes/StarRatingDisplay";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { deletePropertyAction } from "@/app/[locale]/actions/properties";
 
 import { useProperties } from "../hooks/useProperties";
 import { getPropertyOverallRating, usePropertySearch } from "../hooks/usePropertySearch";
@@ -54,6 +56,11 @@ export type PropertiesClientTexts = {
   propertyTypeHouse: string;
   propertyTypeApartment: string;
   propertyTypeBedsit: string;
+  adminDeleteProperty?: string;
+  adminDeletePropertyConfirm?: string;
+  adminDeletePropertySuccess?: string;
+  adminDeletePropertyError?: string;
+  adminDeletePropertyUnauthorized?: string;
 };
 
 export type PropertiesClientMessages = {
@@ -369,12 +376,18 @@ function PropertyCard({
   unknownPlace,
   seeReviews,
   texts,
+  isAdmin,
+  isDeleting,
+  onDeleteProperty,
 }: {
   p: Property;
   unknownAddress: string;
   unknownPlace: string;
   seeReviews: string;
   texts: PropertiesClientTexts;
+  isAdmin: boolean;
+  isDeleting: boolean;
+  onDeleteProperty: (property: Property) => void;
 }) {
   const displayAddress = capitalizeFirstLetter(p.address) || unknownAddress;
   const displayCity = capitalizeWords(p.city);
@@ -382,12 +395,16 @@ function PropertyCard({
   const displayPlace = [displayCity, displayCountry].filter(Boolean).join(", ") || unknownPlace;
   const metadataTiles = buildMetaTiles(p, texts);
   const summary = p.ratingsSummary;
+  const deleteLabel = texts.adminDeleteProperty ?? "Slett bolig";
 
   return (
-    <Link href={`/properties/${p.id}/reviews`} className="block">
-      <Card className="cursor-pointer transition-all hover:shadow-lg hover:shadow-blue-100/50">
+      <Card className="transition-all hover:shadow-lg hover:shadow-blue-100/50">
         <CardHeader>
-          <CardTitle className="text-xl text-blue-700">{displayAddress}</CardTitle>
+          <CardTitle className="text-xl text-blue-700">
+            <Link href={`/properties/${p.id}/reviews`} className="hover:underline">
+              {displayAddress}
+            </Link>
+          </CardTitle>
           <CardDescription>{displayPlace}</CardDescription>
         </CardHeader>
 
@@ -445,16 +462,28 @@ function PropertyCard({
               </div>
             </div>
 
-            <div className="mt-3 flex justify-end">
-              <span className="text-sm font-medium text-blue-700">
+            <div className="mt-3 flex items-center justify-between">
+              {isAdmin ? (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDeleteProperty(p)}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? `${deleteLabel}...` : deleteLabel}
+                </Button>
+              ) : (
+                <span />
+              )}
+
+              <Link href={`/properties/${p.id}/reviews`} className="text-sm font-medium text-blue-700 hover:underline">
                 {seeReviews} -&gt;
-              </span>
+              </Link>
             </div>
           </div>
 
         </CardContent>
       </Card>
-    </Link>
   );
 }
 
@@ -462,12 +491,15 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { currentUser, isAdmin } = useAuth();
   const initialQ = searchParams.get("q") ?? "";
   const initialArea = normalizeAreaValue(searchParams.get("area"));
   const initialMinRating = parseMinRating(searchParams.get("minRating"));
   const initialSortBy = parseSortBy(searchParams.get("sort"));
 
   const { properties, loading, error } = useProperties(messages);
+  const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
+  const [deletedPropertyIds, setDeletedPropertyIds] = useState<Set<string>>(new Set());
 
   const [search, setSearch] = useState(initialQ);
   const [area, setArea] = useState(initialArea);
@@ -519,7 +551,47 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
 
   const filtered = usePropertySearch(properties, { search, area, minRating: minRating ?? 0 });
   const sorted = useMemo(() => sortProperties(filtered, sortBy), [filtered, sortBy]);
+  const visibleProperties = useMemo(
+    () => sorted.filter((property) => !deletedPropertyIds.has(property.id)),
+    [deletedPropertyIds, sorted],
+  );
   const hasActiveFilters = search.trim().length > 0 || area.trim().length > 0 || (minRating !== null && minRating > 0);
+
+  async function handleDeleteProperty(property: Property) {
+    const unauthorizedMessage = texts.adminDeletePropertyUnauthorized ?? "Kun administratorer kan slette boliger.";
+    const confirmMessage = texts.adminDeletePropertyConfirm ?? "Er du sikker på at du vil slette boligen og alle anmeldelsene?";
+    const successMessage = texts.adminDeletePropertySuccess ?? "Boligen og alle anmeldelser ble slettet.";
+    const errorMessage = texts.adminDeletePropertyError ?? "Kunne ikke slette bolig.";
+
+    if (!currentUser || !isAdmin) {
+      alert(unauthorizedMessage);
+      return;
+    }
+
+    const confirmed = window.confirm(confirmMessage);
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingPropertyId(property.id);
+    try {
+      const callerIdToken = await currentUser.getIdToken();
+      const result = await deletePropertyAction(property.id, callerIdToken);
+
+      if (!result.success) {
+        alert(result.error ?? errorMessage);
+        return;
+      }
+
+      setDeletedPropertyIds((prev) => new Set(prev).add(property.id));
+      alert(successMessage);
+    } catch (deleteError) {
+      console.error("Error deleting property:", deleteError);
+      alert(errorMessage);
+    } finally {
+      setDeletingPropertyId(null);
+    }
+  }
 
   function clearAllFilters() {
     setSearch("");
@@ -575,7 +647,7 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
               description1={texts.loadingDescription1}
               description2={texts.loadingDescription2}
             />
-          ) : sorted.length === 0 ? (
+          ) : visibleProperties.length === 0 ? (
             <PropertiesEmpty
               onClear={clearAllFilters}
               title={texts.emptyTitle}
@@ -584,7 +656,7 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
             />
           ) : (
             <div className="flex flex-col gap-6">
-              {sorted.map((p) => (
+              {visibleProperties.map((p) => (
                 <PropertyCard
                   key={p.id}
                   p={p}
@@ -592,6 +664,9 @@ export default function PropertiesClient({ texts, messages }: PropertiesClientPr
                   unknownPlace={texts.unknownPlace}
                   seeReviews={texts.seeReviews}
                   texts={texts}
+                  isAdmin={isAdmin}
+                  isDeleting={deletingPropertyId === p.id}
+                  onDeleteProperty={handleDeleteProperty}
                 />
               ))}
             </div>

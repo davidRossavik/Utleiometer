@@ -98,6 +98,11 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
           propertyTypeHouse: t("propertyTypeHouse"),
           propertyTypeApartment: t("propertyTypeApartment"),
           propertyTypeBedsit: t("propertyTypeBedsit"),
+          adminDeleteProperty: t("adminDeleteProperty"),
+          adminDeletePropertyConfirm: t("adminDeletePropertyConfirm"),
+          adminDeletePropertySuccess: t("adminDeletePropertySuccess"),
+          adminDeletePropertyError: t("adminDeletePropertyError"),
+          adminDeletePropertyUnauthorized: t("adminDeletePropertyUnauthorized"),
           reviewSubmittedSuccess: t("messages.reviewSubmittedSuccess"),
           propertySubmittedSuccess: t("messages.propertySubmittedSuccess"),
         }}

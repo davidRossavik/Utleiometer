@@ -11,6 +11,7 @@ import { LikeButton } from "./LikeButton";
 interface ReviewCardProps {
     review: Review;
     currentUserId?: string;
+    isAdmin?: boolean;
     onSave: (updated: Review) => void;
     onDelete: (reviewId: string) => void;
     onToggleLike: (reviewId: string) => Promise<void>;
@@ -38,12 +39,13 @@ function formatDate(ts: any) {
     return d.toLocaleDateString("no-NO", { year: "numeric", month: "short", day: "numeric" });
 }
 
-export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLike, texts }: ReviewCardProps) {
+export function ReviewCard({ review, currentUserId, isAdmin, onSave, onDelete, onToggleLike, texts }: ReviewCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const isOwner = Boolean(currentUserId && review.userId && review.userId === currentUserId);
-    const hasLiked = currentUserId ? review.likedBy?.includes(currentUserId) : false;
+    const canDelete = isOwner || Boolean(isAdmin);
+    const hasLiked = currentUserId ? Boolean(review.likedBy?.includes(currentUserId)) : false;
 
 
     function handleSave(updated: Review) {
@@ -128,7 +130,7 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
                     disabled={!currentUserId}
                 />
 
-                {isOwner && (
+                {canDelete && (
                     <div className="flex gap-2">
                         {showDeleteConfirm ? (
                             <>
@@ -142,9 +144,11 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
                             </>
                         ) : (
                             <>
-                                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                    {texts.edit}
-                                </Button>
+                                {isOwner ? (
+                                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                                        {texts.edit}
+                                    </Button>
+                                ) : null}
                                 <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
                                     {texts.delete}
                                 </Button>
