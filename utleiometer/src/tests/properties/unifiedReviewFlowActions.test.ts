@@ -29,6 +29,7 @@ function buildBaseReviewFormData() {
   formData.append("zipCode", "7030");
   formData.append("city", "Trondheim");
   formData.append("registeredByUid", "user-1");
+  formData.append("userDisplayName", "ola_nordmann");
   formData.append("ratingLocation", "4");
   formData.append("ratingNoise", "4");
   formData.append("ratingLandlord", "4");
@@ -90,7 +91,7 @@ describe("unified review flow actions", () => {
     expect(result).toEqual({ propertyId: "existing-1" });
     expect(propertiesLib.createProperty).not.toHaveBeenCalled();
     expect(reviewsLib.createReview).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: "user-1", propertyId: "existing-1" }),
+      expect.objectContaining({ userId: "user-1", userDisplayName: "ola_nordmann", propertyId: "existing-1" }),
     );
   });
 
@@ -125,7 +126,7 @@ describe("unified review flow actions", () => {
     expect(result).toEqual({ propertyId: "new-1" });
     expect(propertiesLib.createProperty).toHaveBeenCalledTimes(1);
     expect(reviewsLib.createReview).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: "user-1", propertyId: "new-1" }),
+      expect.objectContaining({ userId: "user-1", userDisplayName: "ola_nordmann", propertyId: "new-1" }),
     );
   });
 
@@ -157,7 +158,7 @@ describe("unified review flow actions", () => {
     expect(submitResult).toEqual({ propertyId: "late-existing" });
     expect(propertiesLib.createProperty).not.toHaveBeenCalled();
     expect(reviewsLib.createReview).toHaveBeenCalledWith(
-      expect.objectContaining({ propertyId: "late-existing" }),
+      expect.objectContaining({ userDisplayName: "ola_nordmann", propertyId: "late-existing" }),
     );
   });
 });

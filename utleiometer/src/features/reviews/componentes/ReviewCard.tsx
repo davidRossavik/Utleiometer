@@ -44,6 +44,7 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
 
     const isOwner = Boolean(currentUserId && review.userId && review.userId === currentUserId);
     const hasLiked = currentUserId ? review.likedBy?.includes(currentUserId) : false;
+    const reviewHeading = review.userDisplayName?.trim() || texts.defaultTitle;
 
 
     function handleSave(updated: Review) {
@@ -79,7 +80,7 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
         <Card className="transition-shadow hover:shadow-md">
             <CardHeader>
                 <CardTitle className="text-xl text-blue-700">
-                    {review.title?.trim() ? review.title : texts.defaultTitle}
+                    {reviewHeading}
                 </CardTitle>
                 <CardDescription>
                     <span className="mr-2">{texts.overall}</span>
@@ -89,7 +90,6 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
                         className="inline-flex"
                         showDecimalLabel
                     />
-                    {review.userDisplayName ? `• ${review.userDisplayName}` : null}
                     {review.createdAt ? ` • ${formatDate(review.createdAt)}` : null}
                 </CardDescription>
             </CardHeader>
