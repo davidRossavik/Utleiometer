@@ -1,7 +1,7 @@
 "use server"; 
 
 import { createReview, updateReview, deleteReview } from "@/lib/firebase/reviews";
-import { adminDb, FieldValue } from "@/lib/firebase/admin";
+import { adminAuth, adminDb, FieldValue } from "@/lib/firebase/admin";
 import type { ReviewRatings } from "@/features/reviews/types";
 
 function parseCategoryRating(formData: FormData, key: string) {
@@ -44,7 +44,6 @@ export async function createReviewAction(formData: FormData) {
             userId,
             propertyId,
             rating: ratings.overall, // legacy support
-            ratings,
             comment: comment.trim(),
         });
         console.log("Review created successfully:", newReview);

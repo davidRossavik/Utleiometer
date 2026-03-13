@@ -7,6 +7,7 @@ export interface Review {
     userId: string;
     propertyId: string;
     rating: number;
+    ratings?: ReviewRatings;
     comment: string;
     title?: string;
     createdAt: Date;
