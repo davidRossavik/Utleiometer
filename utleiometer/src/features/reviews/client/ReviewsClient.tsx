@@ -258,6 +258,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
 
     const [reviewSearch, setReviewSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("newest");
+    const [optimisticLikes, setOptimisticLikes] = useState<Record<string, { count: number; liked: boolean }>>({});
 
     async function handleSaveReview(updated: Review) {
         try {
@@ -307,26 +308,44 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
             return;
         }
 
+        const review = reviews?.find(r => r.id === reviewId);
+        const serverCount = review?.likeCount ?? 0;
+        const serverLiked = review?.likedBy?.includes(currentUser.uid) ?? false;
+        const prev = optimisticLikes[reviewId] ?? { count: serverCount, liked: serverLiked };
+        const next = { count: prev.liked ? prev.count - 1 : prev.count + 1, liked: !prev.liked };
+
+        setOptimisticLikes(o => ({ ...o, [reviewId]: next }));
+
         try {
             const result = await toggleLikeReviewAction(reviewId, currentUser.uid);
-            
-            if (result.error) {
-                alert(`Feil: ${result.error}`);
-                throw new Error(result.error); // Throw error so LikeButton can revert
-            }
 
-            // No refetch needed - LikeButton handles optimistic update
-            // Data will sync from DB on next page load
+            if (result.error) {
+                setOptimisticLikes(o => ({ ...o, [reviewId]: prev }));
+                alert(`Feil: ${result.error}`);
+                throw new Error(result.error);
+            }
         } catch (error) {
+            setOptimisticLikes(o => ({ ...o, [reviewId]: prev }));
             console.error("Toggle like failed:", error);
-            throw error; // Re-throw so LikeButton can revert optimistic update
+            throw error;
         }
     }
 
+    const visibleReviews = useMemo(() =>
+        (reviews ?? []).map(r => {
+            const opt = optimisticLikes[r.id];
+            if (!opt) return r;
+            const likedBy = opt.liked
+                ? [...(r.likedBy ?? []).filter(id => id !== currentUser?.uid), currentUser!.uid]
+                : (r.likedBy ?? []).filter(id => id !== currentUser?.uid);
+            return { ...r, likeCount: opt.count, likedBy };
+        }),
+    [reviews, optimisticLikes, currentUser]);
+
     const visible = useMemo(() => {
-        const filtered = filterReviews(reviews ?? [], reviewSearch);
+        const filtered = filterReviews(visibleReviews, reviewSearch);
         return sortReviews(filtered, sort);
-    }, [reviews, reviewSearch, sort]);
+    }, [visibleReviews, reviewSearch, sort]);
 
     const subtitle = useMemo(
         () => buildSubtitle(fetchedProperty, texts.unknownProperty),
