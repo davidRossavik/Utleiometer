@@ -15,9 +15,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
 import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
-import PropertyMap from "@/ui/map/propertyMap";
+import dynamic from "next/dynamic";
 
-type SortKey = "newest" | "oldest" | "likes_desc" | "overall_desc" | "location_desc" | "noise_desc" | "landlord_desc" | "condition_desc"
+const PropertyMap = dynamic(() => import("@/ui/map/propertyMap"), { ssr: false });
+
+type SortKey = "newest" | "oldest" | "overall_desc" | "likes_desc"
 
 export type ReviewsClientTexts = {
     badge: string;
@@ -68,12 +70,8 @@ export type ReviewsClientTexts = {
     sortByLabel: string;
     sortByNewest: string;
     sortByOldest: string;
-    sortByLikes: string;
     sortByOverall: string;
-    sortByLocation: string;
-    sortByNoise: string;
-    sortByLandlord: string;
-    sortByCondition: string;
+    sortByLikes: string;
 };
 
 export type ReviewsClientMessages = {
@@ -107,26 +105,16 @@ function sortReviews(reviews: Review[], sort: SortKey) {
 
     const getDateMs = (r: Review) => (r.createdAt?.toDate ? r.createdAt.toDate().getTime() : 0);
     const getOverall = (r: Review) => r.ratings?.overall ?? r.rating ?? 0;
-    const getRating = (r: Review, key: "location" | "noise" | "landlord" | "condition") =>
-        r.ratings?.[key] ?? 0;
 
     switch (sort) {
         case "newest":
             return copy.sort((a, b) => getDateMs(b) - getDateMs(a));
         case "oldest":
             return copy.sort((a, b) => getDateMs(a) - getDateMs(b));
-        case "likes_desc":
-            return copy.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
         case "overall_desc":
             return copy.sort((a, b) => getOverall(b) - getOverall(a));
-        case "location_desc":
-            return copy.sort((a, b) => getRating(b, "location") - getRating(a, "location"));
-        case "noise_desc":
-            return copy.sort((a, b) => getRating(b, "noise") - getRating(a, "noise"));
-        case "landlord_desc":
-            return copy.sort((a, b) => getRating(b, "landlord") - getRating(a, "landlord"));
-        case "condition_desc":
-            return copy.sort((a, b) => getRating(b, "condition") - getRating(a, "condition"));
+        case "likes_desc":
+            return copy.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
         default:
             return copy;
     }
@@ -502,12 +490,8 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                     >
                         <option value="newest">{texts.sortByNewest}</option>
                         <option value="oldest">{texts.sortByOldest}</option>
-                        <option value="likes_desc">{texts.sortByLikes}</option>
                         <option value="overall_desc">{texts.sortByOverall}</option>
-                        <option value="location_desc">{texts.sortByLocation}</option>
-                        <option value="noise_desc">{texts.sortByNoise}</option>
-                        <option value="landlord_desc">{texts.sortByLandlord}</option>
-                        <option value="condition_desc">{texts.sortByCondition}</option>
+                        <option value="likes_desc">{texts.sortByLikes}</option>
                     </select>
                     </div>
                 </div>

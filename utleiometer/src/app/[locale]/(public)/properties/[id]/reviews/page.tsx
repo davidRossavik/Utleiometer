@@ -103,12 +103,8 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
           sortByLabel: t("sortByLabel"),
           sortByNewest: t("sortByNewest"),
           sortByOldest: t("sortByOldest"),
-          sortByLikes: t("sortByLikes"),
           sortByOverall: t("sortByOverall"),
-          sortByLocation: t("sortByLocation"),
-          sortByNoise: t("sortByNoise"),
-          sortByLandlord: t("sortByLandlord"),
-          sortByCondition: t("sortByCondition"),
+          sortByLikes: t("sortByLikes"),
         }}
         messages={{
           loadReviewsError: t("messages.loadReviewsError"),
