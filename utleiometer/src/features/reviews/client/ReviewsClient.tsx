@@ -17,7 +17,7 @@ import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
 import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
 import PropertyMap from "@/ui/map/propertyMap";
 
-type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
+type SortKey = "newest" | "oldest" | "likes_desc" | "overall_desc" | "location_desc" | "noise_desc" | "landlord_desc" | "condition_desc"
 
 export type ReviewsClientTexts = {
     badge: string;
@@ -65,6 +65,15 @@ export type ReviewsClientTexts = {
     propertyTypeBedsit: string;
     reviewSubmittedSuccess: string;
     propertySubmittedSuccess: string;
+    sortByLabel: string;
+    sortByNewest: string;
+    sortByOldest: string;
+    sortByLikes: string;
+    sortByOverall: string;
+    sortByLocation: string;
+    sortByNoise: string;
+    sortByLandlord: string;
+    sortByCondition: string;
 };
 
 export type ReviewsClientMessages = {
@@ -97,12 +106,27 @@ function sortReviews(reviews: Review[], sort: SortKey) {
     const copy = [...reviews];
 
     const getDateMs = (r: Review) => (r.createdAt?.toDate ? r.createdAt.toDate().getTime() : 0);
+    const getOverall = (r: Review) => r.ratings?.overall ?? r.rating ?? 0;
+    const getRating = (r: Review, key: "location" | "noise" | "landlord" | "condition") =>
+        r.ratings?.[key] ?? 0;
 
     switch (sort) {
         case "newest":
             return copy.sort((a, b) => getDateMs(b) - getDateMs(a));
         case "oldest":
             return copy.sort((a, b) => getDateMs(a) - getDateMs(b));
+        case "likes_desc":
+            return copy.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
+        case "overall_desc":
+            return copy.sort((a, b) => getOverall(b) - getOverall(a));
+        case "location_desc":
+            return copy.sort((a, b) => getRating(b, "location") - getRating(a, "location"));
+        case "noise_desc":
+            return copy.sort((a, b) => getRating(b, "noise") - getRating(a, "noise"));
+        case "landlord_desc":
+            return copy.sort((a, b) => getRating(b, "landlord") - getRating(a, "landlord"));
+        case "condition_desc":
+            return copy.sort((a, b) => getRating(b, "condition") - getRating(a, "condition"));
         default:
             return copy;
     }
@@ -461,8 +485,8 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         </div>
                     </div>
 
-                    {/* SEARCH IN REVIEWS */}
-                    <div className="mt-6">
+                    {/* SEARCH AND SORT */}
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <Input
                         id="review-search"
                         placeholder={texts.searchPlaceholder}
@@ -470,6 +494,21 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         value={reviewSearch}
                         onChange={(e) => setReviewSearch(e.target.value)}
                     />
+                    <select
+                        value={sort}
+                        onChange={(e) => setSort(e.target.value as SortKey)}
+                        aria-label={texts.sortByLabel}
+                        className="h-12 rounded-md border border-input bg-background px-3 text-sm sm:w-56 shrink-0"
+                    >
+                        <option value="newest">{texts.sortByNewest}</option>
+                        <option value="oldest">{texts.sortByOldest}</option>
+                        <option value="likes_desc">{texts.sortByLikes}</option>
+                        <option value="overall_desc">{texts.sortByOverall}</option>
+                        <option value="location_desc">{texts.sortByLocation}</option>
+                        <option value="noise_desc">{texts.sortByNoise}</option>
+                        <option value="landlord_desc">{texts.sortByLandlord}</option>
+                        <option value="condition_desc">{texts.sortByCondition}</option>
+                    </select>
                     </div>
                 </div>
                 </section>

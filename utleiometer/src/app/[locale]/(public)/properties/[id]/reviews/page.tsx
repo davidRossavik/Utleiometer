@@ -100,6 +100,15 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
           propertyTypeBedsit: t("propertyTypeBedsit"),
           reviewSubmittedSuccess: t("messages.reviewSubmittedSuccess"),
           propertySubmittedSuccess: t("messages.propertySubmittedSuccess"),
+          sortByLabel: t("sortByLabel"),
+          sortByNewest: t("sortByNewest"),
+          sortByOldest: t("sortByOldest"),
+          sortByLikes: t("sortByLikes"),
+          sortByOverall: t("sortByOverall"),
+          sortByLocation: t("sortByLocation"),
+          sortByNoise: t("sortByNoise"),
+          sortByLandlord: t("sortByLandlord"),
+          sortByCondition: t("sortByCondition"),
         }}
         messages={{
           loadReviewsError: t("messages.loadReviewsError"),
