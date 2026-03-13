@@ -400,12 +400,28 @@ function PropertyCard({
   return (
       <Card className="transition-all hover:shadow-lg hover:shadow-blue-100/50">
         <CardHeader>
-          <CardTitle className="text-xl text-blue-700">
-            <Link href={`/properties/${p.id}/reviews`} className="hover:underline">
-              {displayAddress}
-            </Link>
-          </CardTitle>
-          <CardDescription>{displayPlace}</CardDescription>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-xl text-blue-700">
+                <Link href={`/properties/${p.id}/reviews`} className="hover:underline">
+                  {displayAddress}
+                </Link>
+              </CardTitle>
+              <CardDescription>{displayPlace}</CardDescription>
+            </div>
+
+            {isAdmin ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDeleteProperty(p)}
+                disabled={isDeleting}
+                className="shrink-0"
+              >
+                {isDeleting ? `${deleteLabel}...` : deleteLabel}
+              </Button>
+            ) : null}
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-4 pt-0">
@@ -462,20 +478,7 @@ function PropertyCard({
               </div>
             </div>
 
-            <div className="mt-3 flex items-center justify-between">
-              {isAdmin ? (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDeleteProperty(p)}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? `${deleteLabel}...` : deleteLabel}
-                </Button>
-              ) : (
-                <span />
-              )}
-
+            <div className="mt-3 flex items-center justify-end">
               <Link href={`/properties/${p.id}/reviews`} className="text-sm font-medium text-blue-700 hover:underline">
                 {seeReviews} -&gt;
               </Link>
