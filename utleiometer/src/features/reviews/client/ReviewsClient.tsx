@@ -14,7 +14,7 @@ import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
-import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
+import { updateReviewAction, deleteReviewAction, reportReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
 import PropertyMap from "@/ui/map/propertyMap";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
@@ -47,6 +47,14 @@ export type ReviewsClientTexts = {
     reviewDeleteNo: string;
     reviewEdit: string;
     reviewDelete: string;
+    reviewReport: string;
+    reviewReportReasonLabel: string;
+    reviewReportReasonPlaceholder: string;
+    reviewReportSubmit: string;
+    reviewReportCancel: string;
+    reviewReportSubmitted: string;
+    reviewReportAlreadySubmitted: string;
+    reviewReportFailed: string;
     propertyDetailsTitle: string;
     propertyTypeLabel: string;
     areaSqmLabel: string;
@@ -311,6 +319,28 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         }
     }
 
+    async function handleReportReview(reviewId: string, reason?: string) {
+        if (!currentUser) {
+            return { error: "Du må være innlogget for å rapportere anmeldelser" };
+        }
+
+        try {
+            const result = await reportReviewAction(reviewId, currentUser.uid, propertyId, reason);
+
+            if (result.error) {
+                return { error: result.error };
+            }
+
+            return {
+                success: true,
+                alreadyReported: Boolean(result.alreadyReported),
+            };
+        } catch (error) {
+            console.error("Report review failed:", error);
+            return { error: texts.reviewReportFailed };
+        }
+    }
+
     const visible = useMemo(() => {
         const filtered = filterReviews(reviews ?? [], reviewSearch);
         return sortReviews(filtered, sort);
@@ -516,6 +546,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             onSave={handleSaveReview}
                             onDelete={handleDeleteReview}
                             onToggleLike={handleToggleLike}
+                            onReport={handleReportReview}
                             texts={{
                                 editTitle: texts.reviewEditTitle,
                                 defaultTitle: texts.reviewDefaultTitle,
@@ -531,6 +562,14 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                                 deleteNo: texts.reviewDeleteNo,
                                 edit: texts.reviewEdit,
                                 delete: texts.reviewDelete,
+                                report: texts.reviewReport,
+                                reportReasonLabel: texts.reviewReportReasonLabel,
+                                reportReasonPlaceholder: texts.reviewReportReasonPlaceholder,
+                                reportSubmit: texts.reviewReportSubmit,
+                                reportCancel: texts.reviewReportCancel,
+                                reportSubmitted: texts.reviewReportSubmitted,
+                                reportAlreadySubmitted: texts.reviewReportAlreadySubmitted,
+                                reportFailed: texts.reviewReportFailed,
                             }}
                         />
                         ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Review } from "@/features/reviews/types";
 import { Button } from "@/ui/primitives/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/ui/feedback/card";
@@ -8,12 +8,19 @@ import { EditReviewForm } from "./EditReviewForm";
 import { StarRatingDisplay } from "./StarRatingDisplay";
 import { LikeButton } from "./LikeButton";
 
+type ReportReviewResult = {
+    success?: boolean;
+    alreadyReported?: boolean;
+    error?: string;
+};
+
 interface ReviewCardProps {
     review: Review;
     currentUserId?: string;
     onSave: (updated: Review) => void;
     onDelete: (reviewId: string) => void;
     onToggleLike: (reviewId: string) => Promise<void>;
+    onReport?: (reviewId: string, reason?: string) => Promise<ReportReviewResult>;
     texts: {
         editTitle: string;
         defaultTitle: string;
@@ -29,6 +36,14 @@ interface ReviewCardProps {
         deleteNo: string;
         edit: string;
         delete: string;
+        report?: string;
+        reportReasonLabel?: string;
+        reportReasonPlaceholder?: string;
+        reportSubmit?: string;
+        reportCancel?: string;
+        reportSubmitted?: string;
+        reportAlreadySubmitted?: string;
+        reportFailed?: string;
     };
 }
 
@@ -38,13 +53,26 @@ function formatDate(ts: any) {
     return d.toLocaleDateString("no-NO", { year: "numeric", month: "short", day: "numeric" });
 }
 
-export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLike, texts }: ReviewCardProps) {
+export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLike, onReport, texts }: ReviewCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showReportForm, setShowReportForm] = useState(false);
+    const [reportReason, setReportReason] = useState("");
+    const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+    const [reportMessage, setReportMessage] = useState<string | null>(null);
 
     const isOwner = Boolean(currentUserId && review.userId && review.userId === currentUserId);
-    const hasLiked = currentUserId ? review.likedBy?.includes(currentUserId) : false;
+    const hasLiked = currentUserId ? Boolean(review.likedBy?.includes(currentUserId)) : false;
+    const canReport = Boolean(currentUserId && !isOwner && onReport);
     const reviewHeading = review.userDisplayName?.trim() || texts.defaultTitle;
+    const reportLabel = texts.report ?? "Report review";
+    const reportReasonLabel = texts.reportReasonLabel ?? "Reason for report";
+    const reportReasonPlaceholder = texts.reportReasonPlaceholder ?? "Optional: describe the issue";
+    const reportSubmitText = texts.reportSubmit ?? "Submit report";
+    const reportCancelText = texts.reportCancel ?? "Cancel";
+    const reportSubmittedText = texts.reportSubmitted ?? "Report submitted";
+    const reportAlreadySubmittedText = texts.reportAlreadySubmitted ?? "You already reported this review";
+    const reportFailedText = texts.reportFailed ?? "Could not submit report";
 
 
     function handleSave(updated: Review) {
@@ -55,6 +83,42 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
     function handleDelete() {
         onDelete(review.id);
         setShowDeleteConfirm(false);
+    }
+
+    function handleOpenReport() {
+        setShowReportForm(true);
+        setReportMessage(null);
+    }
+
+    function handleCancelReport() {
+        if (isSubmittingReport) return;
+        setShowReportForm(false);
+        setReportReason("");
+    }
+
+    async function handleSubmitReport(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!onReport) return;
+
+        setIsSubmittingReport(true);
+        setReportMessage(null);
+
+        try {
+            const result = await onReport(review.id, reportReason.trim());
+
+            if (result?.error) {
+                setReportMessage(result.error);
+                return;
+            }
+
+            setReportMessage(result?.alreadyReported ? reportAlreadySubmittedText : reportSubmittedText);
+            setShowReportForm(false);
+            setReportReason("");
+        } catch {
+            setReportMessage(reportFailedText);
+        } finally {
+            setIsSubmittingReport(false);
+        }
     }
 
     // Redigeringsmodus
@@ -117,9 +181,44 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {review.comment?.trim() ? review.comment : texts.emptyComment}
                 </p>
+
+                {canReport && showReportForm ? (
+                    <form onSubmit={handleSubmitReport} className="mt-4 rounded-md border p-3">
+                        <label htmlFor={`report-reason-${review.id}`} className="mb-2 block text-sm font-medium">
+                            {reportReasonLabel}
+                        </label>
+                        <textarea
+                            id={`report-reason-${review.id}`}
+                            value={reportReason}
+                            onChange={(event) => setReportReason(event.target.value)}
+                            placeholder={reportReasonPlaceholder}
+                            className="min-h-[90px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+                        />
+                        <div className="mt-3 flex items-center gap-2">
+                            <Button type="submit" size="sm" disabled={isSubmittingReport}>
+                                {reportSubmitText}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleCancelReport}
+                                disabled={isSubmittingReport}
+                            >
+                                {reportCancelText}
+                            </Button>
+                        </div>
+                    </form>
+                ) : null}
+
+                {canReport && reportMessage ? (
+                    <p className="mt-3 text-sm text-muted-foreground" role="status" aria-live="polite">
+                        {reportMessage}
+                    </p>
+                ) : null}
             </CardContent>
 
-            <CardFooter className="flex justify-between items-center">
+            <CardFooter className="flex flex-wrap items-center justify-between gap-2">
                 <LikeButton
                     reviewId={review.id}
                     initialLikeCount={review.likeCount || 0}
@@ -128,30 +227,38 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, onToggleLi
                     disabled={!currentUserId}
                 />
 
-                {isOwner && (
-                    <div className="flex gap-2">
-                        {showDeleteConfirm ? (
-                            <>
-                                <span className="text-sm text-red-600 mr-2">{texts.confirmDelete}</span>
-                                <Button variant="destructive" size="sm" onClick={handleDelete}>
-                                    {texts.deleteYes}
-                                </Button>
-                                <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)}>
-                                    {texts.deleteNo}
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                    {texts.edit}
-                                </Button>
-                                <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
-                                    {texts.delete}
-                                </Button>
-                            </>
-                        )}
-                    </div>
-                )}
+                <div className="flex items-center gap-2">
+                    {canReport && !showReportForm ? (
+                        <Button variant="outline" size="sm" onClick={handleOpenReport}>
+                            {reportLabel}
+                        </Button>
+                    ) : null}
+
+                    {isOwner && (
+                        <div className="flex gap-2">
+                            {showDeleteConfirm ? (
+                                <>
+                                    <span className="text-sm text-red-600 mr-2">{texts.confirmDelete}</span>
+                                    <Button variant="destructive" size="sm" onClick={handleDelete}>
+                                        {texts.deleteYes}
+                                    </Button>
+                                    <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                                        {texts.deleteNo}
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                                        {texts.edit}
+                                    </Button>
+                                    <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                                        {texts.delete}
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
             </CardFooter>
         </Card>
     );

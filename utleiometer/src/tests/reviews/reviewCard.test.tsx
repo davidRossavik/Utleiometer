@@ -21,6 +21,14 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
     deleteNo: "Avbryt",
     edit: "Rediger",
     delete: "Slett",
+    report: "Rapporter",
+    reportReasonLabel: "Hvorfor rapporterer du denne anmeldelsen?",
+    reportReasonPlaceholder: "Valgfritt",
+    reportSubmit: "Send rapport",
+    reportCancel: "Avbryt",
+    reportSubmitted: "Rapport sendt",
+    reportAlreadySubmitted: "Allerede rapportert",
+    reportFailed: "Kunne ikke sende",
   };
 
   const mockReview: Review = {
@@ -276,6 +284,68 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
       fireEvent.click(screen.getByText("Ja, slett"));
 
       expect(onDelete).toHaveBeenCalledWith("review123");
+    });
+  });
+
+  describe("Report Functionality", () => {
+    it("shows report button for logged in non-owner", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="other-user"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          onReport={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.getByText("Rapporter")).toBeInTheDocument();
+    });
+
+    it("does not show report button for review owner", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="user123"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          onReport={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.queryByText("Rapporter")).not.toBeInTheDocument();
+    });
+
+    it("submits report reason and shows success message", async () => {
+      const onReport = vi.fn().mockResolvedValue({ success: true });
+
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="other-user"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          onReport={onReport}
+          texts={mockTexts}
+        />
+      );
+
+      fireEvent.click(screen.getByText("Rapporter"));
+
+      const reasonInput = screen.getByLabelText("Hvorfor rapporterer du denne anmeldelsen?");
+      fireEvent.change(reasonInput, { target: { value: "Misvisende innhold" } });
+      fireEvent.click(screen.getByText("Send rapport"));
+
+      await waitFor(() => {
+        expect(onReport).toHaveBeenCalledWith("review123", "Misvisende innhold");
+      });
+
+      expect(screen.getByText("Rapport sendt")).toBeInTheDocument();
     });
   });
 });

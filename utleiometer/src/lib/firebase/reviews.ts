@@ -8,12 +8,25 @@ export interface Review {
     userDisplayName?: string;
     propertyId: string;
     rating: number;
+    ratings?: ReviewRatings;
     comment: string;
     title?: string;
     createdAt: Date;
     updatedAt?: Date;
     likedBy?: string[];
     likeCount?: number; 
+}
+
+export interface ReviewReport {
+    reportId: string;
+    reviewId: string;
+    reporterUserId: string;
+    propertyId: string;
+    reviewUserId?: string;
+    reason?: string;
+    status: "pending" | "resolved" | "dismissed";
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
 export async function createReview(data: Omit<Review, "reviewId" | "createdAt">) {
@@ -83,4 +96,37 @@ export async function deleteReviewsByPropertyId(propertyId: string) {
     
     await batch.commit();
     return { deletedCount: snapshot.docs.length };
+}
+
+export async function createReviewReport(data: {
+    reviewId: string;
+    reporterUserId: string;
+    propertyId: string;
+    reviewUserId?: string;
+    reason?: string;
+}) {
+    const reportId = `${data.reviewId}_${data.reporterUserId}`;
+    const reportRef = adminDb.collection("reviewReports").doc(reportId);
+    const existingReport = await reportRef.get();
+
+    if (existingReport.exists) {
+        return { reportId, alreadyReported: true as const };
+    }
+
+    const reportData: Record<string, unknown> = {
+        reviewId: data.reviewId,
+        reporterUserId: data.reporterUserId,
+        propertyId: data.propertyId,
+        reviewUserId: data.reviewUserId,
+        reason: data.reason?.trim() ?? "",
+        status: "pending",
+        createdAt: new Date(),
+    };
+
+    Object.keys(reportData).forEach((key) => {
+        if (reportData[key] === undefined) delete reportData[key];
+    });
+
+    await reportRef.set(reportData);
+    return { reportId, alreadyReported: false as const };
 }
