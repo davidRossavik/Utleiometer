@@ -131,28 +131,30 @@ export async function fetchProperties(): Promise<Property[]> {
         }
     });
 
-    return propertySnap.docs.map((d) => {
-        const aggregate = ratingsByProperty.get(d.id);
-        const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
-        const ratingCount = aggregate?.overall.count ?? 0;
+    return propertySnap.docs
+        .map((d) => {
+            const aggregate = ratingsByProperty.get(d.id);
+            const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
+            const ratingCount = aggregate?.overall.count ?? 0;
 
-        return {
-            id: d.id,
-            ...(d.data() as Omit<Property, "id">),
-            ratingAvg,
-            ratingCount,
-            latestReviewAt: latestReviewAtByProperty.get(d.id),
-            ratingsSummary: aggregate
-                ? {
-                    overall: averageValue(aggregate.overall),
-                    location: averageValue(aggregate.location),
-                    noise: averageValue(aggregate.noise),
-                    landlord: averageValue(aggregate.landlord),
-                    condition: averageValue(aggregate.condition),
-                }
-                : undefined,
-        };
-    });
+            return {
+                id: d.id,
+                ...(d.data() as Omit<Property, "id">),
+                ratingAvg,
+                ratingCount,
+                latestReviewAt: latestReviewAtByProperty.get(d.id),
+                ratingsSummary: aggregate
+                    ? {
+                        overall: averageValue(aggregate.overall),
+                        location: averageValue(aggregate.location),
+                        noise: averageValue(aggregate.noise),
+                        landlord: averageValue(aggregate.landlord),
+                        condition: averageValue(aggregate.condition),
+                    }
+                    : undefined,
+            };
+        })
+        .filter((p) => p.ratingCount > 0);
 }
 
 export async function fetchPropertyById(propertyId: string): Promise<Property | null> {
