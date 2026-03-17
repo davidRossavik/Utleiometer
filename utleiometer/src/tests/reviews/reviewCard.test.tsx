@@ -127,6 +127,23 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
       expect(screen.queryByText("Slett")).not.toBeInTheDocument();
     });
 
+    it("should show delete but not edit when admin is not the owner", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="otherUser"
+          isAdmin
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.queryByText("Rediger")).not.toBeInTheDocument();
+      expect(screen.getByText("Slett")).toBeInTheDocument();
+    });
+
     it("should NOT show edit and delete buttons when no user is logged in", () => {
       render(
         <ReviewCard

@@ -2,8 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 let submittedParam: string | null = null;
+const mockRouter = {
+  push: vi.fn(),
+  refresh: vi.fn(),
+};
 
 vi.mock("next/navigation", () => ({
+  useRouter: () => mockRouter,
   useSearchParams: () => ({
     get: (key: string) => (key === "submitted" ? submittedParam : null),
   }),
@@ -24,6 +29,12 @@ vi.mock("@/features/properties/data/fetchProperties", () => ({
 vi.mock("@/app/[locale]/actions/reviews", () => ({
   updateReviewAction: vi.fn(),
   deleteReviewAction: vi.fn(),
+  reportReviewAction: vi.fn(),
+  toggleLikeReviewAction: vi.fn(),
+}));
+
+vi.mock("@/app/[locale]/actions/properties", () => ({
+  deletePropertyAction: vi.fn(),
 }));
 
 import ReviewsClient from "@/features/reviews/client/ReviewsClient";
@@ -80,6 +91,11 @@ const texts = {
   propertyTypeHouse: "House",
   propertyTypeApartment: "Apartment",
   propertyTypeBedsit: "Bedsit",
+  adminDeleteProperty: "Delete property",
+  adminDeletePropertyConfirm: "Are you sure you want to delete this property?",
+  adminDeletePropertySuccess: "Property deleted",
+  adminDeletePropertyError: "Failed to delete property",
+  adminDeletePropertyUnauthorized: "Not authorized",
   reviewSubmittedSuccess: "Review submitted",
   propertySubmittedSuccess: "Property submitted",
 };

@@ -8,14 +8,15 @@ import { fetchPropertyById } from "@/features/properties/data/fetchProperties";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Badge } from "@/ui/feedback/badge";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
-import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction, reportReviewAction } from "@/app/[locale]/actions/reviews";
 import dynamic from "next/dynamic";
+import { updateReviewAction, deleteReviewAction, reportReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
+import { deletePropertyAction } from "@/app/[locale]/actions/properties";
 
 const PropertyMap = dynamic(() => import("@/ui/map/propertyMap"), { ssr: false });
 
@@ -73,6 +74,11 @@ export type ReviewsClientTexts = {
     propertyTypeHouse: string;
     propertyTypeApartment: string;
     propertyTypeBedsit: string;
+    adminDeleteProperty: string;
+    adminDeletePropertyConfirm: string;
+    adminDeletePropertySuccess: string;
+    adminDeletePropertyError: string;
+    adminDeletePropertyUnauthorized: string;
     reviewSubmittedSuccess: string;
     propertySubmittedSuccess: string;
     sortByLabel: string;
@@ -253,10 +259,12 @@ function computeRatingSummary(reviews: Review[]): RatingSummary {
 }
 
 export default function ReviewsClient({ propertyId, property, texts, messages }: ReviewsClientProps) {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const { reviews, loading, error, refetch } = useReviews({ propertyId, messages });
-    const { currentUser } = useAuth();
+    const { currentUser, isAdmin } = useAuth();
     const [fetchedProperty, setFetchedProperty] = useState<Property | null>(property);
+    const [isDeletingProperty, setIsDeletingProperty] = useState(false);
     
     useEffect(() => {
         if (!property && propertyId) {
@@ -295,7 +303,8 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
 
     async function handleDeleteReview(reviewId: string) {
         try {
-            const result = await deleteReviewAction(reviewId, propertyId);
+            const callerIdToken = isAdmin && currentUser ? await currentUser.getIdToken() : undefined;
+            const result = await deleteReviewAction(reviewId, propertyId, callerIdToken);
             
             if (result.error) {
                 alert(`Feil: ${result.error}`);
@@ -307,6 +316,38 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         } catch (error) {
             console.error("Delete failed:", error);
             alert("Kunne ikke slette anmeldelse");
+        }
+    }
+
+    async function handleDeleteProperty() {
+        if (!currentUser || !isAdmin) {
+            alert(texts.adminDeletePropertyUnauthorized);
+            return;
+        }
+
+        const confirmed = window.confirm(texts.adminDeletePropertyConfirm);
+        if (!confirmed) {
+            return;
+        }
+
+        setIsDeletingProperty(true);
+        try {
+            const callerIdToken = await currentUser.getIdToken();
+            const result = await deletePropertyAction(propertyId, callerIdToken);
+
+            if (!result.success) {
+                alert(result.error ?? texts.adminDeletePropertyError);
+                return;
+            }
+
+            alert(texts.adminDeletePropertySuccess);
+            router.push("/properties");
+            router.refresh();
+        } catch (error) {
+            console.error("Delete property failed:", error);
+            alert(texts.adminDeletePropertyError);
+        } finally {
+            setIsDeletingProperty(false);
         }
     }
 
@@ -443,6 +484,16 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         <Link href="/properties">{texts.toProperties}</Link>
                         </Button>
 
+                        {isAdmin && (
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeleteProperty}
+                            disabled={isDeletingProperty}
+                        >
+                            {isDeletingProperty ? `${texts.adminDeleteProperty}...` : texts.adminDeleteProperty}
+                        </Button>
+                        )}
+
                         {currentUser && (
                         <Button asChild>
                             <Link
@@ -570,6 +621,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             key={r.id}
                             review={r}
                             currentUserId={currentUser?.uid}
+                            isAdmin={isAdmin}
                             onSave={handleSaveReview}
                             onDelete={handleDeleteReview}
                             onToggleLike={handleToggleLike}

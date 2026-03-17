@@ -227,6 +227,11 @@
         "propertyTypeHouse": "Maison",
         "propertyTypeApartment": "Appartement",
         "propertyTypeBedsit": "Chambre",
+        "adminDeleteProperty": "Supprimer le logement",
+        "adminDeletePropertyConfirm": "Voulez-vous vraiment supprimer ce logement et tous les avis ? Cette action est irreversible.",
+        "adminDeletePropertySuccess": "Le logement et tous les avis ont ete supprimes.",
+        "adminDeletePropertyError": "Impossible de supprimer le logement.",
+        "adminDeletePropertyUnauthorized": "Seuls les administrateurs peuvent supprimer des logements.",
         "messages": {
             "loadPropertiesError": "Impossible de récupérer les logements"
         }
@@ -290,6 +295,11 @@
         "sortByOldest": "Plus ancien en premier",
         "sortByOverall": "Meilleure note globale",
         "sortByLikes": "Plus de likes",
+        "adminDeleteProperty": "Supprimer le logement",
+        "adminDeletePropertyConfirm": "Voulez-vous vraiment supprimer ce logement et tous les avis ? Cette action est irreversible.",
+        "adminDeletePropertySuccess": "Le logement et tous les avis ont ete supprimes.",
+        "adminDeletePropertyError": "Impossible de supprimer le logement.",
+        "adminDeletePropertyUnauthorized": "Seuls les administrateurs peuvent supprimer des logements.",
         "messages": {
             "loadReviewsError": "Impossible de récupérer les avis",
             "reviewSubmittedSuccess": "Votre avis a bien été envoyé.",
