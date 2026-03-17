@@ -236,7 +236,7 @@ export function ReviewCard({ review, currentUserId, isAdmin, onSave, onDelete, o
                         </Button>
                     ) : null}
 
-                 {isOwner && (
+                 {canDelete && (
                         <div className="flex gap-2">
                             {showDeleteConfirm ? (
                                 <>
@@ -250,9 +250,11 @@ export function ReviewCard({ review, currentUserId, isAdmin, onSave, onDelete, o
                                 </>
                             ) : (
                                 <>
-                                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                        {texts.edit}
-                                    </Button>
+                                    {isOwner ? (
+                                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                                            {texts.edit}
+                                        </Button>
+                                    ) : null}
                                     <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
                                         {texts.delete}
                                     </Button>
