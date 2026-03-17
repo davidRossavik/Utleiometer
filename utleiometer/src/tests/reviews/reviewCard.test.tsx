@@ -21,11 +21,20 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
     deleteNo: "Avbryt",
     edit: "Rediger",
     delete: "Slett",
+    report: "Rapporter",
+    reportReasonLabel: "Hvorfor rapporterer du denne anmeldelsen?",
+    reportReasonPlaceholder: "Valgfritt",
+    reportSubmit: "Send rapport",
+    reportCancel: "Avbryt",
+    reportSubmitted: "Rapport sendt",
+    reportAlreadySubmitted: "Allerede rapportert",
+    reportFailed: "Kunne ikke sende",
   };
 
   const mockReview: Review = {
     id: "review123",
     userId: "user123",
+    userDisplayName: "ola_nordmann",
     propertyId: "property456",
     ratings: {
       location: 4,
@@ -40,6 +49,52 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
   };
 
   describe("Ownership and Visibility", () => {
+    it("shows the author's username as the review heading", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="user123"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.getByText("ola_nordmann")).toBeInTheDocument();
+      expect(screen.queryByText("Anmeldelse")).not.toBeInTheDocument();
+    });
+
+    it("falls back to default title when username is missing", () => {
+      render(
+        <ReviewCard
+          review={{ ...mockReview, userDisplayName: undefined }}
+          currentUserId="user123"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.getByText("Anmeldelse")).toBeInTheDocument();
+    });
+
+    it("does not repeat the username in the metadata line", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="user123"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.getAllByText("ola_nordmann")).toHaveLength(1);
+    });
+
     it("should show edit and delete buttons when user owns the review", () => {
       render(
         <ReviewCard
@@ -47,6 +102,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -62,6 +118,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="otherUser"
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -77,6 +134,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId={undefined}
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -94,6 +152,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -112,6 +171,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -137,6 +197,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={onSave}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -166,6 +227,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -185,6 +247,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={vi.fn()}
           onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -209,6 +272,7 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
           currentUserId="user123"
           onSave={vi.fn()}
           onDelete={onDelete}
+          onToggleLike={vi.fn()}
           texts={mockTexts}
         />
       );
@@ -220,6 +284,68 @@ describe("ReviewCard - Edit and Delete Own Review", () => {
       fireEvent.click(screen.getByText("Ja, slett"));
 
       expect(onDelete).toHaveBeenCalledWith("review123");
+    });
+  });
+
+  describe("Report Functionality", () => {
+    it("shows report button for logged in non-owner", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="other-user"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          onReport={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.getByText("Rapporter")).toBeInTheDocument();
+    });
+
+    it("does not show report button for review owner", () => {
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="user123"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          onReport={vi.fn()}
+          texts={mockTexts}
+        />
+      );
+
+      expect(screen.queryByText("Rapporter")).not.toBeInTheDocument();
+    });
+
+    it("submits report reason and shows success message", async () => {
+      const onReport = vi.fn().mockResolvedValue({ success: true });
+
+      render(
+        <ReviewCard
+          review={mockReview}
+          currentUserId="other-user"
+          onSave={vi.fn()}
+          onDelete={vi.fn()}
+          onToggleLike={vi.fn()}
+          onReport={onReport}
+          texts={mockTexts}
+        />
+      );
+
+      fireEvent.click(screen.getByText("Rapporter"));
+
+      const reasonInput = screen.getByLabelText("Hvorfor rapporterer du denne anmeldelsen?");
+      fireEvent.change(reasonInput, { target: { value: "Misvisende innhold" } });
+      fireEvent.click(screen.getByText("Send rapport"));
+
+      await waitFor(() => {
+        expect(onReport).toHaveBeenCalledWith("review123", "Misvisende innhold");
+      });
+
+      expect(screen.getByText("Rapport sendt")).toBeInTheDocument();
     });
   });
 });

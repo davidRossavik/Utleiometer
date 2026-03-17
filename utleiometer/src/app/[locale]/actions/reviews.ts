@@ -1,6 +1,6 @@
 "use server"; 
 
-import { createReview, updateReview, deleteReview } from "@/lib/firebase/reviews";
+import { createReview, createReviewReport, updateReview, deleteReview } from "@/lib/firebase/reviews";
 import { adminAuth, adminDb, FieldValue } from "@/lib/firebase/admin";
 import type { ReviewRatings } from "@/features/reviews/types";
 
@@ -30,6 +30,7 @@ export async function createReviewAction(formData: FormData) {
     const userId = formData.get("userId") as string;
     const propertyId = formData.get("propertyId") as string;
     const comment = formData.get("comment") as string;
+    const userDisplayName = (formData.get("userDisplayName") as string | null)?.trim() ?? "";
     const ratings = buildRatings(formData);
 
     console.log("createReviewAction called with:", { userId, propertyId, ratings, comment });
@@ -43,6 +44,7 @@ export async function createReviewAction(formData: FormData) {
         const newReview = await createReview({
             userId,
             propertyId,
+            userDisplayName: userDisplayName || undefined,
             rating: ratings.overall, // legacy support
             comment: comment.trim(),
         });
@@ -161,5 +163,49 @@ export async function toggleLikeReviewAction(reviewId: string, userId: string) {
     } catch (error) {
         console.error("Error toggling like:", error);
         return { error: `Kunne ikke oppdatere like: ${error instanceof Error ? error.message : 'Ukjent feil'}` };
+    }
+}
+
+export async function reportReviewAction(
+    reviewId: string,
+    reporterUserId: string,
+    propertyId: string,
+    reason?: string,
+) {
+    if (!reviewId || !reporterUserId || !propertyId) {
+        return { error: "Review ID, User ID og Property ID er påkrevd" };
+    }
+
+    try {
+        const reviewRef = adminDb.collection("reviews").doc(reviewId);
+        const reviewDoc = await reviewRef.get();
+
+        if (!reviewDoc.exists) {
+            return { error: "Anmeldelse ikke funnet" };
+        }
+
+        const reviewData = reviewDoc.data();
+        const reviewOwnerId = typeof reviewData?.userId === "string" ? reviewData.userId : undefined;
+
+        if (reviewOwnerId && reviewOwnerId === reporterUserId) {
+            return { error: "Du kan ikke rapportere din egen anmeldelse" };
+        }
+
+        const reportResult = await createReviewReport({
+            reviewId,
+            reporterUserId,
+            propertyId: typeof reviewData?.propertyId === "string" ? reviewData.propertyId : propertyId,
+            reviewUserId: reviewOwnerId,
+            reason,
+        });
+
+        return {
+            success: true,
+            reportId: reportResult.reportId,
+            alreadyReported: reportResult.alreadyReported,
+        };
+    } catch (error) {
+        console.error("Error reporting review:", error);
+        return { error: `Kunne ikke rapportere anmeldelse: ${error instanceof Error ? error.message : "Ukjent feil"}` };
     }
 }

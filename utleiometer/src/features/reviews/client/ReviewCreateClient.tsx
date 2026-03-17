@@ -89,6 +89,9 @@ export default function ReviewCreateClient({
     const formData = new FormData(e.currentTarget);
     formData.append("propertyId", propertyId);
     formData.append("userId", currentUser.uid);
+    if (currentUser.displayName?.trim()) {
+      formData.append("userDisplayName", currentUser.displayName.trim());
+    }
 
     try {
       const result = await createReviewAction(formData);
