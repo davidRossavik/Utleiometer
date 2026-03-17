@@ -392,6 +392,21 @@ function PropertyCard({
         </CardHeader>
 
         <CardContent className="space-y-4 pt-0">
+          <div className="h-44 overflow-hidden rounded-lg border bg-muted/20">
+            {p.imageUrl ? (
+              <img
+                src={p.imageUrl}
+                alt={displayAddress}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                {texts.notProvided}
+              </div>
+            )}
+          </div>
+
           <div className="rounded-lg border bg-muted/20 p-3">
             <div className="mb-2">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">

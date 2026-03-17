@@ -336,6 +336,7 @@ export async function createPropertyAndReviewAction(formData: FormData) {
 
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
+  const reviewImageUrl = asTrimmedString(formData.get("reviewImageUrl"));
 
   if (!parsed.ok || !ratings || !comment) {
     return {
@@ -362,6 +363,7 @@ export async function createPropertyAndReviewAction(formData: FormData) {
       rating: ratings.overall,
       ratings,
       comment,
+      ...(reviewImageUrl ? { imageUrl: reviewImageUrl } : {}),
     });
 
     return { propertyId: newProperty.propertyId };
@@ -375,6 +377,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
   const addressAndUser = parseAddressAndUser(formData);
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
+  const reviewImageUrl = asTrimmedString(formData.get("reviewImageUrl"));
 
   if (!addressAndUser.ok || !ratings || !comment) {
     return {
@@ -418,6 +421,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
       rating: ratings.overall,
       ratings,
       comment,
+      ...(reviewImageUrl ? { imageUrl: reviewImageUrl } : {}),
     });
 
     return { propertyId };

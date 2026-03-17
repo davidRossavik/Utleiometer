@@ -91,6 +91,17 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, texts }: R
             </CardHeader>
 
             <CardContent>
+                {review.imageUrl ? (
+                    <div className="mb-4 overflow-hidden rounded-lg border bg-muted/10">
+                        <img
+                            src={review.imageUrl}
+                            alt="Review image"
+                            className="h-64 w-full object-cover"
+                            loading="lazy"
+                        />
+                    </div>
+                ) : null}
+
                 <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <div className="flex items-center justify-between gap-2 rounded-md border p-2">
                         <span className="text-sm font-medium">{texts.location}</span>

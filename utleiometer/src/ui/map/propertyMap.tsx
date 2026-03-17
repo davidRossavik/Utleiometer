@@ -1,8 +1,25 @@
 "use client";
 
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import dynamic from "next/dynamic";
+import type { Icon } from "leaflet";
+import { useEffect, useState } from "react";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((module) => module.MapContainer),
+  { ssr: false },
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((module) => module.Marker),
+  { ssr: false },
+);
+const Popup = dynamic(
+  () => import("react-leaflet").then((module) => module.Popup),
+  { ssr: false },
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((module) => module.TileLayer),
+  { ssr: false },
+);
 
 const redPinSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="48" viewBox="0 0 32 48">
@@ -10,13 +27,6 @@ const redPinSvg = `
   <circle cx="16" cy="15" r="5.5" fill="#fff"/>
 </svg>
 `;
-
-const redPinIcon = new L.Icon({
-  iconUrl: `data:image/svg+xml;utf8,${encodeURIComponent(redPinSvg)}`,
-  iconSize: [32, 48],
-  iconAnchor: [16, 46],
-  popupAnchor: [0, -40],
-});
 
 type PropertyMapProps = {
   lat: number;
@@ -29,6 +39,29 @@ export default function PropertyMap({
   lng,
   title = "Bolig",
 }: PropertyMapProps) {
+  const [redPinIcon, setRedPinIcon] = useState<Icon | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    import("leaflet").then((leaflet) => {
+      if (!isMounted) return;
+
+      const icon = new leaflet.Icon({
+        iconUrl: `data:image/svg+xml;utf8,${encodeURIComponent(redPinSvg)}`,
+        iconSize: [32, 48],
+        iconAnchor: [16, 46],
+        popupAnchor: [0, -40],
+      });
+
+      setRedPinIcon(icon);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="h-[220px] w-full rounded-2xl overflow-hidden">
       <MapContainer
@@ -41,9 +74,11 @@ export default function PropertyMap({
           attribution='&copy; OpenStreetMap contributors'
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={[lat, lng]} icon={redPinIcon}>
-          <Popup>{title}</Popup>
-        </Marker>
+        {redPinIcon ? (
+          <Marker position={[lat, lng]} icon={redPinIcon}>
+            <Popup>{title}</Popup>
+          </Marker>
+        ) : null}
       </MapContainer>
     </div>
   );

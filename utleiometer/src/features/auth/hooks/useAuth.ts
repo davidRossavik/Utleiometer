@@ -19,21 +19,33 @@ export function useAuth() {
     const [isUserAdmin, setIsUserAdmin] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
+
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (!isMounted) return;
+
             setCurrentUser(user);
-            
-            // Check admin status
-            if (user) {
+            setLoading(false);
+
+            if (!user) {
+                setIsUserAdmin(false);
+                return;
+            }
+
+            try {
                 const adminStatus = await isAdmin(user);
+                if (!isMounted) return;
                 setIsUserAdmin(adminStatus);
-            } else {
+            } catch {
+                if (!isMounted) return;
                 setIsUserAdmin(false);
             }
-            
-            setLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            isMounted = false;
+            unsubscribe();
+        };
     }, []);
 
     return { currentUser, loading, isAdmin: isUserAdmin };

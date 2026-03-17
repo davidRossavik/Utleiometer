@@ -6,7 +6,15 @@ export interface Review {
     userId: string;
     propertyId: string;
     rating: number;
+    ratings?: {
+        location: number;
+        noise: number;
+        landlord: number;
+        condition: number;
+        overall: number;
+    };
     comment: string;
+    imageUrl?: string;
     title?: string;
     createdAt: Date;
     updatedAt?: Date;
@@ -29,12 +37,31 @@ export async function getReviewsByPropertyId(propertyId: string) {
 
 export async function updateReview(
     reviewId: string, 
-    data: { rating: number; comment: string; title?: string }
+    data: {
+        rating?: number;
+        ratings?: {
+            location: number;
+            noise: number;
+            landlord: number;
+            condition: number;
+            overall: number;
+        };
+        comment: string;
+        title?: string;
+    }
 ) {
     const reviewRef = adminDb.collection("reviews").doc(reviewId);
+
+    const resolvedRating =
+        typeof data.rating === "number"
+            ? data.rating
+            : typeof data.ratings?.overall === "number"
+              ? data.ratings.overall
+              : undefined;
     
     const updateData = {
-        rating: data.rating,
+        rating: resolvedRating,
+        ...(data.ratings ? { ratings: data.ratings } : {}),
         comment: data.comment,
         title: data.title || "",
         updatedAt: new Date()

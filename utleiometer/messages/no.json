@@ -146,6 +146,10 @@
             "landlordHelp": "Hvordan er utleieren å forholde seg til?",
             "conditionLabel": "Standard",
             "conditionHelp": "Hvordan er standarden på leiligheten?",
+            "propertyImageLabel": "Bilde av boligen (valgfritt)",
+            "propertyImageHelp": "PNG/JPG/WebP, maks 15 MB",
+            "reviewImageLabel": "Bilde i anmeldelsen (valgfritt)",
+            "reviewImageHelp": "PNG/JPG/WebP, maks 5 MB",
             "hint": "Du kan redigere anmeldelsen senere"
         },
         "messages": {
@@ -169,6 +173,8 @@
             "landlordHelp": "Hvordan er utleieren å forholde seg til?",
             "conditionLabel": "Standard",
             "conditionHelp": "Hvordan er standarden på leiligheten?",
+            "reviewImageLabel": "Bilde i anmeldelsen (valgfritt)",
+            "reviewImageHelp": "PNG/JPG/WebP, maks 15 MB",
             "cancel": "Avbryt",
             "submit": "Legg til anmeldelse",
             "submitting": "Legger til...",

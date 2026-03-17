@@ -117,6 +117,10 @@ export default async function Page() {
             landlordHelp: t("form.landlordHelp"),
             conditionLabel: t("form.conditionLabel"),
             conditionHelp: t("form.conditionHelp"),
+            propertyImageLabel: t("form.propertyImageLabel"),
+            propertyImageHelp: t("form.propertyImageHelp"),
+            reviewImageLabel: t("form.reviewImageLabel"),
+            reviewImageHelp: t("form.reviewImageHelp"),
             hint: t("form.hint"),
             }}
             messages={{

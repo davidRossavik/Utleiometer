@@ -133,8 +133,19 @@ export function PopularPropertiesSection({ texts, messages }: PopularPropertiesS
                   <Link key={property.id} href={`/properties/${property.id}/reviews`} className="block">
                     <Card className="h-full cursor-pointer gap-4 transition-all hover:shadow-lg hover:shadow-blue-100/50">
                       <CardHeader className="gap-1">
-                        <div className="mb-3 flex h-40 items-center justify-center rounded-lg border bg-muted/30 text-sm text-muted-foreground">
-                          {texts.imagePlaceholder}
+                        <div className="mb-3 h-40 overflow-hidden rounded-lg border bg-muted/30">
+                          {property.imageUrl ? (
+                            <img
+                              src={property.imageUrl}
+                              alt={formatAddress(property.address, texts.notProvided)}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                              {texts.imagePlaceholder}
+                            </div>
+                          )}
                         </div>
                         <CardTitle className="text-xl text-blue-700">
                           {formatAddress(property.address, texts.notProvided)}

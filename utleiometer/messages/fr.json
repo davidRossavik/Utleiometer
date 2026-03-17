@@ -146,6 +146,10 @@
             "landlordHelp": "Comment est le propriétaire au quotidien ?",
             "conditionLabel": "État",
             "conditionHelp": "Comment jugez-vous l'état de l'appartement ?",
+            "propertyImageLabel": "Image du logement (optionnel)",
+            "propertyImageHelp": "PNG/JPG/WebP, max 15 Mo",
+            "reviewImageLabel": "Image de l'avis (optionnel)",
+            "reviewImageHelp": "PNG/JPG/WebP, max 5 Mo",
             "hint": "Vous pouvez modifier l'avis plus tard"
         },
         "messages": {
@@ -169,6 +173,8 @@
             "landlordHelp": "Comment est le propriétaire au quotidien ?",
             "conditionLabel": "État",
             "conditionHelp": "Comment jugez-vous l'état de l'appartement ?",
+            "reviewImageLabel": "Image de l'avis (optionnel)",
+            "reviewImageHelp": "PNG/JPG/WebP, max 15 Mo",
             "cancel": "Annuler",
             "submit": "Ajouter l'avis",
             "submitting": "Ajout en cours...",

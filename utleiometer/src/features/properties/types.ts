@@ -32,6 +32,4 @@ export type Property = {
     latestReviewAt?: number;
     latitude?: number;
     longitude?: number;
-    imageUrl?: string;
-
 };

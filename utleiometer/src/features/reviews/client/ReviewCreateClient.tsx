@@ -10,12 +10,14 @@ import {
 } from "@/ui/feedback/card";
 import { Field, FieldDescription } from "@/ui/primitives/field";
 import { Label } from "@/ui/primitives/label";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createReviewAction } from "@/app/[locale]/actions/reviews";
+import { uploadReviewImageAction } from "@/app/[locale]/actions/uploadReviewImage";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import Link from "next/link";
 import { StarRatingInput } from "../componentes/StarRatingInput";
+import { Input } from "@/ui/primitives/input";
 
 export type ReviewCreateTexts = {
   brand: string;
@@ -32,6 +34,8 @@ export type ReviewCreateTexts = {
   landlordHelp: string;
   conditionLabel: string;
   conditionHelp: string;
+  reviewImageLabel?: string;
+  reviewImageHelp?: string;
   cancel: string;
   submit: string;
   submitting: string;
@@ -61,13 +65,25 @@ export default function ReviewCreateClient({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [skipImageUpload, setSkipImageUpload] = useState(false);
   const [ratingLocation, setRatingLocation] = useState<number | undefined>(undefined);
   const [ratingNoise, setRatingNoise] = useState<number | undefined>(undefined);
   const [ratingLandlord, setRatingLandlord] = useState<number | undefined>(undefined);
   const [ratingCondition, setRatingCondition] = useState<number | undefined>(undefined);
+  const [reviewImageFile, setReviewImageFile] = useState<File | null>(null);
+  const reviewImageInputRef = useRef<HTMLInputElement | null>(null);
 
   function handleCancel() {
     router.push(`/properties/${propertyId}/reviews`);
+  }
+
+  function clearReviewImageSelection() {
+    setReviewImageFile(null);
+    setSkipImageUpload(false);
+    if (reviewImageInputRef.current) {
+      reviewImageInputRef.current.value = "";
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -91,6 +107,40 @@ export default function ReviewCreateClient({
     formData.append("userId", currentUser.uid);
 
     try {
+      if (reviewImageFile && !skipImageUpload) {
+        setIsUploadingImage(true);
+        console.log("Starting server-side image upload...");
+        try {
+          const uploadFormData = new FormData();
+          uploadFormData.append("file", reviewImageFile);
+          uploadFormData.append("userId", currentUser.uid);
+
+          const result = await uploadReviewImageAction(uploadFormData);
+
+          if (result.error) {
+            console.error("Server upload failed:", result.error);
+            setError(result.error);
+            setIsSubmitting(false);
+            setIsUploadingImage(false);
+            return;
+          }
+
+          if (result.url) {
+            console.log("Image upload successful, URL:", result.url);
+            formData.append("reviewImageUrl", result.url);
+          }
+        } catch (uploadErr) {
+          console.error("Image upload error:", uploadErr);
+          const uploadErrMsg = uploadErr instanceof Error ? uploadErr.message : "Failed to upload image";
+          setError(uploadErrMsg);
+          setIsSubmitting(false);
+          setIsUploadingImage(false);
+          return;
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
       const result = await createReviewAction(formData);
 
       if ("error" in result) {
@@ -100,10 +150,13 @@ export default function ReviewCreateClient({
       }
 
       router.replace(`/properties/${propertyId}/reviews?submitted=review`);
-    } catch {
-      setError(messages.unknownError);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : messages.unknownError;
+      console.error("Review submission error:", err);
+      setError(message);
     } finally {
       setIsSubmitting(false);
+      setIsUploadingImage(false);
     }
   }
 
@@ -198,6 +251,50 @@ export default function ReviewCreateClient({
                     required
                   />
                 </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="reviewImage">{texts.reviewImageLabel ?? "Bilde i anmeldelsen (valgfritt)"}</Label>
+                  <Input
+                    id="reviewImage"
+                    name="reviewImage"
+                    type="file"
+                    accept="image/*"
+                    ref={reviewImageInputRef}
+                    className="h-11 rounded-xl border-slate-300/80 bg-white shadow-xs transition-colors focus-visible:border-blue-400 focus-visible:ring-blue-200"
+                    onChange={(e) => {
+                      setReviewImageFile(e.target.files?.[0] ?? null);
+                      setSkipImageUpload(false);
+                    }}
+                    disabled={isUploadingImage}
+                  />
+                  {reviewImageFile ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                        <span className="truncate text-slate-700">{reviewImageFile.name}</span>
+                        <Button type="button" variant="ghost" className="h-auto px-2 py-1 text-xs" onClick={clearReviewImageSelection} disabled={isUploadingImage}>
+                          Fjern bilde
+                        </Button>
+                      </div>
+                      {isUploadingImage && (
+                        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
+                          <span className="text-blue-700 flex-1">Laster opp bilde...</span>
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            className="h-auto px-2 py-1 text-xs text-blue-600 hover:text-blue-700"
+                            onClick={() => setSkipImageUpload(true)}
+                          >
+                            Hopp over
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                  <p className="text-xs text-muted-foreground">
+                    {texts.reviewImageHelp ?? "PNG/JPG/WebP, maks 5 MB"}
+                  </p>
+                </div>
               </div>
 
               {error && (
@@ -218,9 +315,9 @@ export default function ReviewCreateClient({
                 <Button
                   type="submit"
                   className="w-40 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md transition hover:from-blue-800 hover:to-blue-700"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting && !skipImageUpload}
                 >
-                  {isSubmitting ? texts.submitting : texts.submit}
+                  {isUploadingImage && !skipImageUpload ? "Laster opp bilde..." : isSubmitting ? texts.submitting : texts.submit}
                 </Button>
               </div>
 

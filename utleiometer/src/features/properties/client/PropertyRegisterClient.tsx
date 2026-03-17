@@ -1,9 +1,11 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useRef, useState } from "react";
 import { lookupPropertyByAddressAction, submitUnifiedReviewAction } from "@/app/[locale]/actions/properties";
+import { uploadPropertyImageAction } from "@/app/[locale]/actions/uploadPropertyImage";
+import { uploadReviewImageAction } from "@/app/[locale]/actions/uploadReviewImage";
 
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
@@ -62,6 +64,10 @@ export type PropertyRegisterTexts = {
   landlordHelp: string;
   conditionLabel: string;
   conditionHelp: string;
+  propertyImageLabel?: string;
+  propertyImageHelp?: string;
+  reviewImageLabel?: string;
+  reviewImageHelp?: string;
   continueButton: string;
   cancelButton: string;
   submitButton: string;
@@ -104,12 +110,16 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
   const [roomAreaSqm, setRoomAreaSqm] = useState("");
   const [hasPrivateBathroom, setHasPrivateBathroom] = useState("true");
   const [otherBedsitsInUnit, setOtherBedsitsInUnit] = useState("");
+  const [propertyImageFile, setPropertyImageFile] = useState<File | null>(null);
+  const propertyImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const [ratingLocation, setRatingLocation] = useState<number | undefined>(undefined);
   const [ratingNoise, setRatingNoise] = useState<number | undefined>(undefined);
   const [ratingLandlord, setRatingLandlord] = useState<number | undefined>(undefined);
   const [ratingCondition, setRatingCondition] = useState<number | undefined>(undefined);
   const [comment, setComment] = useState("");
+  const [reviewImageFile, setReviewImageFile] = useState<File | null>(null);
+  const reviewImageInputRef = useRef<HTMLInputElement | null>(null);
   const baseInputClass =
     "h-11 rounded-xl border-slate-300/80 bg-white shadow-xs transition-colors focus-visible:border-blue-400 focus-visible:ring-blue-200";
   const baseSelectClass =
@@ -160,6 +170,20 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
     setStep("review");
   }
 
+  function clearPropertyImageSelection() {
+    setPropertyImageFile(null);
+    if (propertyImageInputRef.current) {
+      propertyImageInputRef.current.value = "";
+    }
+  }
+
+  function clearReviewImageSelection() {
+    setReviewImageFile(null);
+    if (reviewImageInputRef.current) {
+      reviewImageInputRef.current.value = "";
+    }
+  }
+
   function appendPropertyDetails(formData: FormData) {
     formData.append("propertyType", propertyType);
 
@@ -205,6 +229,38 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
     formData.append("comment", comment);
 
     try {
+      if (!existingPropertyId && propertyImageFile) {
+        const propertyFormData = new FormData();
+        propertyFormData.append("file", propertyImageFile);
+        propertyFormData.append("userId", currentUser.uid);
+
+        const propertyImageResult = await uploadPropertyImageAction(propertyFormData);
+        if (propertyImageResult.error) {
+          setError(propertyImageResult.error);
+          setIsSubmitting(false);
+          return;
+        }
+        if (propertyImageResult.url) {
+          formData.append("imageUrl", propertyImageResult.url);
+        }
+      }
+
+      if (reviewImageFile) {
+        const reviewFormData = new FormData();
+        reviewFormData.append("file", reviewImageFile);
+        reviewFormData.append("userId", currentUser.uid);
+
+        const reviewImageResult = await uploadReviewImageAction(reviewFormData);
+        if (reviewImageResult.error) {
+          setError(reviewImageResult.error);
+          setIsSubmitting(false);
+          return;
+        }
+        if (reviewImageResult.url) {
+          formData.append("reviewImageUrl", reviewImageResult.url);
+        }
+      }
+
       const result = await submitUnifiedReviewAction(formData);
 
       if ("error" in result) {
@@ -450,6 +506,30 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                     </div>
                   </>
                 )}
+
+                <div className="grid gap-2">
+                  <Label htmlFor="propertyImage">{texts.propertyImageLabel ?? "Bilde av boligen (valgfritt)"}</Label>
+                  <Input
+                    id="propertyImage"
+                    name="propertyImage"
+                    type="file"
+                    accept="image/*"
+                    ref={propertyImageInputRef}
+                    className={baseInputClass}
+                    onChange={(e) => setPropertyImageFile(e.target.files?.[0] ?? null)}
+                  />
+                  {propertyImageFile ? (
+                    <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                      <span className="truncate text-slate-700">{propertyImageFile.name}</span>
+                      <Button type="button" variant="ghost" className="h-auto px-2 py-1 text-xs" onClick={clearPropertyImageSelection}>
+                        Fjern bilde
+                      </Button>
+                    </div>
+                  ) : null}
+                  <p className="text-xs text-muted-foreground">
+                    {texts.propertyImageHelp ?? "PNG/JPG/WebP, maks 5 MB"}
+                  </p>
+                </div>
               </div>
 
               {error ? (
@@ -541,6 +621,30 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                     onChange={(e) => setComment(e.target.value)}
                     required
                   />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="reviewImage">{texts.reviewImageLabel ?? "Bilde i anmeldelsen (valgfritt)"}</Label>
+                  <Input
+                    id="reviewImage"
+                    name="reviewImage"
+                    type="file"
+                    accept="image/*"
+                    ref={reviewImageInputRef}
+                    className={baseInputClass}
+                    onChange={(e) => setReviewImageFile(e.target.files?.[0] ?? null)}
+                  />
+                  {reviewImageFile ? (
+                    <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                      <span className="truncate text-slate-700">{reviewImageFile.name}</span>
+                      <Button type="button" variant="ghost" className="h-auto px-2 py-1 text-xs" onClick={clearReviewImageSelection}>
+                        Fjern bilde
+                      </Button>
+                    </div>
+                  ) : null}
+                  <p className="text-xs text-muted-foreground">
+                    {texts.reviewImageHelp ?? "PNG/JPG/WebP, maks 5 MB"}
+                  </p>
                 </div>
               </div>
 

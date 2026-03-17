@@ -30,6 +30,7 @@ export async function createReviewAction(formData: FormData) {
     const userId = formData.get("userId") as string;
     const propertyId = formData.get("propertyId") as string;
     const comment = formData.get("comment") as string;
+    const reviewImageUrl = String(formData.get("reviewImageUrl") ?? formData.get("imageUrl") ?? "").trim();
     const ratings = buildRatings(formData);
 
     console.log("createReviewAction called with:", { userId, propertyId, ratings, comment });
@@ -46,6 +47,7 @@ export async function createReviewAction(formData: FormData) {
             rating: ratings.overall, // legacy support
             ratings,
             comment: comment.trim(),
+            ...(reviewImageUrl ? { imageUrl: reviewImageUrl } : {}),
         });
         console.log("Review created successfully:", newReview);
         return { reviewId: newReview.reviewId };
