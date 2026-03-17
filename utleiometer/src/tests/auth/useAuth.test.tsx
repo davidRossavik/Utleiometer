@@ -23,7 +23,7 @@ describe("useAuth", () => {
     vi.clearAllMocks();
   });
 
-  it("starter med loading=true og ender med loading=false + currentUser når onAuthStateChanged fyrer", () => {
+  it("starter med loading=true og ender med loading=false + currentUser når onAuthStateChanged fyrer", async () => {
     const unsubscribe = vi.fn();
 
     // Sett implementasjon på mocken
@@ -39,9 +39,13 @@ describe("useAuth", () => {
     expect(result.current.loading).toBe(true);
     expect(result.current.currentUser).toBe(null);
 
-    const fakeUser = { uid: "abc", email: "test@test.no" };
-    act(() => {
-      (onAuthStateChangedMock as any)._cb(fakeUser);
+    const fakeUser = {
+      uid: "abc",
+      email: "test@test.no",
+      getIdTokenResult: vi.fn().mockResolvedValue({ claims: { admin: false } }),
+    };
+    await act(async () => {
+      await (onAuthStateChangedMock as any)._cb(fakeUser);
     });
 
     expect(result.current.loading).toBe(false);
