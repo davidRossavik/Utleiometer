@@ -285,6 +285,11 @@
         "propertyTypeHouse": "Hus",
         "propertyTypeApartment": "Leilighet",
         "propertyTypeBedsit": "Hybel",
+        "sortByLabel": "Sorter etter",
+        "sortByNewest": "Nyeste først",
+        "sortByOldest": "Eldste først",
+        "sortByOverall": "Høyest totalvurdering",
+        "sortByLikes": "Flest likes",
         "messages": {
             "loadReviewsError": "Kunne ikke hente anmeldelser",
             "reviewSubmittedSuccess": "Anmeldelsen din ble sendt inn.",

@@ -14,10 +14,12 @@ import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
-import { updateReviewAction, deleteReviewAction, reportReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
-import PropertyMap from "@/ui/map/propertyMap";
+import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
+import dynamic from "next/dynamic";
 
-type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
+const PropertyMap = dynamic(() => import("@/ui/map/propertyMap"), { ssr: false });
+
+type SortKey = "newest" | "oldest" | "overall_desc" | "likes_desc"
 
 export type ReviewsClientTexts = {
     badge: string;
@@ -73,6 +75,11 @@ export type ReviewsClientTexts = {
     propertyTypeBedsit: string;
     reviewSubmittedSuccess: string;
     propertySubmittedSuccess: string;
+    sortByLabel: string;
+    sortByNewest: string;
+    sortByOldest: string;
+    sortByOverall: string;
+    sortByLikes: string;
 };
 
 export type ReviewsClientMessages = {
@@ -105,12 +112,17 @@ function sortReviews(reviews: Review[], sort: SortKey) {
     const copy = [...reviews];
 
     const getDateMs = (r: Review) => (r.createdAt?.toDate ? r.createdAt.toDate().getTime() : 0);
+    const getOverall = (r: Review) => r.ratings?.overall ?? r.rating ?? 0;
 
     switch (sort) {
         case "newest":
             return copy.sort((a, b) => getDateMs(b) - getDateMs(a));
         case "oldest":
             return copy.sort((a, b) => getDateMs(a) - getDateMs(b));
+        case "overall_desc":
+            return copy.sort((a, b) => getOverall(b) - getOverall(a));
+        case "likes_desc":
+            return copy.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0));
         default:
             return copy;
     }
@@ -254,6 +266,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
 
     const [reviewSearch, setReviewSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("newest");
+    const [optimisticLikes, setOptimisticLikes] = useState<Record<string, { count: number; liked: boolean }>>({});
 
     async function handleSaveReview(updated: Review) {
         try {
@@ -303,48 +316,44 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
             return;
         }
 
+        const review = reviews?.find(r => r.id === reviewId);
+        const serverCount = review?.likeCount ?? 0;
+        const serverLiked = review?.likedBy?.includes(currentUser.uid) ?? false;
+        const prev = optimisticLikes[reviewId] ?? { count: serverCount, liked: serverLiked };
+        const next = { count: prev.liked ? prev.count - 1 : prev.count + 1, liked: !prev.liked };
+
+        setOptimisticLikes(o => ({ ...o, [reviewId]: next }));
+
         try {
             const result = await toggleLikeReviewAction(reviewId, currentUser.uid);
-            
+
             if (result.error) {
+                setOptimisticLikes(o => ({ ...o, [reviewId]: prev }));
                 alert(`Feil: ${result.error}`);
-                throw new Error(result.error); // Throw error so LikeButton can revert
+                throw new Error(result.error);
             }
-
-            // No refetch needed - LikeButton handles optimistic update
-            // Data will sync from DB on next page load
         } catch (error) {
+            setOptimisticLikes(o => ({ ...o, [reviewId]: prev }));
             console.error("Toggle like failed:", error);
-            throw error; // Re-throw so LikeButton can revert optimistic update
+            throw error;
         }
     }
 
-    async function handleReportReview(reviewId: string, reason?: string) {
-        if (!currentUser) {
-            return { error: "Du må være innlogget for å rapportere anmeldelser" };
-        }
-
-        try {
-            const result = await reportReviewAction(reviewId, currentUser.uid, propertyId, reason);
-
-            if (result.error) {
-                return { error: result.error };
-            }
-
-            return {
-                success: true,
-                alreadyReported: Boolean(result.alreadyReported),
-            };
-        } catch (error) {
-            console.error("Report review failed:", error);
-            return { error: texts.reviewReportFailed };
-        }
-    }
+    const visibleReviews = useMemo(() =>
+        (reviews ?? []).map(r => {
+            const opt = optimisticLikes[r.id];
+            if (!opt) return r;
+            const likedBy = opt.liked
+                ? [...(r.likedBy ?? []).filter(id => id !== currentUser?.uid), currentUser!.uid]
+                : (r.likedBy ?? []).filter(id => id !== currentUser?.uid);
+            return { ...r, likeCount: opt.count, likedBy };
+        }),
+    [reviews, optimisticLikes, currentUser]);
 
     const visible = useMemo(() => {
-        const filtered = filterReviews(reviews ?? [], reviewSearch);
+        const filtered = filterReviews(visibleReviews, reviewSearch);
         return sortReviews(filtered, sort);
-    }, [reviews, reviewSearch, sort]);
+    }, [visibleReviews, reviewSearch, sort]);
 
     const subtitle = useMemo(
         () => buildSubtitle(fetchedProperty, texts.unknownProperty),
@@ -491,8 +500,8 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         </div>
                     </div>
 
-                    {/* SEARCH IN REVIEWS */}
-                    <div className="mt-6">
+                    {/* SEARCH AND SORT */}
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <Input
                         id="review-search"
                         placeholder={texts.searchPlaceholder}
@@ -500,6 +509,17 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         value={reviewSearch}
                         onChange={(e) => setReviewSearch(e.target.value)}
                     />
+                    <select
+                        value={sort}
+                        onChange={(e) => setSort(e.target.value as SortKey)}
+                        aria-label={texts.sortByLabel}
+                        className="h-12 rounded-md border border-input bg-background px-3 text-sm sm:w-56 shrink-0"
+                    >
+                        <option value="newest">{texts.sortByNewest}</option>
+                        <option value="oldest">{texts.sortByOldest}</option>
+                        <option value="overall_desc">{texts.sortByOverall}</option>
+                        <option value="likes_desc">{texts.sortByLikes}</option>
+                    </select>
                     </div>
                 </div>
                 </section>
