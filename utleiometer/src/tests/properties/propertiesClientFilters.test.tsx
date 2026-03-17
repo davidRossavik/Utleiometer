@@ -49,6 +49,18 @@ vi.mock("@/features/properties/hooks/useProperties", () => ({
   }),
 }));
 
+vi.mock("@/features/auth/hooks/useAuth", () => ({
+  useAuth: () => ({
+    currentUser: null,
+    loading: false,
+    isAdmin: false,
+  }),
+}));
+
+vi.mock("@/app/[locale]/actions/properties", () => ({
+  deletePropertyAction: vi.fn(),
+}));
+
 const texts: PropertiesClientTexts = {
   badge: "Boliger",
   title: "Utforsk boliger",

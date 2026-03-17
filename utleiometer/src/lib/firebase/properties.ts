@@ -1,5 +1,7 @@
 import { adminDb, FieldValue } from "./admin";
 
+export type PropertyType = "house" | "apartment" | "bedsit";
+
 export interface Property {
   propertyId: string;
   address: string;
@@ -11,6 +13,15 @@ export interface Property {
   createdAt: Date;
   reviewCount?: number;
   imageUrl?: string;
+    propertyType?: PropertyType;
+    areaSqm?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    floors?: number;
+    buildYear?: number;
+    roomAreaSqm?: number;
+    hasPrivateBathroom?: boolean;
+    otherBedsitsInUnit?: number;
 }
 
 export async function createProperty(data: Omit<Property, "propertyId" | "createdAt">) {

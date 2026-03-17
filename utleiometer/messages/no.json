@@ -227,6 +227,11 @@
         "propertyTypeHouse": "Hus",
         "propertyTypeApartment": "Leilighet",
         "propertyTypeBedsit": "Hybel",
+        "adminDeleteProperty": "Slett bolig",
+        "adminDeletePropertyConfirm": "Er du sikker på at du vil slette boligen og alle anmeldelsene? Dette kan ikke angres.",
+        "adminDeletePropertySuccess": "Boligen og alle anmeldelser ble slettet.",
+        "adminDeletePropertyError": "Kunne ikke slette bolig.",
+        "adminDeletePropertyUnauthorized": "Kun administratorer kan slette boliger.",
         "messages": {
             "loadPropertiesError": "Kunne ikke hente boliger"
         }
@@ -285,6 +290,11 @@
         "propertyTypeHouse": "Hus",
         "propertyTypeApartment": "Leilighet",
         "propertyTypeBedsit": "Hybel",
+        "adminDeleteProperty": "Slett bolig",
+        "adminDeletePropertyConfirm": "Er du sikker på at du vil slette boligen og alle anmeldelsene? Dette kan ikke angres.",
+        "adminDeletePropertySuccess": "Boligen og alle anmeldelser ble slettet.",
+        "adminDeletePropertyError": "Kunne ikke slette bolig.",
+        "adminDeletePropertyUnauthorized": "Kun administratorer kan slette boliger.",
         "messages": {
             "loadReviewsError": "Kunne ikke hente anmeldelser",
             "reviewSubmittedSuccess": "Anmeldelsen din ble sendt inn.",

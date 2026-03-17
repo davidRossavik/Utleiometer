@@ -46,7 +46,6 @@ export async function createReviewAction(formData: FormData) {
             propertyId,
             userDisplayName: userDisplayName || undefined,
             rating: ratings.overall, // legacy support
-            ratings,
             comment: comment.trim(),
         });
         console.log("Review created successfully:", newReview);
