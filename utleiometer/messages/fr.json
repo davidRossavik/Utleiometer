@@ -285,11 +285,6 @@
         "propertyTypeHouse": "Maison",
         "propertyTypeApartment": "Appartement",
         "propertyTypeBedsit": "Chambre",
-        "sortByLabel": "Trier par",
-        "sortByNewest": "Plus récent en premier",
-        "sortByOldest": "Plus ancien en premier",
-        "sortByOverall": "Meilleure note globale",
-        "sortByLikes": "Plus de likes",
         "messages": {
             "loadReviewsError": "Impossible de récupérer les avis",
             "reviewSubmittedSuccess": "Votre avis a bien été envoyé.",
