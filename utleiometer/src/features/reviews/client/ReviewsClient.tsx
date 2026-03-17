@@ -14,7 +14,7 @@ import { Input } from "@/ui/primitives/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/feedback/card";
 import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
-import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction } from "@/app/[locale]/actions/reviews";
+import { updateReviewAction, deleteReviewAction, toggleLikeReviewAction, reportReviewAction } from "@/app/[locale]/actions/reviews";
 import dynamic from "next/dynamic";
 
 const PropertyMap = dynamic(() => import("@/ui/map/propertyMap"), { ssr: false });
@@ -337,6 +337,13 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
             console.error("Toggle like failed:", error);
             throw error;
         }
+    }
+
+    async function handleReportReview(reviewId: string, reason?: string) {
+        if (!currentUser) {
+            return { error: "Du må være innlogget for å rapportere anmeldelser" };
+        }
+        return reportReviewAction(reviewId, currentUser.uid, propertyId, reason);
     }
 
     const visibleReviews = useMemo(() =>
