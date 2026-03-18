@@ -7,7 +7,7 @@ export type ReviewRatings = {
     overall: number;
 };
 
-export type Review = {
+export interface Review {
     id: string;
     propertyId: string;
     userId?: string;          // <-- NY: ID-en til brukeren som skrev anmeldelsen
@@ -19,4 +19,7 @@ export type Review = {
     ratings?: ReviewRatings;
     userDisplayName?: string;
     createdAt?: any; // Firestore Timestamp
+    updatedAt?: any; // Firestore Timestamp
+    likedBy?: string[];
+    likeCount?: number;
 };

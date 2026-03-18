@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/features/auth/hooks/useAuth", () => ({
-  useAuth: () => ({ currentUser: { uid: "user-1" } }),
+  useAuth: () => ({ currentUser: { uid: "user-1", displayName: "ola_nordmann" } }),
 }));
 
 vi.mock("@/app/[locale]/actions/properties", () => ({
@@ -189,5 +189,8 @@ describe("PropertyRegisterClient wizard", () => {
       expect(submitUnifiedReviewActionMock).toHaveBeenCalledTimes(1);
       expect(replaceMock).toHaveBeenCalledWith("/properties/prop-1/reviews?submitted=review");
     });
+
+    const submittedFormData = submitUnifiedReviewActionMock.mock.calls[0][0] as FormData;
+    expect(submittedFormData.get("userDisplayName")).toBe("ola_nordmann");
   });
 });

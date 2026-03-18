@@ -203,6 +203,9 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
 
     const formData = new FormData();
     formData.append("registeredByUid", currentUser.uid);
+    if (currentUser.displayName?.trim()) {
+      formData.append("userDisplayName", currentUser.displayName.trim());
+    }
     formData.append("address", address);
     formData.append("zipCode", zipCode);
     formData.append("city", city);

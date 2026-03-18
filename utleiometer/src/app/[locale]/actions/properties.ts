@@ -338,6 +338,7 @@ export async function createPropertyAndReviewAction(formData: FormData) {
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
   const reviewImageUrl = asTrimmedString(formData.get("reviewImageUrl"));
+  const userDisplayName = asTrimmedString(formData.get("userDisplayName"));
 
   if (!parsed.ok || !ratings || !comment) {
     return {
@@ -360,6 +361,7 @@ export async function createPropertyAndReviewAction(formData: FormData) {
 
     await createReview({
       userId: data.registeredByUid,
+      userDisplayName,
       propertyId: newProperty.propertyId,
       rating: ratings.overall,
       ratings,
@@ -379,6 +381,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
   const reviewImageUrl = asTrimmedString(formData.get("reviewImageUrl"));
+  const userDisplayName = asTrimmedString(formData.get("userDisplayName"));
 
   if (!addressAndUser.ok || !ratings || !comment) {
     return {
@@ -405,7 +408,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
         return { error: parsedDetails.error };
       }
 
-      const newProperty = await createProperty({
+      const propertyData = await withGeocodedCoordinates({
         address: addressAndUser.data.address,
         zipCode: addressAndUser.data.zipCode,
         city: addressAndUser.data.city,
@@ -413,11 +416,14 @@ export async function submitUnifiedReviewAction(formData: FormData) {
         ...parsedDetails.data,
       });
 
+      const newProperty = await createProperty(propertyData);
+
       propertyId = newProperty.propertyId;
     }
 
     await createReview({
       userId: addressAndUser.data.registeredByUid,
+      userDisplayName,
       propertyId,
       rating: ratings.overall,
       ratings,

@@ -175,33 +175,39 @@ export async function fetchProperties(): Promise<Property[]> {
         }
     });
 
-    return propertySnap.docs.map((d) => {
-        const propertyData = d.data() as Omit<Property, "id">;
-        const aggregate = ratingsByProperty.get(d.id);
-        const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
-        const ratingCount = aggregate?.overall.count ?? 0;
-        const fallbackReviewImage = latestReviewImageByProperty.get(d.id)?.imageUrl;
-        const { imageUrl, imageUrls } = getPreferredImageUrls(propertyData.imageUrls, propertyData.imageUrl, fallbackReviewImage);
+    return propertySnap.docs
+        .map((d) => {
+            const propertyData = d.data() as Omit<Property, "id">;
+            const aggregate = ratingsByProperty.get(d.id);
+            const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
+            const ratingCount = aggregate?.overall.count ?? 0;
+            const fallbackReviewImage = latestReviewImageByProperty.get(d.id)?.imageUrl;
+            const { imageUrl, imageUrls } = getPreferredImageUrls(
+                propertyData.imageUrls,
+                propertyData.imageUrl,
+                fallbackReviewImage,
+            );
 
-        return {
-            id: d.id,
-            ...propertyData,
-            imageUrl,
-            imageUrls,
-            ratingAvg,
-            ratingCount,
-            latestReviewAt: latestReviewAtByProperty.get(d.id),
-            ratingsSummary: aggregate
-                ? {
-                    overall: averageValue(aggregate.overall),
-                    location: averageValue(aggregate.location),
-                    noise: averageValue(aggregate.noise),
-                    landlord: averageValue(aggregate.landlord),
-                    condition: averageValue(aggregate.condition),
-                }
-                : undefined,
-        };
-    });
+            return {
+                id: d.id,
+                ...propertyData,
+                imageUrl,
+                imageUrls,
+                ratingAvg,
+                ratingCount,
+                latestReviewAt: latestReviewAtByProperty.get(d.id),
+                ratingsSummary: aggregate
+                    ? {
+                        overall: averageValue(aggregate.overall),
+                        location: averageValue(aggregate.location),
+                        noise: averageValue(aggregate.noise),
+                        landlord: averageValue(aggregate.landlord),
+                        condition: averageValue(aggregate.condition),
+                    }
+                    : undefined,
+            };
+        })
+        .filter((p) => p.ratingCount > 0);
 }
 
 export async function fetchPropertyById(propertyId: string): Promise<Property | null> {

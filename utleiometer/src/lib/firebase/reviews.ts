@@ -1,28 +1,43 @@
 import { adminDb } from "./admin";
 import { incrementReviewCount, decrementReviewCount } from "./properties";
+import type { ReviewRatings } from "@/features/reviews/types";
 
 export interface Review {
     reviewId: string;
     userId: string;
+    userDisplayName?: string;
     propertyId: string;
     rating: number;
-    ratings?: {
-        location: number;
-        noise: number;
-        landlord: number;
-        condition: number;
-        overall: number;
-    };
+    ratings?: ReviewRatings;
     comment: string;
     imageUrl?: string;  // legacy: single image (backwards compatible)
     imageUrls?: string[];  // new: multiple images
     title?: string;
     createdAt: Date;
     updatedAt?: Date;
+    likedBy?: string[];
+    likeCount?: number; 
+}
+
+export interface ReviewReport {
+    reportId: string;
+    reviewId: string;
+    reporterUserId: string;
+    propertyId: string;
+    reviewUserId?: string;
+    reason?: string;
+    status: "pending" | "resolved" | "dismissed";
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
 export async function createReview(data: Omit<Review, "reviewId" | "createdAt">) {
-    const reviewData = { ...data, createdAt: new Date() };
+    const reviewData = { 
+        ...data, 
+        createdAt: new Date(),
+        likedBy: [],
+        likeCount: 0
+    };
     const docRef = await adminDb.collection("reviews").add(reviewData);
     
     // Oppdater review-telleren på property
@@ -40,13 +55,7 @@ export async function updateReview(
     reviewId: string, 
     data: {
         rating?: number;
-        ratings?: {
-            location: number;
-            noise: number;
-            landlord: number;
-            condition: number;
-            overall: number;
-        };
+        ratings?: ReviewRatings;
         comment: string;
         title?: string;
     }
@@ -60,14 +69,19 @@ export async function updateReview(
               ? data.ratings.overall
               : undefined;
     
-    const updateData = {
+    const updateData: Record<string, unknown> = {
         rating: resolvedRating,
         ...(data.ratings ? { ratings: data.ratings } : {}),
         comment: data.comment,
-        title: data.title || "",
-        updatedAt: new Date()
+        title: data.title?.trim() ?? "",
+        updatedAt: new Date(),
     };
-    
+
+    // Remove any undefined values to avoid Firestore errors
+    Object.keys(updateData).forEach((key) => {
+        if (updateData[key] === undefined) delete updateData[key];
+    });
+
     await reviewRef.update(updateData);
     return { reviewId, ...updateData };
 }
@@ -96,4 +110,37 @@ export async function deleteReviewsByPropertyId(propertyId: string) {
     
     await batch.commit();
     return { deletedCount: snapshot.docs.length };
+}
+
+export async function createReviewReport(data: {
+    reviewId: string;
+    reporterUserId: string;
+    propertyId: string;
+    reviewUserId?: string;
+    reason?: string;
+}) {
+    const reportId = `${data.reviewId}_${data.reporterUserId}`;
+    const reportRef = adminDb.collection("reviewReports").doc(reportId);
+    const existingReport = await reportRef.get();
+
+    if (existingReport.exists) {
+        return { reportId, alreadyReported: true as const };
+    }
+
+    const reportData: Record<string, unknown> = {
+        reviewId: data.reviewId,
+        reporterUserId: data.reporterUserId,
+        propertyId: data.propertyId,
+        reviewUserId: data.reviewUserId,
+        reason: data.reason?.trim() ?? "",
+        status: "pending",
+        createdAt: new Date(),
+    };
+
+    Object.keys(reportData).forEach((key) => {
+        if (reportData[key] === undefined) delete reportData[key];
+    });
+
+    await reportRef.set(reportData);
+    return { reportId, alreadyReported: false as const };
 }
