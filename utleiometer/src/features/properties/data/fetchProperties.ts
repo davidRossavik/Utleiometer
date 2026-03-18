@@ -93,6 +93,16 @@ function getTimestampMs(value: unknown): number | undefined {
     return undefined;
 }
 
+function getValidImageUrl(value: unknown): string | undefined {
+    if (typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function getPreferredImageUrl(propertyImageUrl: unknown, reviewImageUrl: string | undefined): string | undefined {
+    return getValidImageUrl(propertyImageUrl) ?? reviewImageUrl;
+}
+
 export async function fetchProperties(): Promise<Property[]> {
     
     const q = query(
@@ -107,8 +117,9 @@ export async function fetchProperties(): Promise<Property[]> {
 
     const ratingsByProperty = new Map<string, RatingAggregatesByCategory>();
     const latestReviewAtByProperty = new Map<string, number>();
+    const latestReviewImageByProperty = new Map<string, { imageUrl: string; createdAtMs: number }>();
     reviewSnap.docs.forEach((reviewDoc) => {
-        const reviewData = reviewDoc.data() as { propertyId?: unknown; createdAt?: unknown };
+        const reviewData = reviewDoc.data() as { propertyId?: unknown; createdAt?: unknown; imageUrl?: unknown };
         if (typeof reviewData.propertyId !== "string") return;
 
         const reviewRatings = getReviewRatings(reviewDoc.data());
@@ -129,16 +140,32 @@ export async function fetchProperties(): Promise<Property[]> {
                 latestReviewAtByProperty.set(reviewData.propertyId, createdAtMs);
             }
         }
+
+        const reviewImageUrl = getValidImageUrl(reviewData.imageUrl);
+        if (reviewImageUrl) {
+            const comparableCreatedAt = createdAtMs ?? Number.NEGATIVE_INFINITY;
+            const previous = latestReviewImageByProperty.get(reviewData.propertyId);
+
+            if (!previous || comparableCreatedAt > previous.createdAtMs) {
+                latestReviewImageByProperty.set(reviewData.propertyId, {
+                    imageUrl: reviewImageUrl,
+                    createdAtMs: comparableCreatedAt,
+                });
+            }
+        }
     });
 
     return propertySnap.docs.map((d) => {
+        const propertyData = d.data() as Omit<Property, "id">;
         const aggregate = ratingsByProperty.get(d.id);
         const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
         const ratingCount = aggregate?.overall.count ?? 0;
+        const fallbackReviewImage = latestReviewImageByProperty.get(d.id)?.imageUrl;
 
         return {
             id: d.id,
-            ...(d.data() as Omit<Property, "id">),
+            ...propertyData,
+            imageUrl: getPreferredImageUrl(propertyData.imageUrl, fallbackReviewImage),
             ratingAvg,
             ratingCount,
             latestReviewAt: latestReviewAtByProperty.get(d.id),

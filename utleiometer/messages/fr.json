@@ -253,6 +253,8 @@
         "clearSearch": "Effacer la recherche",
         "unknownProperty": "Logement inconnu",
         "averageTitle": "Moyennes des étoiles",
+        "imagesTitle": "Images des avis",
+        "imagesEmpty": "Aucune image dans les avis pour le moment.",
         "overallLabel": "Global",
         "locationLabel": "Emplacement",
         "noiseLabel": "Bruit",

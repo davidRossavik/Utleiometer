@@ -68,6 +68,8 @@ export default async function ReviewsPage({ params }: { params: Promise<{ id: st
           clearSearch: t("clearSearch"),
           unknownProperty: t("unknownProperty"),
           averageTitle: t("averageTitle"),
+          imagesTitle: t("imagesTitle"),
+          imagesEmpty: t("imagesEmpty"),
           overallLabel: t("overallLabel"),
           locationLabel: t("locationLabel"),
           noiseLabel: t("noiseLabel"),

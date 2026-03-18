@@ -92,11 +92,11 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, texts }: R
 
             <CardContent>
                 {review.imageUrl ? (
-                    <div className="mb-4 overflow-hidden rounded-lg border bg-muted/10">
+                    <div className="mb-4 overflow-hidden rounded-lg border bg-muted/10 w-24 h-24 sm:w-28 sm:h-28">
                         <img
                             src={review.imageUrl}
                             alt="Review image"
-                            className="h-64 w-full object-cover"
+                            className="h-full w-full object-cover"
                             loading="lazy"
                         />
                     </div>

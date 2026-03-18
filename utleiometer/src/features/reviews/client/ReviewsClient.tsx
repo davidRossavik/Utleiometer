@@ -16,6 +16,7 @@ import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
 import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
 import PropertyMap from "@/ui/map/propertyMap";
+import { X } from "lucide-react";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
 
@@ -33,6 +34,8 @@ export type ReviewsClientTexts = {
     clearSearch: string;
     unknownProperty: string;
     averageTitle: string;
+    imagesTitle?: string;
+    imagesEmpty?: string;
     overallLabel: string;
     locationLabel: string;
     noiseLabel: string;
@@ -246,6 +249,7 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
 
     const [reviewSearch, setReviewSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("newest");
+    const [selectedTopImageUrl, setSelectedTopImageUrl] = useState<string | null>(null);
 
     async function handleSaveReview(updated: Review) {
         try {
@@ -303,6 +307,15 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         [fetchedProperty, texts.unknownProperty],
     );
     const ratingSummary = useMemo(() => computeRatingSummary(reviews ?? []), [reviews]);
+    const topReviewImageUrls = useMemo(() => {
+        const unique = new Set<string>();
+        for (const review of reviews ?? []) {
+            const url = review.imageUrl?.trim();
+            if (!url) continue;
+            unique.add(url);
+        }
+        return Array.from(unique);
+    }, [reviews]);
     const detailRows = useMemo(
         () => buildDetailRows(fetchedProperty, texts),
         [fetchedProperty, texts],
@@ -327,7 +340,6 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                 <div className="mx-auto max-w-5xl">
                     <Badge className="mb-4">{texts.badge}</Badge>
 
-                    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-blue-700">
                         {heading}
@@ -339,7 +351,27 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                         ) : null}
                         {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
 
-                        <div className="mt-5 overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/40 shadow-sm">
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            <Button asChild variant="secondary">
+                            <Link href="/properties">{texts.toProperties}</Link>
+                            </Button>
+
+                            {currentUser && (
+                            <Button asChild>
+                                <Link
+                                href={`/properties/${propertyId}/reviews/new?address=${encodeURIComponent(
+                                    subtitle
+                                )}`}
+                                >
+                                {texts.addReview}
+                                </Link>
+                            </Button>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-4">
+                        <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/40 shadow-sm">
                             <div className="border-b border-blue-100 px-4 py-3">
                                 <p className="text-sm font-semibold text-blue-800">{texts.propertyDetailsTitle}</p>
                             </div>
@@ -368,73 +400,92 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    <div className="flex gap-2">
-                        <Button asChild variant="secondary">
-                        <Link href="/properties">{texts.toProperties}</Link>
-                        </Button>
+                        <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/20 shadow-sm">
+                            <div className="border-b border-blue-100 px-4 py-3">
+                                <p className="text-sm font-semibold text-blue-800">{texts.averageTitle}</p>
+                            </div>
+                            <div className="overflow-x-auto p-3">
+                                <div className="flex min-w-max items-center gap-4">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-sm font-medium whitespace-nowrap">{texts.overallLabel}</span>
+                                        <StarRatingDisplay
+                                            value={ratingSummary.overall}
+                                            fallbackLabel={texts.notRated}
+                                            className="whitespace-nowrap"
+                                            showDecimalLabel
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-sm font-medium whitespace-nowrap">{texts.locationLabel}</span>
+                                        <StarRatingDisplay
+                                            value={ratingSummary.location}
+                                            fallbackLabel={texts.notRated}
+                                            className="whitespace-nowrap"
+                                            showDecimalLabel
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-sm font-medium whitespace-nowrap">{texts.noiseLabel}</span>
+                                        <StarRatingDisplay
+                                            value={ratingSummary.noise}
+                                            fallbackLabel={texts.notRated}
+                                            className="whitespace-nowrap"
+                                            showDecimalLabel
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-sm font-medium whitespace-nowrap">{texts.landlordLabel}</span>
+                                        <StarRatingDisplay
+                                            value={ratingSummary.landlord}
+                                            fallbackLabel={texts.notRated}
+                                            className="whitespace-nowrap"
+                                            showDecimalLabel
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-sm font-medium whitespace-nowrap">{texts.conditionLabel}</span>
+                                        <StarRatingDisplay
+                                            value={ratingSummary.condition}
+                                            fallbackLabel={texts.notRated}
+                                            className="whitespace-nowrap"
+                                            showDecimalLabel
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        {currentUser && (
-                        <Button asChild>
-                            <Link
-                            href={`/properties/${propertyId}/reviews/new?address=${encodeURIComponent(
-                                subtitle
-                            )}`}
-                            >
-                            {texts.addReview}
-                            </Link>
-                        </Button>
-                        )}
-                    </div>
-                    </div>
-
-                    <div className="mt-4 border-b pb-4 overflow-x-auto">
-                        <div className="flex min-w-max items-center gap-4">
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium whitespace-nowrap">{texts.overallLabel}</span>
-                                <StarRatingDisplay
-                                    value={ratingSummary.overall}
-                                    fallbackLabel={texts.notRated}
-                                    className="whitespace-nowrap"
-                                    showDecimalLabel
-                                />
+                        <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/10 shadow-sm">
+                            <div className="border-b border-blue-100 px-4 py-3">
+                                <p className="text-sm font-semibold text-blue-800">{texts.imagesTitle ?? "Bilder"}</p>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium whitespace-nowrap">{texts.locationLabel}</span>
-                                <StarRatingDisplay
-                                    value={ratingSummary.location}
-                                    fallbackLabel={texts.notRated}
-                                    className="whitespace-nowrap"
-                                    showDecimalLabel
-                                />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium whitespace-nowrap">{texts.noiseLabel}</span>
-                                <StarRatingDisplay
-                                    value={ratingSummary.noise}
-                                    fallbackLabel={texts.notRated}
-                                    className="whitespace-nowrap"
-                                    showDecimalLabel
-                                />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium whitespace-nowrap">{texts.landlordLabel}</span>
-                                <StarRatingDisplay
-                                    value={ratingSummary.landlord}
-                                    fallbackLabel={texts.notRated}
-                                    className="whitespace-nowrap"
-                                    showDecimalLabel
-                                />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium whitespace-nowrap">{texts.conditionLabel}</span>
-                                <StarRatingDisplay
-                                    value={ratingSummary.condition}
-                                    fallbackLabel={texts.notRated}
-                                    className="whitespace-nowrap"
-                                    showDecimalLabel
-                                />
+                            <div className="p-3">
+                                {topReviewImageUrls.length > 0 ? (
+                                    <div className="-mx-1 overflow-x-auto px-1">
+                                        <div className="flex min-w-max flex-nowrap items-center gap-2">
+                                            {topReviewImageUrls.map((imageUrl, index) => (
+                                                <button
+                                                    key={imageUrl}
+                                                    onClick={() => setSelectedTopImageUrl(imageUrl)}
+                                                    className="relative aspect-square w-10 shrink-0 overflow-hidden rounded-md border bg-muted/10 transition-opacity hover:opacity-85 sm:w-12"
+                                                    aria-label={`Review image ${index + 1}`}
+                                                >
+                                                    <img
+                                                        src={imageUrl}
+                                                        alt={`Review image ${index + 1}`}
+                                                        className="h-full w-full object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="rounded-lg border bg-background/90 px-3 py-2 text-sm text-muted-foreground">
+                                        {texts.imagesEmpty ?? "Ingen bilder i anmeldelser ennå."}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -515,6 +566,30 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                     )}
                 </div>
                 </section>
+
+                {selectedTopImageUrl ? (
+                    <div
+                        className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 p-4"
+                        onClick={() => setSelectedTopImageUrl(null)}
+                    >
+                        <div className="relative max-h-[80vh] max-w-2xl" onClick={(e) => e.stopPropagation()}>
+                            <img
+                                src={selectedTopImageUrl}
+                                alt="Selected review image"
+                                className="h-full w-full object-contain"
+                            />
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedTopImageUrl(null)}
+                                className="absolute right-2 top-2 h-8 w-8 rounded-full bg-white/10 p-0 text-white hover:bg-white/20"
+                                aria-label="Close"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                ) : null}
             </main>
         );
 }

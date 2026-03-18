@@ -253,6 +253,8 @@
         "clearSearch": "Tøm søk",
         "unknownProperty": "Ukjent bolig",
         "averageTitle": "Gjennomsnittlige stjerner",
+        "imagesTitle": "Bilder fra anmeldelser",
+        "imagesEmpty": "Ingen bilder i anmeldelser ennå.",
         "overallLabel": "Total",
         "locationLabel": "Beliggenhet",
         "noiseLabel": "Støy",

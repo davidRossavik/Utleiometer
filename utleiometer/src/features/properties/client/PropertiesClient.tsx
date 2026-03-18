@@ -13,6 +13,7 @@ import { StarRatingDisplay } from "@/features/reviews/componentes/StarRatingDisp
 import { useProperties } from "../hooks/useProperties";
 import { getPropertyOverallRating, usePropertySearch } from "../hooks/usePropertySearch";
 import { Property } from "../types";
+import { PropertyReviewImages } from "./PropertyReviewImages";
 
 type SortBy = "alphabetical" | "latestReview" | "popularity";
 
@@ -392,19 +393,25 @@ function PropertyCard({
         </CardHeader>
 
         <CardContent className="space-y-4 pt-0">
-          <div className="h-44 overflow-hidden rounded-lg border bg-muted/20">
+          <div className="flex flex-wrap items-start gap-2">
             {p.imageUrl ? (
-              <img
-                src={p.imageUrl}
-                alt={displayAddress}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                {texts.notProvided}
+              <div className="aspect-square w-24 shrink-0 overflow-hidden rounded-lg border bg-muted/20">
+                <img
+                  src={p.imageUrl}
+                  alt={displayAddress}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
-            )}
+            ) : null}
+
+            <PropertyReviewImages
+              propertyId={p.id}
+              maxImages={p.imageUrl ? 4 : 5}
+              showAsMainImage={!p.imageUrl}
+              excludeImageUrl={p.imageUrl}
+              layout="row"
+            />
           </div>
 
           <div className="rounded-lg border bg-muted/20 p-3">
