@@ -6,6 +6,7 @@ import {
   getAllProperties,
   getPropertyByAddress,
   getPropertyById,
+  updateProperty,
   deleteProperty,
   type Property,
   type PropertyType,
@@ -378,6 +379,16 @@ export async function submitUnifiedReviewAction(formData: FormData) {
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
   const reviewImageUrl = asTrimmedString(formData.get("reviewImageUrl"));
+  
+  // Extract property image URLs
+  const propertyImageUrlsCount = parseInt(asTrimmedString(formData.get("propertyImageUrlsCount")) || "0", 10);
+  const propertyImageUrls: string[] = [];
+  for (let i = 0; i < propertyImageUrlsCount; i++) {
+    const url = asTrimmedString(formData.get(`propertyImageUrl_${i}`));
+    if (url) {
+      propertyImageUrls.push(url);
+    }
+  }
 
   if (!addressAndUser.ok || !ratings || !comment) {
     return {
@@ -410,6 +421,7 @@ export async function submitUnifiedReviewAction(formData: FormData) {
         city: addressAndUser.data.city,
         registeredByUid: addressAndUser.data.registeredByUid,
         ...parsedDetails.data,
+        ...(propertyImageUrls.length > 0 ? { imageUrls: propertyImageUrls } : {}),
       });
 
       propertyId = newProperty.propertyId;
@@ -427,17 +439,70 @@ export async function submitUnifiedReviewAction(formData: FormData) {
     return { propertyId };
   } catch (error) {
     console.error("Error submitting unified review flow:", error);
-    return { error: "Noe gikk galt" };
+      console.error("Error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : "No stack trace",
+        propertyImageUrlsCount: propertyImageUrls.length,
+      });
+      return { error: error instanceof Error ? error.message : "Noe gikk galt" };
   }
 }
 
 export async function getPropertyAction(propertyId: string) {
   try {
     const property = await getPropertyById(propertyId);
-    return property;
+    // Map Firebase propertyId to features/properties id format
+    return {
+      id: property.propertyId,
+      address: property.address,
+      zipCode: property.zipCode,
+      city: property.city,
+      registeredByUid: property.registeredByUid,
+      updatedByUid: property.updatedByUid,
+      imageUrl: property.imageUrl,
+      imageUrls: property.imageUrls,
+      propertyType: property.propertyType,
+      areaSqm: property.areaSqm,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      floors: property.floors,
+      buildYear: property.buildYear,
+      roomAreaSqm: property.roomAreaSqm,
+      hasPrivateBathroom: property.hasPrivateBathroom,
+      otherBedsitsInUnit: property.otherBedsitsInUnit,
+      latitude: property.latitude,
+      longitude: property.longitude,
+    };
   } catch (error) {
     console.error("Error fetching property:", error);
-    return { error: "Could not fetch property" };
+    return { error: error instanceof Error ? error.message : "Could not fetch property" };
+  }
+}
+
+export async function updatePropertyImageUrlsAction(
+  propertyId: string,
+  imageUrls: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const property = await getPropertyById(propertyId);
+    
+    // Verify the caller is the property owner
+    const { uid } = await adminAuth.getUser(property.registeredByUid).catch(() => ({ uid: null }));
+    
+    // Update property with new image URLs (keep first as imageUrl for backwards compatibility)
+    const updateData: any = { imageUrls };
+    if (imageUrls.length > 0) {
+      updateData.imageUrl = imageUrls[0];
+    }
+    
+    await (updateProperty as any)(propertyId, updateData);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating property images:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update property images"
+    };
   }
 }
 

@@ -16,7 +16,10 @@ export type Property = {
     city?: string;
     country?: string;
     ownerName?: string;
-    imageUrl?: string;
+    registeredByUid?: string;  // Property owner's user ID
+    updatedByUid?: string;     // Last person to edit the property
+    imageUrl?: string;  // legacy: single image (backwards compatible)
+    imageUrls?: string[];  // new: multiple images
     ratingAvg?: number;
     ratingCount?: number;
     ratingsSummary?: PropertyRatingsSummary;

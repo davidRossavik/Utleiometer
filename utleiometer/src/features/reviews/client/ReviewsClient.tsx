@@ -16,6 +16,7 @@ import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
 import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
 import PropertyMap from "@/ui/map/propertyMap";
+import { PropertyImagesGallery } from "@/features/properties/client/PropertyImagesGallery";
 import { X } from "lucide-react";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
@@ -340,21 +341,31 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                 <div className="mx-auto max-w-5xl">
                     <Badge className="mb-4">{texts.badge}</Badge>
 
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-blue-700">
-                        {heading}
-                        </h1>
-                        {successMessage ? (
-                            <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-                                {successMessage}
-                            </div>
-                        ) : null}
-                        {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-blue-700">
+                            {heading}
+                            </h1>
+                            {successMessage ? (
+                                <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+                                    {successMessage}
+                                </div>
+                            ) : null}
+                            {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+                        </div>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                             <Button asChild variant="secondary">
                             <Link href="/properties">{texts.toProperties}</Link>
                             </Button>
+
+                            {currentUser && fetchedProperty?.registeredByUid === currentUser.uid && (
+                            <Button asChild>
+                                <Link href={`/properties/${propertyId}/edit`}>
+                                Rediger bilder
+                                </Link>
+                            </Button>
+                            )}
 
                             {currentUser && (
                             <Button asChild>
@@ -375,6 +386,17 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             <div className="border-b border-blue-100 px-4 py-3">
                                 <p className="text-sm font-semibold text-blue-800">{texts.propertyDetailsTitle}</p>
                             </div>
+                            
+                            {/* Property Images Gallery */}
+                            {fetchedProperty?.imageUrls && fetchedProperty.imageUrls.length > 0 && (
+                                <div className="border-b border-blue-100 p-3">
+                                    <PropertyImagesGallery 
+                                        imageUrls={fetchedProperty.imageUrls}
+                                        propertyTitle={heading}
+                                    />
+                                </div>
+                            )}
+                            
                             <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-3">
                                 {detailRows.map((row) => (
                                     <div key={row.label} className="rounded-lg border bg-background/90 px-3 py-2">
@@ -405,52 +427,52 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             <div className="border-b border-blue-100 px-4 py-3">
                                 <p className="text-sm font-semibold text-blue-800">{texts.averageTitle}</p>
                             </div>
-                            <div className="overflow-x-auto p-3">
-                                <div className="flex min-w-max items-center gap-4">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm font-medium whitespace-nowrap">{texts.overallLabel}</span>
+                            <div className="p-3">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                                    {/* Overall Rating - Prominent */}
+                                    <div className="flex flex-col items-center justify-center rounded-lg bg-blue-50/40 px-4 py-3 sm:border sm:border-blue-100">
+                                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1.5">{texts.overallLabel}</span>
                                         <StarRatingDisplay
                                             value={ratingSummary.overall}
                                             fallbackLabel={texts.notRated}
-                                            className="whitespace-nowrap"
                                             showDecimalLabel
                                         />
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm font-medium whitespace-nowrap">{texts.locationLabel}</span>
-                                        <StarRatingDisplay
-                                            value={ratingSummary.location}
-                                            fallbackLabel={texts.notRated}
-                                            className="whitespace-nowrap"
-                                            showDecimalLabel
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm font-medium whitespace-nowrap">{texts.noiseLabel}</span>
-                                        <StarRatingDisplay
-                                            value={ratingSummary.noise}
-                                            fallbackLabel={texts.notRated}
-                                            className="whitespace-nowrap"
-                                            showDecimalLabel
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm font-medium whitespace-nowrap">{texts.landlordLabel}</span>
-                                        <StarRatingDisplay
-                                            value={ratingSummary.landlord}
-                                            fallbackLabel={texts.notRated}
-                                            className="whitespace-nowrap"
-                                            showDecimalLabel
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm font-medium whitespace-nowrap">{texts.conditionLabel}</span>
-                                        <StarRatingDisplay
-                                            value={ratingSummary.condition}
-                                            fallbackLabel={texts.notRated}
-                                            className="whitespace-nowrap"
-                                            showDecimalLabel
-                                        />
+
+                                    {/* Other Ratings - Grid */}
+                                    <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
+                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.locationLabel}</span>
+                                            <StarRatingDisplay
+                                                value={ratingSummary.location}
+                                                fallbackLabel={texts.notRated}
+                                                showDecimalLabel
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.noiseLabel}</span>
+                                            <StarRatingDisplay
+                                                value={ratingSummary.noise}
+                                                fallbackLabel={texts.notRated}
+                                                showDecimalLabel
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.landlordLabel}</span>
+                                            <StarRatingDisplay
+                                                value={ratingSummary.landlord}
+                                                fallbackLabel={texts.notRated}
+                                                showDecimalLabel
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.conditionLabel}</span>
+                                            <StarRatingDisplay
+                                                value={ratingSummary.condition}
+                                                fallbackLabel={texts.notRated}
+                                                showDecimalLabel
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

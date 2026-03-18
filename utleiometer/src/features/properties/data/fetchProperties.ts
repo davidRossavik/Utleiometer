@@ -99,8 +99,28 @@ function getValidImageUrl(value: unknown): string | undefined {
     return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function getPreferredImageUrl(propertyImageUrl: unknown, reviewImageUrl: string | undefined): string | undefined {
-    return getValidImageUrl(propertyImageUrl) ?? reviewImageUrl;
+function getImageUrls(value: unknown): string[] | undefined {
+    if (!Array.isArray(value)) return undefined;
+    return value.filter((url) => typeof url === "string" && url.trim().length > 0);
+}
+
+function getPreferredImageUrls(propertyImageUrls: unknown, propertyImageUrl: unknown, reviewImageUrl: string | undefined): { imageUrl: string | undefined; imageUrls: string[] | undefined } {
+    // Prefer imageUrls array, then single imageUrl, then review image
+    const imageUrls = getImageUrls(propertyImageUrls);
+    if (imageUrls && imageUrls.length > 0) {
+        return { imageUrl: imageUrls[0], imageUrls };
+    }
+    
+    const singleUrl = getValidImageUrl(propertyImageUrl);
+    if (singleUrl) {
+        return { imageUrl: singleUrl, imageUrls: undefined };
+    }
+    
+    if (reviewImageUrl) {
+        return { imageUrl: reviewImageUrl, imageUrls: undefined };
+    }
+    
+    return { imageUrl: undefined, imageUrls: undefined };
 }
 
 export async function fetchProperties(): Promise<Property[]> {
@@ -161,11 +181,13 @@ export async function fetchProperties(): Promise<Property[]> {
         const ratingAvg = aggregate ? averageValue(aggregate.overall) : undefined;
         const ratingCount = aggregate?.overall.count ?? 0;
         const fallbackReviewImage = latestReviewImageByProperty.get(d.id)?.imageUrl;
+        const { imageUrl, imageUrls } = getPreferredImageUrls(propertyData.imageUrls, propertyData.imageUrl, fallbackReviewImage);
 
         return {
             id: d.id,
             ...propertyData,
-            imageUrl: getPreferredImageUrl(propertyData.imageUrl, fallbackReviewImage),
+            imageUrl,
+            imageUrls,
             ratingAvg,
             ratingCount,
             latestReviewAt: latestReviewAtByProperty.get(d.id),

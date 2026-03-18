@@ -10,9 +10,12 @@ export interface Property {
   latitude?: number;
   longitude?: number;
   registeredByUid: string;
+  updatedByUid?: string;
   createdAt: Date;
+  updatedAt?: Date;
   reviewCount?: number;
-  imageUrl?: string;
+  imageUrl?: string;  // legacy: single image (backwards compatible)
+  imageUrls?: string[];  // new: multiple images
   propertyType?: PropertyType;
   areaSqm?: number;
   bedrooms?: number;
@@ -70,6 +73,17 @@ export async function getPropertyByAddress(address: string, zipCode: string, cit
   
   const doc = snapshot.docs[0];
   return { propertyId: doc.id, ...doc.data() } as Property;
+}
+
+export async function updateProperty(propertyId: string, data: Partial<Omit<Property, "propertyId" | "createdAt" | "registeredByUid">>) {
+    const propertyRef = adminDb.collection("properties").doc(propertyId);
+    const updateData = { ...data, updatedAt: new Date() };
+    await propertyRef.update(updateData);
+    const doc = await propertyRef.get();
+    if (!doc.exists) {
+        throw new Error("Property not found");
+    }
+    return { propertyId: doc.id, ...doc.data() } as Property;
 }
 
 /**

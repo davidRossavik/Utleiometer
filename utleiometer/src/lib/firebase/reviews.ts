@@ -14,7 +14,8 @@ export interface Review {
         overall: number;
     };
     comment: string;
-    imageUrl?: string;
+    imageUrl?: string;  // legacy: single image (backwards compatible)
+    imageUrls?: string[];  // new: multiple images
     title?: string;
     createdAt: Date;
     updatedAt?: Date;

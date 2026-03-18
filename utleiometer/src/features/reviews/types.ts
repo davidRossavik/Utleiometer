@@ -13,7 +13,8 @@ export type Review = {
     userId?: string;          // <-- NY: ID-en til brukeren som skrev anmeldelsen
     title?: string;
     comment?: string;
-    imageUrl?: string;
+    imageUrl?: string;  // legacy: single image (backwards compatible)
+    imageUrls?: string[];  // new: multiple images
     rating?: number; // legacy 1-5
     ratings?: ReviewRatings;
     userDisplayName?: string;
