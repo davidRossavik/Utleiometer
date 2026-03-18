@@ -379,16 +379,6 @@ export async function submitUnifiedReviewAction(formData: FormData) {
   const ratings = buildRatings(formData);
   const comment = asTrimmedString(formData.get("comment"));
   const reviewImageUrl = asTrimmedString(formData.get("reviewImageUrl"));
-  
-  // Extract property image URLs
-  const propertyImageUrlsCount = parseInt(asTrimmedString(formData.get("propertyImageUrlsCount")) || "0", 10);
-  const propertyImageUrls: string[] = [];
-  for (let i = 0; i < propertyImageUrlsCount; i++) {
-    const url = asTrimmedString(formData.get(`propertyImageUrl_${i}`));
-    if (url) {
-      propertyImageUrls.push(url);
-    }
-  }
 
   if (!addressAndUser.ok || !ratings || !comment) {
     return {
@@ -421,7 +411,6 @@ export async function submitUnifiedReviewAction(formData: FormData) {
         city: addressAndUser.data.city,
         registeredByUid: addressAndUser.data.registeredByUid,
         ...parsedDetails.data,
-        ...(propertyImageUrls.length > 0 ? { imageUrls: propertyImageUrls } : {}),
       });
 
       propertyId = newProperty.propertyId;
@@ -442,7 +431,6 @@ export async function submitUnifiedReviewAction(formData: FormData) {
       console.error("Error details:", {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : "No stack trace",
-        propertyImageUrlsCount: propertyImageUrls.length,
       });
       return { error: error instanceof Error ? error.message : "Noe gikk galt" };
   }

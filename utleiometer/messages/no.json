@@ -187,6 +187,9 @@
             "unknownError": "Noe gikk galt"
         }
     },
+    "PropertyEditPage": {
+        "brand": "Utleiometer"
+    },
     "PublicPropertiesPage": {
         "brand": "Utleiometer",
         "footer": "Utleiometer. Laget av Lillian, Katharina, Robert, David og Marius / PU-gruppe 4.",

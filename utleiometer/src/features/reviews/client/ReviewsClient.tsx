@@ -16,7 +16,6 @@ import { ReviewCard } from "../componentes/ReviewCard";
 import { StarRatingDisplay } from "../componentes/StarRatingDisplay";
 import { updateReviewAction, deleteReviewAction } from "@/app/[locale]/actions/reviews";
 import PropertyMap from "@/ui/map/propertyMap";
-import { PropertyImagesGallery } from "@/features/properties/client/PropertyImagesGallery";
 import { X } from "lucide-react";
 
 type SortKey = "newest" | "oldest" | "rating_desc" | "rating_asc"
@@ -359,14 +358,6 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             <Link href="/properties">{texts.toProperties}</Link>
                             </Button>
 
-                            {currentUser && fetchedProperty?.registeredByUid === currentUser.uid && (
-                            <Button asChild>
-                                <Link href={`/properties/${propertyId}/edit`}>
-                                Rediger bilder
-                                </Link>
-                            </Button>
-                            )}
-
                             {currentUser && (
                             <Button asChild>
                                 <Link
@@ -386,16 +377,6 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             <div className="border-b border-blue-100 px-4 py-3">
                                 <p className="text-sm font-semibold text-blue-800">{texts.propertyDetailsTitle}</p>
                             </div>
-                            
-                            {/* Property Images Gallery */}
-                            {fetchedProperty?.imageUrls && fetchedProperty.imageUrls.length > 0 && (
-                                <div className="border-b border-blue-100 p-3">
-                                    <PropertyImagesGallery 
-                                        imageUrls={fetchedProperty.imageUrls}
-                                        propertyTitle={heading}
-                                    />
-                                </div>
-                            )}
                             
                             <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-3">
                                 {detailRows.map((row) => (

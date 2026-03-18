@@ -187,6 +187,9 @@
             "unknownError": "Une erreur est survenue"
         }
     },
+    "PropertyEditPage": {
+        "brand": "L'Utleiomètre"
+    },
     "PublicPropertiesPage": {
         "brand": "L'Utleiomètre",
         "footer": "Utleiometer. Créé par Lillian, Katharina, Robert, David et Marius / PU-groupe 4.",

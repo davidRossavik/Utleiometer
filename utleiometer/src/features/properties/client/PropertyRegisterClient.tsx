@@ -5,7 +5,6 @@ import { useRouter } from "@/i18n/navigation";
 import { useRef, useState } from "react";
 import { lookupPropertyByAddressAction, submitUnifiedReviewAction } from "@/app/[locale]/actions/properties";
 import { uploadReviewImageAction } from "@/app/[locale]/actions/uploadReviewImage";
-import { uploadPropertyImageAction } from "@/app/[locale]/actions/uploadPropertyImage";
 
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
@@ -117,10 +116,6 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
   const [reviewImageFile, setReviewImageFile] = useState<File | null>(null);
   const reviewImageInputRef = useRef<HTMLInputElement | null>(null);
   
-  const [propertyImageFiles, setPropertyImageFiles] = useState<File[]>([]);
-  const [isUploadingPropertyImages, setIsUploadingPropertyImages] = useState(false);
-  const propertyImageInputRef = useRef<HTMLInputElement | null>(null);
-  
   const baseInputClass =
     "h-11 rounded-xl border-slate-300/80 bg-white shadow-xs transition-colors focus-visible:border-blue-400 focus-visible:ring-blue-200";
   const baseSelectClass =
@@ -129,17 +124,6 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
 
   function handleCancel() {
     router.push("/");
-  }
-
-  function clearPropertyImageSelection() {
-    setPropertyImageFiles([]);
-    if (propertyImageInputRef.current) {
-      propertyImageInputRef.current.value = "";
-    }
-  }
-
-  function removePropertyImage(index: number) {
-    setPropertyImageFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleAddressLookup(e: React.FormEvent<HTMLFormElement>) {
@@ -234,52 +218,6 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
     formData.append("comment", comment);
 
     try {
-      // Upload property images if provided
-      const propertyImageUrls: string[] = [];
-      if (propertyImageFiles.length > 0 && !existingPropertyId) {
-        setIsUploadingPropertyImages(true);
-        console.log("Starting property images upload...");
-        try {
-          for (const file of propertyImageFiles) {
-            const uploadFormData = new FormData();
-            uploadFormData.append("file", file);
-            uploadFormData.append("userId", currentUser.uid);
-
-            const result = await uploadPropertyImageAction(uploadFormData);
-
-            if (result.error) {
-              console.error("Property image upload failed:", result.error);
-              setError(result.error);
-              setIsSubmitting(false);
-              setIsUploadingPropertyImages(false);
-              return;
-            }
-
-            if (result.url) {
-              console.log("Property image uploaded successfully:", result.url);
-              propertyImageUrls.push(result.url);
-            }
-          }
-        } catch (uploadErr) {
-          console.error("Property images upload error:", uploadErr);
-          const uploadErrMsg = uploadErr instanceof Error ? uploadErr.message : "Failed to upload property images";
-          setError(uploadErrMsg);
-          setIsSubmitting(false);
-          setIsUploadingPropertyImages(false);
-          return;
-        } finally {
-          setIsUploadingPropertyImages(false);
-        }
-      }
-
-      // Append property image URLs
-      if (propertyImageUrls.length > 0) {
-        propertyImageUrls.forEach((url, index) => {
-          formData.append(`propertyImageUrl_${index}`, url);
-        });
-        formData.append("propertyImageUrlsCount", String(propertyImageUrls.length));
-      }
-
       if (reviewImageFile) {
         const reviewFormData = new FormData();
         reviewFormData.append("file", reviewImageFile);
@@ -542,55 +480,6 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                     </div>
                   </>
                 )}
-
-                <div className="grid gap-2">
-                  <Label htmlFor="propertyImages">Bilder av boligen (valgfritt)</Label>
-                  <Input
-                    id="propertyImages"
-                    name="propertyImages"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    ref={propertyImageInputRef}
-                    className={baseInputClass}
-                    onChange={(e) => {
-                      setPropertyImageFiles(Array.from(e.target.files ?? []));
-                    }}
-                    disabled={isUploadingPropertyImages}
-                  />
-                  {propertyImageFiles.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-2">
-                        <p className="text-xs font-medium text-blue-700 mb-2">Valgte bilder ({propertyImageFiles.length})</p>
-                        <div className="flex flex-wrap gap-2">
-                          {propertyImageFiles.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-2 py-1 text-xs gap-2">
-                              <span className="truncate text-slate-700 max-w-xs">{file.name}</span>
-                              <Button 
-                                type="button" 
-                                variant="ghost" 
-                                className="h-auto px-1 py-0 text-xs text-red-600 hover:text-red-700" 
-                                onClick={() => removePropertyImage(index)}
-                                disabled={isUploadingPropertyImages}
-                              >
-                                Fjern
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      {isUploadingPropertyImages && (
-                        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
-                          <span className="text-blue-700">Laster opp {propertyImageFiles.length} bilde(r)...</span>
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
-                  <p className="text-xs text-muted-foreground">
-                    PNG/JPG/WebP, maks 15 MB per bilde
-                  </p>
-                </div>
 
               </div>
 
