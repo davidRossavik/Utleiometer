@@ -4,8 +4,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: '50mb',
     },
+    proxyClientMaxBodySize: '50mb',
   },
 };
 
