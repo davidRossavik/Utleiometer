@@ -61,14 +61,6 @@ export type ReviewsClientTexts = {
     reviewReportSubmitted: string;
     reviewReportAlreadySubmitted: string;
     reviewReportFailed: string;
-    reviewReport: string;
-    reviewReportReasonLabel: string;
-    reviewReportReasonPlaceholder: string;
-    reviewReportSubmit: string;
-    reviewReportCancel: string;
-    reviewReportSubmitted: string;
-    reviewReportAlreadySubmitted: string;
-    reviewReportFailed: string;
     propertyDetailsTitle: string;
     propertyTypeLabel: string;
     areaSqmLabel: string;
@@ -486,6 +478,9 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
         typeof fetchedProperty?.latitude === "number" &&
         typeof fetchedProperty?.longitude === "number";
 
+    const propertyImageUrl =
+        fetchedProperty?.imageUrls?.[0] ?? fetchedProperty?.imageUrl ?? null;
+
     const submitted = searchParams.get("submitted");
     const successMessage =
         submitted === "review"
@@ -534,35 +529,50 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                     </div>
 
                     <div className="mt-5 grid gap-4">
-                        <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/40 shadow-sm">
-                            <div className="border-b border-blue-100 px-4 py-3">
-                                <p className="text-sm font-semibold text-blue-800">{texts.propertyDetailsTitle}</p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-3">
-                                {detailRows.map((row) => (
-                                    <div key={row.label} className="rounded-lg border bg-background/90 px-3 py-2">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                            {row.label}
+                        {/* Top row: property details + property image */}
+                        <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
+                            <div className="md:w-1/2 overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/40 shadow-sm">
+                                <div className="border-b border-blue-100 px-4 py-3">
+                                    <p className="text-sm font-semibold text-blue-800">{texts.propertyDetailsTitle}</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-3">
+                                    {detailRows.map((row) => (
+                                        <div key={row.label} className="rounded-lg border bg-background/90 px-3 py-2">
+                                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                                {row.label}
+                                            </p>
+                                            <p className="mt-1 text-sm font-medium text-foreground">{row.value}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="border-t border-blue-100 p-3">
+                                    {hasCoordinates ? (
+                                        <PropertyMap
+                                            lat={fetchedProperty!.latitude!}
+                                            lng={fetchedProperty!.longitude!}
+                                            title={heading}
+                                        />
+                                    ) : (
+                                        <p className="rounded-lg border bg-background/90 px-3 py-2 text-sm text-muted-foreground">
+                                            Kart er ikke tilgjengelig for denne boligen ennå.
                                         </p>
-                                        <p className="mt-1 text-sm font-medium text-foreground">{row.value}</p>
-                                    </div>
-                                ))}
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="border-t border-blue-100 p-3">
-                                {hasCoordinates ? (
-                                    <PropertyMap
-                                        lat={fetchedProperty!.latitude!}
-                                        lng={fetchedProperty!.longitude!}
-                                        title={heading}
+                            {/* Property image – right of map/details */}
+                            {propertyImageUrl ? (
+                                <div className="md:w-1/2 shrink-0 overflow-hidden rounded-xl border border-blue-100 shadow-sm">
+                                    <img
+                                        src={propertyImageUrl}
+                                        alt={heading}
+                                        className="h-full w-full object-cover"
+                                        loading="lazy"
                                     />
-                                ) : (
-                                    <p className="rounded-lg border bg-background/90 px-3 py-2 text-sm text-muted-foreground">
-                                        Kart er ikke tilgjengelig for denne boligen ennå.
-                                    </p>
-                                )}
-                            </div>
+                                </div>
+                            ) : null}
                         </div>
 
                     <div className="flex gap-2">
@@ -594,59 +604,59 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                     </div>
 
                         <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/20 shadow-sm">
-                            <div className="border-b border-blue-100 px-4 py-3">
-                                <p className="text-sm font-semibold text-blue-800">{texts.averageTitle}</p>
-                            </div>
-                            <div className="p-3">
-                                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-                                    {/* Overall Rating - Prominent */}
-                                    <div className="flex flex-col items-center justify-center rounded-lg bg-blue-50/40 px-4 py-3 sm:border sm:border-blue-100">
-                                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1.5">{texts.overallLabel}</span>
-                                        <StarRatingDisplay
-                                            value={ratingSummary.overall}
-                                            fallbackLabel={texts.notRated}
-                                            showDecimalLabel
-                                        />
-                                    </div>
+                                <div className="border-b border-blue-100 px-4 py-3">
+                                    <p className="text-sm font-semibold text-blue-800">{texts.averageTitle}</p>
+                                </div>
+                                <div className="p-3">
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                                        {/* Overall Rating - Prominent */}
+                                        <div className="flex flex-col items-center justify-center rounded-lg bg-blue-50/40 px-4 py-3 sm:border sm:border-blue-100">
+                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1.5">{texts.overallLabel}</span>
+                                            <StarRatingDisplay
+                                                value={ratingSummary.overall}
+                                                fallbackLabel={texts.notRated}
+                                                showDecimalLabel
+                                            />
+                                        </div>
 
-                                    {/* Other Ratings - Grid */}
-                                    <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
-                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
-                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.locationLabel}</span>
-                                            <StarRatingDisplay
-                                                value={ratingSummary.location}
-                                                fallbackLabel={texts.notRated}
-                                                showDecimalLabel
-                                            />
-                                        </div>
-                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
-                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.noiseLabel}</span>
-                                            <StarRatingDisplay
-                                                value={ratingSummary.noise}
-                                                fallbackLabel={texts.notRated}
-                                                showDecimalLabel
-                                            />
-                                        </div>
-                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
-                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.landlordLabel}</span>
-                                            <StarRatingDisplay
-                                                value={ratingSummary.landlord}
-                                                fallbackLabel={texts.notRated}
-                                                showDecimalLabel
-                                            />
-                                        </div>
-                                        <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
-                                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.conditionLabel}</span>
-                                            <StarRatingDisplay
-                                                value={ratingSummary.condition}
-                                                fallbackLabel={texts.notRated}
-                                                showDecimalLabel
-                                            />
+                                        {/* Other Ratings - Grid */}
+                                        <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
+                                            <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.locationLabel}</span>
+                                                <StarRatingDisplay
+                                                    value={ratingSummary.location}
+                                                    fallbackLabel={texts.notRated}
+                                                    showDecimalLabel
+                                                />
+                                            </div>
+                                            <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.noiseLabel}</span>
+                                                <StarRatingDisplay
+                                                    value={ratingSummary.noise}
+                                                    fallbackLabel={texts.notRated}
+                                                    showDecimalLabel
+                                                />
+                                            </div>
+                                            <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.landlordLabel}</span>
+                                                <StarRatingDisplay
+                                                    value={ratingSummary.landlord}
+                                                    fallbackLabel={texts.notRated}
+                                                    showDecimalLabel
+                                                />
+                                            </div>
+                                            <div className="flex flex-col items-center rounded-lg border border-blue-100/60 bg-background/50 px-2 py-2">
+                                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{texts.conditionLabel}</span>
+                                                <StarRatingDisplay
+                                                    value={ratingSummary.condition}
+                                                    fallbackLabel={texts.notRated}
+                                                    showDecimalLabel
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
                         <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/10 shadow-sm">
                             <div className="border-b border-blue-100 px-4 py-3">

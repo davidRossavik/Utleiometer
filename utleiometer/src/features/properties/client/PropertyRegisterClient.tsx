@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useRef, useState } from "react";
 import { lookupPropertyByAddressAction, submitUnifiedReviewAction } from "@/app/[locale]/actions/properties";
 import { uploadReviewImageAction } from "@/app/[locale]/actions/uploadReviewImage";
+import { uploadPropertyImageAction } from "@/app/[locale]/actions/uploadPropertyImage";
 
 import { Button } from "@/ui/primitives/button";
 import { Input } from "@/ui/primitives/input";
@@ -63,6 +64,8 @@ export type PropertyRegisterTexts = {
   landlordHelp: string;
   conditionLabel: string;
   conditionHelp: string;
+  propertyImageLabel?: string;
+  propertyImageHelp?: string;
   reviewImageLabel?: string;
   reviewImageHelp?: string;
   continueButton: string;
@@ -113,6 +116,8 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
   const [ratingLandlord, setRatingLandlord] = useState<number | undefined>(undefined);
   const [ratingCondition, setRatingCondition] = useState<number | undefined>(undefined);
   const [comment, setComment] = useState("");
+  const [propertyImageFile, setPropertyImageFile] = useState<File | null>(null);
+  const propertyImageInputRef = useRef<HTMLInputElement | null>(null);
   const [reviewImageFile, setReviewImageFile] = useState<File | null>(null);
   const reviewImageInputRef = useRef<HTMLInputElement | null>(null);
   
@@ -164,6 +169,13 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
     e.preventDefault();
     setError("");
     setStep("review");
+  }
+
+  function clearPropertyImageSelection() {
+    setPropertyImageFile(null);
+    if (propertyImageInputRef.current) {
+      propertyImageInputRef.current.value = "";
+    }
   }
 
   function clearReviewImageSelection() {
@@ -221,6 +233,21 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
     formData.append("comment", comment);
 
     try {
+      if (propertyImageFile && !existingPropertyId) {
+        const propFormData = new FormData();
+        propFormData.append("file", propertyImageFile);
+        propFormData.append("userId", currentUser.uid);
+        const propImageResult = await uploadPropertyImageAction(propFormData);
+        if (propImageResult.error) {
+          setError(propImageResult.error);
+          setIsSubmitting(false);
+          return;
+        }
+        if (propImageResult.url) {
+          formData.append("propertyImageUrl", propImageResult.url);
+        }
+      }
+
       if (reviewImageFile) {
         const reviewFormData = new FormData();
         reviewFormData.append("file", reviewImageFile);
@@ -484,6 +511,35 @@ export default function PropertyRegisterClient({ texts, messages }: PropertyRegi
                   </>
                 )}
 
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="propertyImage">{texts.propertyImageLabel ?? "Bilde av boligen (valgfritt)"}</Label>
+                <Input
+                  id="propertyImage"
+                  name="propertyImage"
+                  type="file"
+                  accept="image/*"
+                  ref={propertyImageInputRef}
+                  className={baseInputClass}
+                  onChange={(e) => setPropertyImageFile(e.target.files?.[0] ?? null)}
+                />
+                {propertyImageFile ? (
+                  <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                    <span className="truncate text-slate-700">{propertyImageFile.name}</span>
+                    <Button type="button" variant="ghost" className="h-auto px-2 py-1 text-xs" onClick={clearPropertyImageSelection}>
+                      Fjern bilde
+                    </Button>
+                  </div>
+                ) : null}
+                {propertyImageFile ? (
+                  <img
+                    src={URL.createObjectURL(propertyImageFile)}
+                    alt="Forhåndsvisning"
+                    className="mt-1 max-h-48 w-full rounded-lg object-cover border border-slate-200"
+                  />
+                ) : null}
+                <p className="text-xs text-muted-foreground">{texts.propertyImageHelp ?? "PNG/JPG/WebP, maks 15 MB"}</p>
               </div>
 
               {error ? (

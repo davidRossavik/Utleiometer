@@ -401,34 +401,30 @@ function PropertyCard({
   return (
       <Card className="transition-all hover:shadow-lg hover:shadow-blue-100/50">
         <CardHeader>
-          <div className="flex items-start justify-between gap-3">
-            <div>
+          <div className="flex items-start gap-4">
+            <div className="flex flex-1 flex-col gap-1">
               <CardTitle className="text-xl text-blue-700">
                 <Link href={`/properties/${p.id}/reviews`} className="hover:underline">
                   {displayAddress}
                 </Link>
               </CardTitle>
               <CardDescription>{displayPlace}</CardDescription>
+
+              {isAdmin ? (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDeleteProperty(p)}
+                  disabled={isDeleting}
+                  className="mt-2 self-start"
+                >
+                  {isDeleting ? `${deleteLabel}...` : deleteLabel}
+                </Button>
+              ) : null}
             </div>
 
-            {isAdmin ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onDeleteProperty(p)}
-                disabled={isDeleting}
-                className="shrink-0"
-              >
-                {isDeleting ? `${deleteLabel}...` : deleteLabel}
-              </Button>
-            ) : null}
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4 pt-0">
-          <div className="flex flex-wrap items-start gap-2">
             {p.imageUrl ? (
-              <div className="aspect-square w-24 shrink-0 overflow-hidden rounded-lg border bg-muted/20">
+              <div className="h-44 w-2/3 shrink-0 overflow-hidden rounded-lg border bg-muted/20">
                 <img
                   src={p.imageUrl}
                   alt={displayAddress}
@@ -437,15 +433,17 @@ function PropertyCard({
                 />
               </div>
             ) : null}
-
-            <PropertyReviewImages
-              propertyId={p.id}
-              maxImages={p.imageUrl ? 4 : 5}
-              showAsMainImage={!p.imageUrl}
-              excludeImageUrl={p.imageUrl}
-              layout="row"
-            />
           </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4 pt-0">
+          <PropertyReviewImages
+            propertyId={p.id}
+            maxImages={p.imageUrl ? 4 : 5}
+            showAsMainImage={!p.imageUrl}
+            excludeImageUrl={p.imageUrl}
+            layout="row"
+          />
 
           <div className="rounded-lg border bg-muted/20 p-3">
             <div className="mb-2">
