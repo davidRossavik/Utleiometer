@@ -91,34 +91,38 @@ export function ReviewCard({ review, currentUserId, onSave, onDelete, texts }: R
             </CardHeader>
 
             <CardContent>
-                {review.imageUrl ? (
-                    <div className="mb-4 overflow-hidden rounded-lg border bg-muted/10 w-24 h-24 sm:w-28 sm:h-28">
-                        <img
-                            src={review.imageUrl}
-                            alt="Review image"
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                        />
+                <div className="mb-4 flex flex-col sm:flex-row gap-4">
+                    {/* Ratings Column */}
+                    <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                            <span className="text-sm font-medium">{texts.location}</span>
+                            <StarRatingDisplay value={review.ratings?.location} fallbackLabel={texts.notRated} />
+                        </div>
+                        <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                            <span className="text-sm font-medium">{texts.noise}</span>
+                            <StarRatingDisplay value={review.ratings?.noise} fallbackLabel={texts.notRated} />
+                        </div>
+                        <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                            <span className="text-sm font-medium">{texts.landlord}</span>
+                            <StarRatingDisplay value={review.ratings?.landlord} fallbackLabel={texts.notRated} />
+                        </div>
+                        <div className="flex items-center justify-between gap-2 rounded-md border p-2">
+                            <span className="text-sm font-medium">{texts.condition}</span>
+                            <StarRatingDisplay value={review.ratings?.condition} fallbackLabel={texts.notRated} />
+                        </div>
                     </div>
-                ) : null}
 
-                <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
-                        <span className="text-sm font-medium">{texts.location}</span>
-                        <StarRatingDisplay value={review.ratings?.location} fallbackLabel={texts.notRated} />
-                    </div>
-                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
-                        <span className="text-sm font-medium">{texts.noise}</span>
-                        <StarRatingDisplay value={review.ratings?.noise} fallbackLabel={texts.notRated} />
-                    </div>
-                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
-                        <span className="text-sm font-medium">{texts.landlord}</span>
-                        <StarRatingDisplay value={review.ratings?.landlord} fallbackLabel={texts.notRated} />
-                    </div>
-                    <div className="flex items-center justify-between gap-2 rounded-md border p-2">
-                        <span className="text-sm font-medium">{texts.condition}</span>
-                        <StarRatingDisplay value={review.ratings?.condition} fallbackLabel={texts.notRated} />
-                    </div>
+                    {/* Image */}
+                    {review.imageUrl ? (
+                        <div className="flex-shrink-0 overflow-hidden rounded-lg border bg-muted/10 w-32 h-32 sm:w-40 sm:h-40">
+                            <img
+                                src={review.imageUrl}
+                                alt="Review image"
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        </div>
+                    ) : null}
                 </div>
 
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
