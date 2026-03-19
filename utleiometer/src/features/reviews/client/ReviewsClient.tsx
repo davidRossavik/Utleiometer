@@ -529,8 +529,20 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                     </div>
 
                     <div className="mt-5 grid gap-4">
-                        {/* Top row: property details + property image */}
+                        {/* Top row: property image + property details */}
                         <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
+                            {/* Property image – left of details */}
+                            {propertyImageUrl ? (
+                                <div className="md:w-1/2 shrink-0 overflow-hidden rounded-xl border border-blue-100 shadow-sm">
+                                    <img
+                                        src={propertyImageUrl}
+                                        alt={heading}
+                                        className="h-full w-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            ) : null}
+
                             <div className="md:w-1/2 overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/40 shadow-sm">
                                 <div className="border-b border-blue-100 px-4 py-3">
                                     <p className="text-sm font-semibold text-blue-800">{texts.propertyDetailsTitle}</p>
@@ -549,11 +561,13 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
 
                                 <div className="border-t border-blue-100 p-3">
                                     {hasCoordinates ? (
-                                        <PropertyMap
-                                            lat={fetchedProperty!.latitude!}
-                                            lng={fetchedProperty!.longitude!}
-                                            title={heading}
-                                        />
+                                        <div className="h-40 overflow-hidden rounded-lg">
+                                            <PropertyMap
+                                                lat={fetchedProperty!.latitude!}
+                                                lng={fetchedProperty!.longitude!}
+                                                title={heading}
+                                            />
+                                        </div>
                                     ) : (
                                         <p className="rounded-lg border bg-background/90 px-3 py-2 text-sm text-muted-foreground">
                                             Kart er ikke tilgjengelig for denne boligen ennå.
@@ -561,18 +575,6 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                                     )}
                                 </div>
                             </div>
-
-                            {/* Property image – right of map/details */}
-                            {propertyImageUrl ? (
-                                <div className="md:w-1/2 shrink-0 overflow-hidden rounded-xl border border-blue-100 shadow-sm">
-                                    <img
-                                        src={propertyImageUrl}
-                                        alt={heading}
-                                        className="h-full w-full object-cover"
-                                        loading="lazy"
-                                    />
-                                </div>
-                            ) : null}
                         </div>
 
 
