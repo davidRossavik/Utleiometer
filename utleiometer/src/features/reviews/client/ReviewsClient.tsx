@@ -575,33 +575,6 @@ export default function ReviewsClient({ propertyId, property, texts, messages }:
                             ) : null}
                         </div>
 
-                    <div className="flex gap-2">
-                        <Button asChild variant="secondary">
-                        <Link href="/properties">{texts.toProperties}</Link>
-                        </Button>
-
-                        {isAdmin && (
-                        <Button
-                            variant="destructive"
-                            onClick={handleDeleteProperty}
-                            disabled={isDeletingProperty}
-                        >
-                            {isDeletingProperty ? `${texts.adminDeleteProperty}...` : texts.adminDeleteProperty}
-                        </Button>
-                        )}
-
-                        {currentUser && (
-                        <Button asChild>
-                            <Link
-                            href={`/properties/${propertyId}/reviews/new?address=${encodeURIComponent(
-                                subtitle
-                            )}`}
-                            >
-                            {texts.addReview}
-                            </Link>
-                        </Button>
-                        )}
-                    </div>
 
                         <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-background to-blue-50/20 shadow-sm">
                                 <div className="border-b border-blue-100 px-4 py-3">
