@@ -437,14 +437,6 @@ function PropertyCard({
         </CardHeader>
 
         <CardContent className="space-y-4 pt-0">
-          <PropertyReviewImages
-            propertyId={p.id}
-            maxImages={p.imageUrl ? 4 : 5}
-            showAsMainImage={!p.imageUrl}
-            excludeImageUrl={p.imageUrl}
-            layout="row"
-          />
-
           <div className="rounded-lg border bg-muted/20 p-3">
             <div className="mb-2">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
