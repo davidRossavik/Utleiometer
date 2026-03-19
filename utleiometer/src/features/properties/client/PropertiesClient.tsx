@@ -403,7 +403,7 @@ function PropertyCard({
         <CardHeader>
           <div className="flex items-start gap-4">
             <div className="flex flex-1 flex-col gap-1">
-              <CardTitle className="text-xl text-blue-700">
+              <CardTitle className="text-2xl text-blue-700">
                 <Link href={`/properties/${p.id}/reviews`} className="hover:underline">
                   {displayAddress}
                 </Link>
