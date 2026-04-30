@@ -2,6 +2,7 @@
 
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { deleteReview } from "@/lib/firebase/reviews";
+import { convertStorageUrlToPermanentDownloadUrl } from "@/lib/firebase/storage-admin";
 
 /**
  * Verify that the caller has admin privileges by checking their ID token
@@ -504,5 +505,175 @@ export async function deleteUserAsAdmin(
   } catch (error) {
     console.error("Error deleting user:", error);
     return { success: false, error: error instanceof Error ? error.message : "Failed to delete user" };
+  }
+}
+
+type UrlMigrationStats = {
+  scannedDocuments: number;
+  updatedDocuments: number;
+  convertedUrls: number;
+  skippedUrls: number;
+  failedUrls: number;
+};
+
+type MigratedUrls = {
+  imageUrl?: string;
+  imageUrls?: string[];
+  convertedCount: number;
+  skippedCount: number;
+  failedCount: number;
+};
+
+async function migrateImageFields(
+  imageUrl: unknown,
+  imageUrls: unknown
+): Promise<MigratedUrls> {
+  let convertedCount = 0;
+  let skippedCount = 0;
+  let failedCount = 0;
+
+  let migratedSingle: string | undefined;
+  if (typeof imageUrl === "string" && imageUrl.trim()) {
+    try {
+      const converted = await convertStorageUrlToPermanentDownloadUrl(imageUrl.trim());
+      if (converted) {
+        migratedSingle = converted;
+        convertedCount += 1;
+      } else {
+        skippedCount += 1;
+        migratedSingle = imageUrl.trim();
+      }
+    } catch {
+      failedCount += 1;
+      migratedSingle = imageUrl.trim();
+    }
+  }
+
+  let migratedMultiple: string[] | undefined;
+  if (Array.isArray(imageUrls)) {
+    migratedMultiple = [];
+    for (const raw of imageUrls) {
+      if (typeof raw !== "string" || !raw.trim()) {
+        skippedCount += 1;
+        continue;
+      }
+
+      const current = raw.trim();
+      try {
+        const converted = await convertStorageUrlToPermanentDownloadUrl(current);
+        if (converted) {
+          migratedMultiple.push(converted);
+          convertedCount += 1;
+        } else {
+          migratedMultiple.push(current);
+          skippedCount += 1;
+        }
+      } catch {
+        migratedMultiple.push(current);
+        failedCount += 1;
+      }
+    }
+  }
+
+  if (migratedMultiple && migratedMultiple.length > 0) {
+    migratedSingle = migratedMultiple[0];
+  }
+
+  return {
+    imageUrl: migratedSingle,
+    imageUrls: migratedMultiple,
+    convertedCount,
+    skippedCount,
+    failedCount,
+  };
+}
+
+async function migrateCollectionImageUrls(collectionName: "properties" | "reviews") {
+  const stats: UrlMigrationStats = {
+    scannedDocuments: 0,
+    updatedDocuments: 0,
+    convertedUrls: 0,
+    skippedUrls: 0,
+    failedUrls: 0,
+  };
+
+  const snapshot = await adminDb.collection(collectionName).get();
+
+  for (const doc of snapshot.docs) {
+    stats.scannedDocuments += 1;
+    const data = doc.data() as Record<string, unknown>;
+    const currentImageUrl = data.imageUrl;
+    const currentImageUrls = data.imageUrls;
+
+    const migrated = await migrateImageFields(currentImageUrl, currentImageUrls);
+
+    stats.convertedUrls += migrated.convertedCount;
+    stats.skippedUrls += migrated.skippedCount;
+    stats.failedUrls += migrated.failedCount;
+
+    const updatePayload: Record<string, unknown> = {};
+    if (
+      typeof migrated.imageUrl === "string" &&
+      migrated.imageUrl !== (typeof currentImageUrl === "string" ? currentImageUrl : undefined)
+    ) {
+      updatePayload.imageUrl = migrated.imageUrl;
+    }
+
+    if (Array.isArray(migrated.imageUrls)) {
+      const current = Array.isArray(currentImageUrls) ? currentImageUrls : undefined;
+      const migratedArray = migrated.imageUrls;
+      const changed =
+        !current ||
+        current.length !== migratedArray.length ||
+        current.some((value, index) => value !== migratedArray[index]);
+
+      if (changed) {
+        updatePayload.imageUrls = migratedArray;
+      }
+    }
+
+    if (Object.keys(updatePayload).length > 0) {
+      await doc.ref.update(updatePayload);
+      stats.updatedDocuments += 1;
+    }
+  }
+
+  return stats;
+}
+
+/**
+ * Admin one-shot migration for image URLs.
+ * Converts legacy/signed Google Cloud Storage URLs to permanent Firebase download URLs.
+ */
+export async function migrateImageUrlsToPermanentUrls(
+  callerIdToken: string
+): Promise<{
+  success: boolean;
+  error?: string;
+  properties?: UrlMigrationStats;
+  reviews?: UrlMigrationStats;
+}> {
+  const callerUid = await verifyCallerIsAdmin(callerIdToken);
+  if (!callerUid) {
+    return { success: false, error: "Unauthorized: Only admins can run image URL migration" };
+  }
+
+  try {
+    const [properties, reviews] = await Promise.all([
+      migrateCollectionImageUrls("properties"),
+      migrateCollectionImageUrls("reviews"),
+    ]);
+
+    return {
+      success: true,
+      properties,
+      reviews,
+    };
+  } catch (error) {
+    console.error("Error migrating image URLs:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to migrate image URLs",
+    };
   }
 }

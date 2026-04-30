@@ -1,4 +1,5 @@
 import { bucket } from "./admin";
+import { randomUUID } from "crypto";
 
 function getFileExtension(fileName: string) {
   const parts = fileName.split(".");
@@ -12,6 +13,89 @@ function getUniqueFileName(originalName: string) {
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return `${Date.now()}-${random}.${extension}`;
+}
+
+function buildFirebaseDownloadUrl(bucketName: string, filePath: string, token: string) {
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(
+    filePath
+  )}?alt=media&token=${token}`;
+}
+
+async function ensureDownloadToken(file: ReturnType<typeof bucket.file>) {
+  const [metadata] = await file.getMetadata();
+  const metadataMap = metadata.metadata ?? {};
+  const existingTokens = metadataMap.firebaseStorageDownloadTokens
+    ?.split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  if (existingTokens && existingTokens.length > 0) {
+    return existingTokens[0];
+  }
+
+  const newToken = randomUUID();
+  await file.setMetadata({
+    metadata: {
+      ...metadataMap,
+      firebaseStorageDownloadTokens: newToken,
+    },
+  });
+  return newToken;
+}
+
+async function getPermanentDownloadUrl(file: ReturnType<typeof bucket.file>) {
+  const token = await ensureDownloadToken(file);
+  return buildFirebaseDownloadUrl(bucket.name, file.name, token);
+}
+
+function parsePathFromStorageUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname;
+
+    if (parsed.hostname === "firebasestorage.googleapis.com") {
+      const marker = "/o/";
+      const markerIndex = pathname.indexOf(marker);
+      if (markerIndex === -1) return null;
+      const encodedPath = pathname.slice(markerIndex + marker.length);
+      return decodeURIComponent(encodedPath);
+    }
+
+    if (parsed.hostname === "storage.googleapis.com") {
+      const downloadPrefix = "/download/storage/v1/b/";
+      if (pathname.startsWith(downloadPrefix)) {
+        const marker = "/o/";
+        const markerIndex = pathname.indexOf(marker);
+        if (markerIndex === -1) return null;
+        const encodedPath = pathname.slice(markerIndex + marker.length);
+        return decodeURIComponent(encodedPath);
+      }
+
+      const parts = pathname.split("/").filter(Boolean);
+      if (parts.length < 2) return null;
+      // Format: /<bucket>/<path/to/object>
+      return parts.slice(1).join("/");
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function convertStorageUrlToPermanentDownloadUrl(url: string) {
+  const filePath = parsePathFromStorageUrl(url);
+  if (!filePath) {
+    return null;
+  }
+
+  const file = bucket.file(filePath);
+  const [exists] = await file.exists();
+  if (!exists) {
+    return null;
+  }
+
+  return getPermanentDownloadUrl(file);
 }
 
 /**
@@ -68,13 +152,9 @@ export async function uploadImageFileAdmin(
       stream.end(fileBuffer);
     });
 
-    // Get download URL
-    console.log("📝 Getting signed download URL...");
-    const [downloadUrl] = await file.getSignedUrl({
-      version: "v4",
-      action: "read",
-      expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days (Firebase max)
-    });
+    // Build a stable Firebase download URL backed by a persistent token.
+    console.log("📝 Getting permanent download URL...");
+    const downloadUrl = await getPermanentDownloadUrl(file);
 
     console.log(`✅ Admin upload complete, URL: ${downloadUrl}`);
     return downloadUrl;

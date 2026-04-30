@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { auth } from "@/lib/firebase/client";
 import {
+  migrateImageUrlsToPermanentUrls,
   dismissReviewReportAsAdmin,
   listUsers,
   listReportedReviews,
@@ -45,6 +46,8 @@ export default function AdminPageClient() {
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reportActionLoading, setReportActionLoading] = useState<string | null>(null);
+  const [isMigratingImages, setIsMigratingImages] = useState(false);
+  const [migrationResult, setMigrationResult] = useState<string | null>(null);
 
   async function getToken(): Promise<string | null> {
     const user = auth.currentUser;
@@ -189,6 +192,41 @@ export default function AdminPageClient() {
     setReportActionLoading(null);
   }
 
+  async function handleMigrateImageUrls() {
+    const confirmed = window.confirm(
+      "Dette oppdaterer gamle bilde-URL-er i properties og reviews. Fortsette?"
+    );
+    if (!confirmed) return;
+
+    setIsMigratingImages(true);
+    setMigrationResult(null);
+
+    const token = await getToken();
+    if (!token) {
+      setMigrationResult(t("notLoggedIn"));
+      setIsMigratingImages(false);
+      return;
+    }
+
+    const result = await migrateImageUrlsToPermanentUrls(token);
+
+    if (!result.success) {
+      setMigrationResult(result.error ?? "Migrering feilet");
+      setIsMigratingImages(false);
+      return;
+    }
+
+    const propertiesUpdated = result.properties?.updatedDocuments ?? 0;
+    const reviewsUpdated = result.reviews?.updatedDocuments ?? 0;
+    const totalConverted =
+      (result.properties?.convertedUrls ?? 0) + (result.reviews?.convertedUrls ?? 0);
+
+    setMigrationResult(
+      `Migrering fullført. Oppdaterte dokumenter: properties=${propertiesUpdated}, reviews=${reviewsUpdated}. Konverterte URL-er: ${totalConverted}.`
+    );
+    setIsMigratingImages(false);
+  }
+
   function statusLabel(status: ReportedReviewRecord["reportStatus"]) {
     if (status === "resolved") return t("statusResolved");
     if (status === "dismissed") return t("statusDismissed");
@@ -236,6 +274,26 @@ export default function AdminPageClient() {
         <p className="text-sm text-muted-foreground mt-1">
           {t("subtitle")}
         </p>
+
+        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50/70 p-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-blue-900">
+              Kjør én gang for å oppdatere gamle utløpte bilde-URL-er til varige Firebase-URL-er.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              className="bg-blue-700 text-white hover:bg-blue-800"
+              onClick={handleMigrateImageUrls}
+              disabled={isMigratingImages}
+            >
+              {isMigratingImages ? "Migrerer..." : "Migrer bilde-URL-er"}
+            </Button>
+          </div>
+          {migrationResult ? (
+            <p className="mt-2 text-xs text-blue-900">{migrationResult}</p>
+          ) : null}
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
